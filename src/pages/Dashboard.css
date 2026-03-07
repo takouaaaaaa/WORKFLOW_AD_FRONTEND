@@ -1,0 +1,211 @@
+/* ── General ── */
+.dashboard-page {
+  min-height: 100vh;
+  background: #f8f9fe;
+  font-family: 'Georgia', serif;
+}
+
+/* ── Header ── */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: linear-gradient(135deg, #0f0c29, #302b63);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-badge {
+  display: inline-block;
+  background: #6366f1;
+  color: white;
+  font-size: 11px;
+  font-family: monospace;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.dashboard-title {
+  color: white;
+  font-size: 22px;
+  margin: 0;
+}
+
+.dashboard-logout {
+  padding: 8px 20px;
+  background: transparent;
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.dashboard-logout:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ── Main ── */
+.dashboard-main {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dashboard-section-title {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+.dashboard-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* ── Table ── */
+.dashboard-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dashboard-table thead tr {
+  background: linear-gradient(135deg, #0f0c29, #302b63);
+  color: white;
+}
+
+.dashboard-table th {
+  padding: 14px 20px;
+  text-align: left;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dashboard-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #374151;
+}
+
+.dashboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dashboard-table tbody tr:hover {
+  background: #f8f9fe;
+}
+
+/* ── Role badges ── */
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.role-admin {
+  background: #ede9fe;
+  color: #6366f1;
+}
+
+.role-user_fonctionnel {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.role-user_technique {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+/* ── Delete button ── */
+.delete-button {
+  padding: 6px 14px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.delete-button:hover {
+  background: #dc2626;
+  color: white;
+}
+
+/* ── User Dashboard ── */
+.dashboard-user-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Georgia', serif;
+}
+
+.dashboard-user-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-user-title {
+  font-size: 28px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.dashboard-user-email {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.dashboard-logout-center {
+  margin-top: 10px;
+  padding: 11px 30px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.dashboard-logout-center:hover {
+  opacity: 0.9;
+}
