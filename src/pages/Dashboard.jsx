@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/api";
+import { registerUser } from "../services/api";
 import { jwtDecode } from "jwt-decode";
 import "./Dashboard.css";
 
@@ -46,7 +47,7 @@ function UserTopbar({ email, role, onLogout, activePage, onOpenNotif }) {
   const isDashboard = activePage === "dashboard";
   return (
     <div className="palm-topbar">
-      <div className="palm-logo">⬡ PALMYRA</div>
+      <div className="palm-logo">⬡ CURE</div>
       <div className="palm-topbar-right">
         <span>Cure Dashboard</span>
         <span style={{ opacity: 0.4 }}>|</span>
@@ -69,7 +70,6 @@ function UserTopbar({ email, role, onLogout, activePage, onOpenNotif }) {
 
 // ─────────────────────────────────────────────────────────────────
 //  SHARED: LEFT SIDEBAR
-//  activePage: "dashboard" | "file-in" | "file-out" | ...
 // ─────────────────────────────────────────────────────────────────
 function UserSidebar({ activePage, onNavigate }) {
   const items = [
@@ -119,21 +119,11 @@ function UserSidebar({ activePage, onNavigate }) {
         </svg>
       ),
     },
-    {
-      id: "jobs",
-      label: "Jobs",
-      icon: (
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
-      ),
-    },
   ];
 
   return (
     <div className="palm-sidebar">
       <div className="palm-sidebar-section">Main</div>
-
       {items.map((item) => (
         <div
           key={item.id}
@@ -144,7 +134,6 @@ function UserSidebar({ activePage, onNavigate }) {
           {item.label}
         </div>
       ))}
-
       <div className="palm-sidebar-section" style={{ marginTop: 12 }}>Links</div>
       <div className="palm-nav-item">🏦 Banque de France</div>
       <div className="palm-nav-item">📖 WIKI CURE</div>
@@ -180,7 +169,6 @@ function UserNotifPanel() {
 function PageDashboard({ onNavigate }) {
   return (
     <div className="palm-main">
-      {/* Stat cards */}
       <div className="palm-stat-row">
         {STATS.map((s) => (
           <div key={s.label} className="palm-stat-card">
@@ -192,10 +180,7 @@ function PageDashboard({ onNavigate }) {
         ))}
       </div>
 
-      {/* Center grid */}
       <div className="palm-center-grid">
-
-        {/* AI Engine orb */}
         <div className="palm-ai-card">
           <div className="palm-ai-bg" />
           <div className="palm-orb-wrap">
@@ -222,7 +207,6 @@ function PageDashboard({ onNavigate }) {
           </div>
         </div>
 
-        {/* Flow table + monitoring */}
         <div className="palm-flow-card">
           <div className="palm-card-title">Reference Flow · Recent</div>
           <table className="palm-table">
@@ -255,7 +239,6 @@ function PageDashboard({ onNavigate }) {
           ))}
         </div>
 
-        {/* Bar chart */}
         <div className="palm-chart-card">
           <div className="palm-card-title">AI Flow Processing · Last 12h</div>
           <div className="palm-bars">
@@ -268,7 +251,6 @@ function PageDashboard({ onNavigate }) {
           </div>
         </div>
 
-        {/* File IN quick-link */}
         <div className="dash-file-link" onClick={() => onNavigate("file-in")}>
           <div className="dash-file-link-icon" style={{ background: "rgba(0,180,255,0.12)", color: "var(--accent)" }}>
             <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -288,7 +270,6 @@ function PageDashboard({ onNavigate }) {
           </svg>
         </div>
 
-        {/* File OUT quick-link */}
         <div className="dash-file-link" onClick={() => onNavigate("file-out")}>
           <div className="dash-file-link-icon" style={{ background: "rgba(124,58,237,0.12)", color: "var(--accent2)" }}>
             <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -307,21 +288,18 @@ function PageDashboard({ onNavigate }) {
             <polyline points="12 5 19 12 12 19" />
           </svg>
         </div>
-
       </div>
     </div>
   );
 }
 
-
 // ─────────────────────────────────────────────────────────────────
-//  USER DASHBOARD — assembles layout + routes pages
+//  USER DASHBOARD
 // ─────────────────────────────────────────────────────────────────
 function UserDashboard({ email, role, onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [notifOpen, setNotifOpen]   = useState(false);
   const isDashboard = activePage === "dashboard";
-
   const navigate = useNavigate();
 
   const renderPage = () => {
@@ -353,7 +331,6 @@ function UserDashboard({ email, role, onLogout }) {
           }
         }} />
         {renderPage()}
-        {/* Full panel on dashboard, floating drawer elsewhere */}
         {isDashboard && <UserNotifPanel />}
         {!isDashboard && notifOpen && (
           <div className="notif-drawer">
@@ -370,16 +347,15 @@ function UserDashboard({ email, role, onLogout }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  ADMIN DASHBOARD COMPONENTS
+//  ADMIN COMPONENTS
 // ─────────────────────────────────────────────────────────────────
 function AdminTopbar({ email, onLogout }) {
   return (
     <div className="admin-topbar">
-      <div className="admin-logo">⬡ PALMYRA</div>
+      <div className="admin-logo">⬡ CURE</div>
       <div className="admin-topbar-right">
         <div className="admin-tabs">
           <button className="admin-tab active">Cure Dashboard</button>
-          <button className="admin-tab">Add Slide</button>
         </div>
         {email && <div className="admin-user-chip">{email}</div>}
         <button className="admin-logout-btn" onClick={onLogout}>Logout</button>
@@ -458,23 +434,37 @@ function AdminMonitoringTable() {
 }
 
 function AdminUsersTable({ users, error, onDelete }) {
+  const getRoleLabel = (role) => {
+    if (!role) return "User";
+    if (role === "ADMIN") return "Admin";
+    if (role === "USER_FONCTIONNEL") return "Fonctionnel";
+    if (role === "USER_TECHNIQUE") return "Technique";
+    return role;
+  };
+
   return (
-    <div className="admin-users-section">
+    <div className="admin-card">
       <div className="admin-card-title">Users Management</div>
       {error && <div className="admin-error">{error}</div>}
-      <table className="admin-table">
+      <table className="admin-table" style={{ tableLayout: "fixed", width: "100%" }}>
         <thead>
-          <tr><th>ID</th><th>Email</th><th>Phone</th><th>Role</th><th>Action</th></tr>
+          <tr>
+            <th style={{ width: "50px" }}>ID</th>
+            <th>Email</th>
+            <th style={{ width: "110px" }}>Phone</th>
+            <th style={{ width: "110px" }}>Role</th>
+            <th style={{ width: "80px" }}>Action</th>
+          </tr>
         </thead>
         <tbody>
           {users.map((u) => (
             <tr key={u.id}>
               <td>{u.id}</td>
-              <td>{u.email}</td>
+              <td style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</td>
               <td>{u.numTel}</td>
               <td>
-                <span className={`admin-badge ${u.role?.toLowerCase() === "admin" ? "admin-role" : "user-role"}`}>
-                  {u.role}
+                <span className={`admin-badge ${u.role === "ADMIN" ? "admin-role" : "user-role"}`}>
+                  {getRoleLabel(u.role)}
                 </span>
               </td>
               <td>
@@ -488,23 +478,65 @@ function AdminUsersTable({ users, error, onDelete }) {
   );
 }
 
-function AdminWidgetPanel() {
+function AdminRegisterForm({ showRegister, setShowRegister, form, handleChange, handleRegister, registerError, registerSuccess }) {
   return (
-    <div className="admin-right-panel">
-      <div>
-        <div className="admin-widget-title">Widget</div>
-        <div className="admin-widget-title" style={{ marginTop: 12 }}>Common Links</div>
-        <div>
-          <span className="admin-link-chip">Banque de France</span>
-          <span className="admin-link-chip">WIKI CURE</span>
-        </div>
-        <div className="admin-widget-title" style={{ marginTop: 16 }}>My Links</div>
+    <div className="admin-card">
+      <div className="admin-register-header">
+        <div className="admin-card-title">Add New User</div>
+        <button className="admin-add-btn" onClick={() => setShowRegister(!showRegister)}>
+          {showRegister ? "Cancel" : "+ Add User"}
+        </button>
       </div>
+      {showRegister && (
+        <form onSubmit={handleRegister} className="admin-register-form">
+          {registerError && <div className="admin-error">{registerError}</div>}
+          {registerSuccess && <div className="admin-success">{registerSuccess}</div>}
+          <div className="admin-register-grid">
+            <div className="admin-register-field">
+              <label className="admin-register-label">Email</label>
+              <input type="email" name="email" placeholder="user@example.com" value={form.email} onChange={handleChange} required className="admin-register-input" />
+            </div>
+            <div className="admin-register-field">
+              <label className="admin-register-label">Password</label>
+              <input type="password" name="motDePasse" placeholder="••••••••" value={form.motDePasse} onChange={handleChange} required className="admin-register-input" />
+            </div>
+            <div className="admin-register-field">
+              <label className="admin-register-label">Phone</label>
+              <input type="number" name="numTel" placeholder="12345678" value={form.numTel} onChange={handleChange} required className="admin-register-input" />
+            </div>
+            <div className="admin-register-field">
+              <label className="admin-register-label">Role</label>
+              <select name="role" value={form.role} onChange={handleChange} className="admin-register-input">
+                <option value="USER_FONCTIONNEL">User Fonctionnel</option>
+                <option value="USER_TECHNIQUE">User Technique</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" className="admin-register-submit">Create User</button>
+           <button className="admin-delete-btn" onClick={() => onDelete(u.id)}>Delete</button>
+
+        </form>
+      )}
     </div>
   );
 }
 
-function AdminDashboard({ email, users, error, onDelete, onLogout }) {
+function AdminWidgetPanel() {
+  return (
+    <div className="admin-right-panel">
+      <div className="admin-widget-title">Widget</div>
+      <div className="admin-widget-title" style={{ marginTop: 12 }}>Common Links</div>
+      <div>
+        <span className="admin-link-chip">Banque de France</span>
+        <span className="admin-link-chip">WIKI CURE</span>
+      </div>
+      <div className="admin-widget-title" style={{ marginTop: 16 }}>My Links</div>
+    </div>
+  );
+}
+
+function AdminDashboard({ email, users, error, onDelete, onLogout, showRegister, setShowRegister, form, handleChange, handleRegister, registerError, registerSuccess }) {
   return (
     <div className="admin-body">
       <AdminTopbar email={email} onLogout={onLogout} />
@@ -514,6 +546,15 @@ function AdminDashboard({ email, users, error, onDelete, onLogout }) {
           <AdminFlowTable />
           <AdminMonitoringTable />
           <AdminUsersTable users={users} error={error} onDelete={onDelete} />
+          <AdminRegisterForm
+            showRegister={showRegister}
+            setShowRegister={setShowRegister}
+            form={form}
+            handleChange={handleChange}
+            handleRegister={handleRegister}
+            registerError={registerError}
+            registerSuccess={registerSuccess}
+          />
         </div>
         <AdminWidgetPanel />
       </div>
@@ -522,13 +563,17 @@ function AdminDashboard({ email, users, error, onDelete, onLogout }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  ROOT — picks dashboard by role
+//  ROOT
 // ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState("");
-  const [role,  setRole]  = useState("");
-  const [email, setEmail] = useState("");
+  const [users, setUsers]                   = useState([]);
+  const [error, setError]                   = useState("");
+  const [role,  setRole]                    = useState("");
+  const [email, setEmail]                   = useState("");
+  const [showRegister, setShowRegister]     = useState(false);
+  const [form, setForm]                     = useState({ email: "", motDePasse: "", numTel: "", role: "USER_FONCTIONNEL" });
+  const [registerError, setRegisterError]   = useState("");
+  const [registerSuccess, setRegisterSuccess] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -562,6 +607,24 @@ export default function Dashboard() {
     window.location.href = "/";
   };
 
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setRegisterError("");
+    setRegisterSuccess("");
+    try {
+      await registerUser({ ...form, numTel: Number(form.numTel) });
+      setRegisterSuccess("User created successfully!");
+      setForm({ email: "", motDePasse: "", numTel: "", role: "USER_FONCTIONNEL" });
+      const res = await axiosInstance.get("/users");
+      setUsers(res.data);
+      setShowRegister(false);
+    } catch (err) {
+      setRegisterError("Failed to create user");
+    }
+  };
+
   if (role === "ADMIN") {
     return (
       <AdminDashboard
@@ -570,6 +633,13 @@ export default function Dashboard() {
         error={error}
         onDelete={handleDelete}
         onLogout={handleLogout}
+        showRegister={showRegister}
+        setShowRegister={setShowRegister}
+        form={form}
+        handleChange={handleChange}
+        handleRegister={handleRegister}
+        registerError={registerError}
+        registerSuccess={registerSuccess}
       />
     );
   }

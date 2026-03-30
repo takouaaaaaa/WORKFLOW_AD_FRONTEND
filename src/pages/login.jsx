@@ -57,9 +57,7 @@ export default function Login() {
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
-        <p className="login-footer">
-          Don't have an account? <a href="/register" className="login-link">Register</a>
-        </p>
+      
       </div>
     </div>
   );
