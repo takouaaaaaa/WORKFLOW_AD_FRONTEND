@@ -1,4 +1,5 @@
 import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Topbar from "./Topbar";
 import Sidebar from "./Sidebar";
 
@@ -16,10 +17,15 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const user = getUserFromToken();
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleLogout = async () => {
     try {
       const refreshToken = getRefreshToken();
-
       if (refreshToken) {
         await logoutUser(refreshToken);
       }
@@ -31,29 +37,25 @@ export default function AppLayout() {
     }
   };
 
-  // sécurité : si pas de user → rien afficher
   if (!user) return null;
 
   return (
-    <div className="palm-body">
-      
-      {/* TOPBAR */}
+    <div className="app-shell">
       <Topbar
         email={user.email}
         role={user.roles?.[0]}
         onLogout={handleLogout}
       />
 
-      {/* LAYOUT */}
-      <div className="palm-layout">
+      <div className="app-layout">
         <Sidebar roles={user.roles || []} />
 
-        {/* PAGE CONTENT */}
-        <div className="palm-content">
-          <Outlet />
+        <div className="app-content">
+          <div className="app-main-scroll">
+            <Outlet />
+          </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,0 +1,101 @@
+.user-management-page {
+  color: #e2e8f0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.user-card-header {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.35), rgba(91, 33, 182, 0.35));
+  color: #ddd6fe;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.user-card-body {
+  padding: 18px;
+}
+
+.user-table-wrap {
+  overflow-x: auto;
+}
+
+.user-table {
+  margin-bottom: 0;
+  color: #e2e8f0;
+}
+
+.user-table thead th {
+  background: rgba(124, 58, 237, 0.45);
+  color: #ddd6fe;
+  border-color: rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+}
+
+.user-table tbody td {
+  background: rgba(3, 19, 43, 0.55);
+  border-color: rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.user-role-badge {
+  background: rgba(0, 209, 255, 0.12);
+  color: #00d1ff;
+  border: 1px solid rgba(0, 209, 255, 0.28);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.user-btn-primary {
+  background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+  border: none;
+  color: white;
+}
+
+.user-btn-primary:hover {
+  color: white;
+  opacity: 0.95;
+}
+
+.user-btn-edit {
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #c4b5fd;
+}
+
+.user-btn-edit:hover {
+  color: white;
+  background: rgba(124, 58, 237, 0.28);
+}
+
+.user-btn-delete {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.user-btn-delete:hover {
+  color: white;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.user-pagination {
+  color: #cbd5e1;
+}
+
+.modal-content.bg-dark {
+  background: #081426 !important;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}

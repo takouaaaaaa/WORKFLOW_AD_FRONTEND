@@ -5,7 +5,11 @@ import {
   updateUserRole,
   deleteUser,
 } from "../services/adminUserService";
-import "../../fonctionnel/pages/FileInPage.css";
+
+import UserTable from "../components/UserTable";
+import AddUserModal from "../components/AddUserModal";
+import EditRoleModal from "../components/EditRoleModal";
+import "../styles/userManagementPage.css";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -51,156 +55,76 @@ export default function UserManagementPage() {
     return rows.slice(start, start + ITEMS_PER_PAGE);
   }, [rows, currentPage]);
 
-  const handleOpenAdd = () => {
-    setRegisterForm({
-      nom: "",
-      prenom: "",
-      email: "",
-      motDePasse: "",
-      role: "USER_FONCTIONNEL",
-    });
-    setShowAddModal(true);
-  };
-
-  const handleOpenRoleEdit = (user) => {
-    setSelectedUser(user);
-    setRoleForm({
-      role: user.role || "USER_FONCTIONNEL",
-    });
-    setShowRoleModal(true);
-  };
-
   const handleAddUser = async () => {
-    if (
-      !registerForm.nom.trim() ||
-      !registerForm.prenom.trim() ||
-      !registerForm.email.trim() ||
-      !registerForm.motDePasse.trim()
-    ) {
-      alert("All fields are required");
-      return;
-    }
-
     try {
       await registerUser(registerForm);
-      alert("User added successfully");
       setShowAddModal(false);
-      await fetchData();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to add user");
+      fetchData();
+    } catch (e) {
+      alert("Error adding user");
     }
   };
 
   const handleUpdateRole = async () => {
-    if (!selectedUser) return;
-
     try {
       await updateUserRole(selectedUser.id, roleForm.role);
-      alert("Role updated successfully");
       setShowRoleModal(false);
-      await fetchData();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update role");
+      fetchData();
+    } catch (e) {
+      alert("Error updating role");
     }
   };
 
   const handleDeleteUser = async (user) => {
-    const confirmed = window.confirm(`Delete user "${user.email}" ?`);
-    if (!confirmed) return;
-
-    try {
-      await deleteUser(user.id);
-      alert("User deleted successfully");
-      await fetchData();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to delete user");
-    }
+    if (!window.confirm(`Delete user "${user.email}" ?`)) return;
+    await deleteUser(user.id);
+    fetchData();
   };
 
   return (
-    <div className="filein-page">
-      <div className="filein-search-card">
-        <div className="filein-card-title">Users Management</div>
-
-        <div className="filein-search-actions" style={{ paddingTop: "16px" }}>
-          <div />
-          <button className="btn search" onClick={handleOpenAdd}>
+    <div className="container-fluid user-management-page">
+      <div className="user-card mb-4">
+        <div className="user-card-header d-flex justify-content-between align-items-center">
+          <span>Users Management</span>
+        </div>
+        <div className="user-card-body d-flex justify-content-end">
+          <button
+            className="btn user-btn-primary"
+            onClick={() => setShowAddModal(true)}
+          >
             + Add User
           </button>
         </div>
       </div>
 
-      <div className="filein-result-card">
-        <div className="filein-card-title">Users List</div>
+      <div className="user-card">
+        <div className="user-card-header">Users List</div>
+        <div className="user-card-body">
+          <UserTable
+            rows={paginatedRows}
+            onEdit={(u) => {
+              setSelectedUser(u);
+              setRoleForm({ role: u.role || "USER_FONCTIONNEL" });
+              setShowRoleModal(true);
+            }}
+            onDelete={handleDeleteUser}
+          />
 
-        <div className="filein-table-wrapper">
-          <table className="filein-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Prenom</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th style={{ width: "220px" }}>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedRows.length === 0 ? (
-                <tr>
-                  <td colSpan="6">No user found</td>
-                </tr>
-              ) : (
-                paginatedRows.map((user) => (
-                  <tr key={user.id}>
-                    <td className="mono">{user.id}</td>
-                    <td>{user.nom}</td>
-                    <td>{user.prenom}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className="status-badge inprocess">
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="action-btn"
-                          onClick={() => handleOpenRoleEdit(user)}
-                        >
-                          Edit Role
-                        </button>
-                        <button
-                          className="action-btn danger"
-                          onClick={() => handleDeleteUser(user)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="filein-footer">
-          <div className="pagination">
+          <div className="d-flex justify-content-between align-items-center mt-3 user-pagination">
             <button
+              className="btn btn-outline-light"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
               Prev
             </button>
+
             <span>
               Page {currentPage} / {totalPages}
             </span>
+
             <button
+              className="btn btn-outline-light"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
@@ -210,119 +134,22 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {showAddModal && (
-        <div className="preview-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-header">
-              <h3>Add User</h3>
-              <button onClick={() => setShowAddModal(false)}>✕</button>
-            </div>
+      <AddUserModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        form={registerForm}
+        setForm={setRegisterForm}
+        onSave={handleAddUser}
+      />
 
-            <div className="modal-content">
-              <label>Nom</label>
-              <input
-                type="text"
-                value={registerForm.nom}
-                onChange={(e) =>
-                  setRegisterForm((prev) => ({ ...prev, nom: e.target.value }))
-                }
-              />
-
-              <label>Prenom</label>
-              <input
-                type="text"
-                value={registerForm.prenom}
-                onChange={(e) =>
-                  setRegisterForm((prev) => ({ ...prev, prenom: e.target.value }))
-                }
-              />
-
-              <label>Email</label>
-              <input
-                type="email"
-                value={registerForm.email}
-                onChange={(e) =>
-                  setRegisterForm((prev) => ({ ...prev, email: e.target.value }))
-                }
-              />
-
-              <label>Password</label>
-              <input
-                type="password"
-                value={registerForm.motDePasse}
-                onChange={(e) =>
-                  setRegisterForm((prev) => ({ ...prev, motDePasse: e.target.value }))
-                }
-              />
-
-              <label>Role</label>
-              <select
-                value={registerForm.role}
-                onChange={(e) =>
-                  setRegisterForm((prev) => ({ ...prev, role: e.target.value }))
-                }
-              >
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER_TECHNIQUE">USER_TECHNIQUE</option>
-                <option value="USER_FONCTIONNEL">USER_FONCTIONNEL</option>
-              </select>
-            </div>
-
-            <div className="modal-actions">
-              <button className="action-btn" onClick={handleAddUser}>
-                Save
-              </button>
-              <button
-                className="action-btn danger"
-                onClick={() => setShowAddModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showRoleModal && selectedUser && (
-        <div className="preview-overlay" onClick={() => setShowRoleModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-header">
-              <h3>Edit Role</h3>
-              <button onClick={() => setShowRoleModal(false)}>✕</button>
-            </div>
-
-            <div className="modal-content">
-              <p>
-                <b>User:</b> {selectedUser.email}
-              </p>
-
-              <label>Role</label>
-              <select
-                value={roleForm.role}
-                onChange={(e) =>
-                  setRoleForm((prev) => ({ ...prev, role: e.target.value }))
-                }
-              >
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER_TECHNIQUE">USER_TECHNIQUE</option>
-                <option value="USER_FONCTIONNEL">USER_FONCTIONNEL</option>
-              </select>
-            </div>
-
-            <div className="modal-actions">
-              <button className="action-btn" onClick={handleUpdateRole}>
-                Save
-              </button>
-              <button
-                className="action-btn danger"
-                onClick={() => setShowRoleModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditRoleModal
+        show={showRoleModal}
+        onClose={() => setShowRoleModal(false)}
+        user={selectedUser}
+        form={roleForm}
+        setForm={setRoleForm}
+        onSave={handleUpdateRole}
+      />
     </div>
   );
 }

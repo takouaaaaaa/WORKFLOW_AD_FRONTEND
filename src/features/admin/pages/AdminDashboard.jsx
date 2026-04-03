@@ -5,7 +5,13 @@ import { getReceivers } from "../../technique/services/receiverService";
 import { getTypeFluxes } from "../../technique/services/typeFluxService";
 import { getFileIns } from "../../fonctionnel/services/fileInService";
 import { getFileOuts } from "../../fonctionnel/services/fileOutService";
-import "./AdminDashboard.css";
+
+import AdminDashboardHeader from "../components/AdminDashboardHeader";
+import AdminStatCard from "../components/AdminStatCard";
+import AdminInfoPanel from "../components/AdminInfoPanel";
+import AdminMiniBox from "../components/AdminMiniBox";
+
+import "../styles/adminDashboard.css";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -62,105 +68,82 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="admin-dashboard-page">
-      <div className="admin-dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <p>Global overview of your platform data and resources.</p>
-      </div>
+    <div className="admin-dashboard-page container-fluid px-0">
+      <AdminDashboardHeader
+        title="Admin Dashboard"
+        subtitle="Global overview of your platform data and resources."
+      />
 
       {loading ? (
-        <div className="admin-dashboard-loading">Loading dashboard...</div>
+        <div className="admin-dashboard-loading">
+          Loading dashboard...
+        </div>
       ) : (
         <>
-          <div className="admin-dashboard-stats">
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">👥</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">Users</span>
-                <h2>{stats.users}</h2>
-              </div>
+          <div className="row g-3 mb-4">
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="👥" label="Users" value={stats.users} />
             </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">📤</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">Senders</span>
-                <h2>{stats.senders}</h2>
-              </div>
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="📤" label="Senders" value={stats.senders} />
             </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">📥</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">Receivers</span>
-                <h2>{stats.receivers}</h2>
-              </div>
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="📥" label="Receivers" value={stats.receivers} />
             </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">🔀</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">Type Flux</span>
-                <h2>{stats.typeFlux}</h2>
-              </div>
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="🔀" label="Type Flux" value={stats.typeFlux} />
             </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">📄</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">File IN</span>
-                <h2>{stats.fileIns}</h2>
-              </div>
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="📄" label="File IN" value={stats.fileIns} />
             </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-icon">🧾</div>
-              <div className="admin-stat-content">
-                <span className="admin-stat-label">File OUT</span>
-                <h2>{stats.fileOuts}</h2>
-              </div>
+            <div className="col-12 col-md-6 col-xl-4">
+              <AdminStatCard icon="🧾" label="File OUT" value={stats.fileOuts} />
             </div>
           </div>
 
-          <div className="admin-dashboard-grid">
-            <div className="admin-panel">
-              <h3>System Summary</h3>
-              <p>
-                This admin dashboard gives you a quick overview of all platform
-                entities and technical resources.
-              </p>
-              <ul>
-                <li>Total users registered: <b>{stats.users}</b></li>
-                <li>Total senders configured: <b>{stats.senders}</b></li>
-                <li>Total receivers configured: <b>{stats.receivers}</b></li>
-                <li>Total flow types available: <b>{stats.typeFlux}</b></li>
-              </ul>
+          <div className="row g-3">
+            <div className="col-12 col-xl-6">
+              <AdminInfoPanel title="System Summary">
+                <p>
+                  This admin dashboard gives you a quick overview of all platform
+                  entities and technical resources.
+                </p>
+
+                <ul>
+                  <li>Total users registered: <b>{stats.users}</b></li>
+                  <li>Total senders configured: <b>{stats.senders}</b></li>
+                  <li>Total receivers configured: <b>{stats.receivers}</b></li>
+                  <li>Total flow types available: <b>{stats.typeFlux}</b></li>
+                </ul>
+              </AdminInfoPanel>
             </div>
 
-            <div className="admin-panel">
-              <h3>Flow Activity</h3>
-              <p>Current number of flow-related records in the platform.</p>
-              <div className="admin-mini-stats">
-                <div className="mini-box">
-                  <span>File IN</span>
-                  <strong>{stats.fileIns}</strong>
+            <div className="col-12 col-xl-6">
+              <AdminInfoPanel title="Flow Activity">
+                <p>Current number of flow-related records in the platform.</p>
+
+                <div className="row g-3 mt-1">
+                  <div className="col-12 col-sm-6">
+                    <AdminMiniBox label="File IN" value={stats.fileIns} />
+                  </div>
+                  <div className="col-12 col-sm-6">
+                    <AdminMiniBox label="File OUT" value={stats.fileOuts} />
+                  </div>
                 </div>
-                <div className="mini-box">
-                  <span>File OUT</span>
-                  <strong>{stats.fileOuts}</strong>
-                </div>
-              </div>
+              </AdminInfoPanel>
             </div>
 
-            <div className="admin-panel wide">
-              <h3>Administrator Space</h3>
-              <p>
-                From this space, you can manage users, configure senders and
-                receivers, define flow types, and monitor incoming/outgoing files.
-              </p>
-              <div className="admin-highlight">
-                <span>✅ Dynamic data loaded from backend services</span>
-              </div>
+            <div className="col-12">
+              <AdminInfoPanel title="Administrator Space" wide>
+                <p>
+                  From this space, you can manage users, configure senders and
+                  receivers, define flow types, and monitor incoming/outgoing files.
+                </p>
+
+                <div className="admin-highlight">
+                  ✅ Dynamic data loaded from backend services
+                </div>
+              </AdminInfoPanel>
             </div>
           </div>
         </>

@@ -1,4 +1,4 @@
-import "./Dashboard.css";
+import "../styles/Dashboard.css";
 
 const FLOWS = [
   { ref: "CURE1867692", type: "ref-atena", date: "04/02 02:16" },

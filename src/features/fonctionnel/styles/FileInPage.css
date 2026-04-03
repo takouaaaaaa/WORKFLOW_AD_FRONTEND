@@ -1,0 +1,517 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   FILEIN PAGE — Complete CSS
+   All selectors scoped to .filein-page-bootstrap to beat globals
+   ============================================================ */
+
+.filein-page-bootstrap {
+  padding: 24px;
+  font-family: 'Sora', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  color: #c9d1d9;
+}
+
+/* ── CARD ─────────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: none;
+}
+
+/* ── CARD TITLE ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6e7681;
+}
+
+/* ── CARD BODY ────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-card-body {
+  padding: 20px 18px;
+  background: #161b22;
+  color: #c9d1d9;
+}
+
+/* ── LABELS ───────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #a371f7;
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── INPUTS ───────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-input,
+.filein-page-bootstrap .filein-input.form-control,
+.filein-page-bootstrap .filein-input.form-select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: 'Sora', sans-serif;
+  border-radius: 8px;
+}
+
+.filein-page-bootstrap .filein-input:focus {
+  box-shadow: none;
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.06);
+  color: #ffffff;
+  outline: none;
+}
+
+.filein-page-bootstrap .filein-input::placeholder {
+  color: rgba(226, 232, 240, 0.45);
+}
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-btn-reset {
+  background: rgba(6, 182, 212, 0.12);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  font-family: 'Sora', sans-serif;
+}
+.filein-page-bootstrap .filein-btn-reset:hover {
+  background: rgba(6, 182, 212, 0.22);
+  color: #67e8f9;
+}
+
+.filein-page-bootstrap .filein-btn-search,
+.filein-page-bootstrap .filein-btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
+  font-family: 'Sora', sans-serif;
+}
+.filein-page-bootstrap .filein-btn-search:hover,
+.filein-page-bootstrap .filein-btn-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+}
+
+.filein-page-bootstrap .filein-btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  font-family: 'Sora', sans-serif;
+}
+.filein-page-bootstrap .filein-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+/* ── TABLE WRAP ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table-wrap {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  width: 100%;
+  background: #161b22;
+}
+/* ── TABLE BASE ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: 'Sora', sans-serif;
+  font-size: 12.5px;
+  color: #c9d1d9;
+  margin: 0;
+  background: #161b22;
+}
+
+/* ── THEAD ────────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table thead tr {
+  background: #0d1117;
+}
+
+.filein-page-bootstrap .filein-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6e7681;
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── TBODY ROWS ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table tbody tr {
+  border-bottom: 1px solid #21262d;
+  transition: background 0.15s;
+  cursor: pointer;
+  background: #161b22;
+}
+
+.filein-page-bootstrap .filein-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* ── TBODY CELLS ──────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table tbody td {
+  padding: 11px 14px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Sora', sans-serif;
+  font-size: 12.5px;
+  color: #c9d1d9;
+  background: transparent;
+  border-bottom: none;
+}
+
+/* ── ZEBRA ────────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table tbody tr:nth-child(even) {
+  background: #1a1f28;
+}
+
+.filein-page-bootstrap .filein-table tbody tr:nth-child(even) td {
+  background: transparent;
+  color: #c9d1d9;
+}
+
+/* ── HOVER ────────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table tbody tr:hover {
+  background: #1c2128;
+}
+
+.filein-page-bootstrap .filein-table tbody tr:hover td {
+  background: transparent;
+  color: #e6edf3;
+}
+
+/* ── SELECTED ROW ─────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table tbody tr.selected-row {
+  background: #1a1f2e;
+}
+
+.filein-page-bootstrap .filein-table tbody tr.selected-row td {
+  background: transparent;
+  color: #e6edf3;
+}
+
+.filein-page-bootstrap .filein-table tbody tr.selected-row td:first-child {
+  box-shadow: inset 3px 0 0 #a371f7;
+}
+
+/* ── COLUMN WIDTHS ────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table .col-app        { width: 110px; }
+.filein-page-bootstrap .filein-table .col-sender-ref { width: 155px; }
+.filein-page-bootstrap .filein-table .col-sender     { width: 120px; }
+.filein-page-bootstrap .filein-table .col-date       { width: 115px; }
+.filein-page-bootstrap .filein-table .col-status     { width: 115px; }
+.filein-page-bootstrap .filein-table .col-flow       { width: 155px; }
+.filein-page-bootstrap .filein-table .col-amount     { width: 100px; text-align: right; }
+.filein-page-bootstrap .filein-table .col-category   { width: 110px; }
+.filein-page-bootstrap .filein-table .col-message    { width: 140px; }
+.filein-page-bootstrap .filein-table .col-receiver   { width: 115px; }
+
+/* ── MONO TEXT ────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table .mono,
+.filein-page-bootstrap .filein-table td.mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #79c0ff;
+}
+
+/* ── STATUS BADGES ────────────────────────────────────────── */
+
+.filein-page-bootstrap .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.filein-page-bootstrap .status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* PROCESSED */
+.filein-page-bootstrap .status-badge.processed {
+  background: rgba(63, 185, 80, 0.1);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.2);
+}
+.filein-page-bootstrap .status-badge.processed::before {
+  background: #3fb950;
+}
+
+/* IN PROCESS */
+.filein-page-bootstrap .status-badge.inprocess {
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
+  border: 1px solid rgba(88, 166, 255, 0.2);
+}
+.filein-page-bootstrap .status-badge.inprocess::before {
+  background: #58a6ff;
+  animation: ft-dot-pulse 1.5s ease-in-out infinite;
+}
+
+/* ERROR / REJECTED */
+.filein-page-bootstrap .status-badge.error,
+.filein-page-bootstrap .status-badge.rejected {
+  background: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.2);
+}
+.filein-page-bootstrap .status-badge.error::before,
+.filein-page-bootstrap .status-badge.rejected::before {
+  background: #f85149;
+}
+
+/* WAIT */
+.filein-page-bootstrap .status-badge.wait {
+  background: rgba(210, 153, 34, 0.1);
+  color: #d29922;
+  border: 1px solid rgba(210, 153, 34, 0.2);
+}
+.filein-page-bootstrap .status-badge.wait::before {
+  background: #d29922;
+}
+
+@keyframes ft-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── FLOW TYPE CHIP ───────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table .flow-chip {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: #8b949e;
+  background: #21262d;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #30363d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── AMOUNT ───────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table .amount-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e6edf3;
+}
+
+.filein-page-bootstrap .filein-table .amount-empty {
+  font-size: 15px;
+  color: #30363d;
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── CATEGORY TAG ─────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-table .category-tag {
+  font-family: 'Sora', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a371f7;
+}
+
+/* ── ACTION BAR ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #0d1117;
+  border-top: 1px solid #21262d;
+  border-radius: 0;
+  margin-top: 0;
+}
+
+/* ── PAGINATION ───────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #8b949e;
+}
+
+.filein-page-bootstrap .filein-pagination span {
+  color: #8b949e;
+}
+
+.filein-page-bootstrap .filein-btn-page {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 5px 16px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filein-page-bootstrap .filein-btn-page:hover {
+  background: #30363d;
+  border-color: #6e40c9;
+  color: #fff;
+}
+
+/* ── ACTION BUTTONS ───────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-btn-view {
+  background: rgba(163, 113, 247, 0.12);
+  color: #a371f7;
+  border: 1px solid rgba(163, 113, 247, 0.25);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filein-page-bootstrap .filein-btn-view:hover {
+  background: rgba(163, 113, 247, 0.22);
+}
+
+.filein-page-bootstrap .filein-btn-edit {
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filein-page-bootstrap .filein-btn-edit:hover {
+  background: rgba(88, 166, 255, 0.18);
+}
+
+.filein-page-bootstrap .filein-btn-download {
+  background: rgba(63, 185, 80, 0.1);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filein-page-bootstrap .filein-btn-download:hover {
+  background: rgba(63, 185, 80, 0.18);
+}
+
+.filein-page-bootstrap .filein-btn-force {
+  background: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.2);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filein-page-bootstrap .filein-btn-force:hover {
+  background: rgba(248, 81, 73, 0.18);
+}
+
+/* ── MODAL ────────────────────────────────────────────────── */
+
+.filein-page-bootstrap .filein-modal-content,
+.filein-modal-content {
+  background: #0d1117;
+  color: #e2e8f0;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 14px;
+}
+
+.filein-modal-content p,
+.filein-modal-content label,
+.filein-modal-content h5,
+.filein-modal-content .modal-title {
+  color: #e2e8f0;
+}
+
+.filein-modal-backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+.filein-btn-edit,
+.filein-btn-force,
+.filein-btn-page,
+.filein-btn-search,
+.filein-btn-reset {
+  border-radius: 8px;
+}
+.filein-btn-edit,
+.filein-btn-force {
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.2;
+}

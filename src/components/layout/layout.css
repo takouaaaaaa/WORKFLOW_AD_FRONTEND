@@ -1,37 +1,46 @@
-.palm-body {
-  min-height: 100vh;
-  background: #050d1a;
-  color: #e0f0ff;
-  font-family: Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.palm-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  min-height: calc(100vh - 64px);
-  /* ✅ Fix: prevent grid blowout */
-  min-width: 0;
+body {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  background: #050d1a;
   overflow: hidden;
 }
 
-.palm-topbar {
+/* ROOT LAYOUT ONLY */
+.app-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #050d1a;
+  color: #e0f0ff;
+}
+
+.app-topbar {
   height: 64px;
+  min-height: 64px;
+  flex-shrink: 0;
   background: linear-gradient(90deg, #2a0a6e 0%, #6d28d9 50%, #7c3aed 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  box-sizing: border-box;
+  z-index: 20;
 }
 
-.palm-logo {
+.app-logo {
   color: white;
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-.palm-topbar-right {
+.app-topbar-right {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -39,14 +48,14 @@
   font-size: 14px;
 }
 
-.palm-user-chip {
+.app-user-chip {
   background: rgba(255, 255, 255, 0.12);
   padding: 8px 14px;
   border-radius: 999px;
   color: white;
 }
 
-.palm-badge {
+.app-badge {
   background: rgba(255, 255, 255, 0.14);
   padding: 8px 12px;
   border-radius: 999px;
@@ -54,7 +63,7 @@
   color: white;
 }
 
-.palm-logout-btn {
+.app-logout-btn {
   background: white;
   color: #2a0a6e;
   border: none;
@@ -64,62 +73,136 @@
   cursor: pointer;
 }
 
-.palm-sidebar {
-  background: #03132b;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  padding: 24px 16px;
-  box-sizing: border-box;
-  /* ✅ Fix: sidebar stays fixed width, no overflow */
-  min-width: 0;
-  overflow: hidden;
+.app-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
 }
 
-.palm-sidebar-section {
+.app-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: #03132b;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 18px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.25s ease, padding 0.25s ease;
+}
+
+.app-sidebar.collapsed {
+  width: 78px;
+  padding: 18px 10px;
+}
+
+.app-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.app-sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.app-sidebar-toggle {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cfe6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.app-sidebar-toggle:hover {
+  background: rgba(0, 180, 255, 0.1);
+  color: #ffffff;
+}
+
+.app-sidebar-section {
   font-size: 12px;
   color: #6e8fb4;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 12px;
   margin-top: 8px;
+  padding-left: 6px;
 }
 
-.palm-nav-item {
-  display: block;
+.app-sidebar.collapsed .app-sidebar-section {
+  text-align: center;
+  padding-left: 0;
+}
+
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  box-sizing: border-box;
   color: #9db7d8;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 10px;
   text-decoration: none;
-  cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
+  min-height: 46px;
 }
 
-.palm-nav-item:hover {
+.app-nav-item:hover {
   background: rgba(0, 180, 255, 0.08);
   color: #ffffff;
+  transform: translateX(2px);
 }
 
-.palm-nav-item.active {
+.app-nav-item.active {
   background: linear-gradient(90deg, rgba(0,180,255,0.18), rgba(124,58,237,0.16));
   color: #00d1ff;
+  border: 1px solid rgba(0, 209, 255, 0.18);
 }
 
-.palm-main {
-  /* ✅ Fix: this is the key — min-width:0 allows the 1fr column to actually shrink
-     and not blow past the grid boundary */
+.app-nav-icon {
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-nav-label {
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.app-sidebar.collapsed .app-nav-item {
+  justify-content: center;
+  padding: 12px 10px;
+}
+
+.app-sidebar.collapsed .app-nav-label {
+  display: none;
+}
+
+.app-content {
+  flex: 1;
   min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.app-main-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
   overflow-x: hidden;
   padding: 24px;
-}
-
-.palm-notif-panel {
-  background: #07182f;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 20px;
-  /* ✅ Fix: same treatment if notif panel is also a grid column */
-  min-width: 0;
 }

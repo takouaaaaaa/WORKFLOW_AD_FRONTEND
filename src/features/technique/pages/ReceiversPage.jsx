@@ -5,20 +5,16 @@ import {
   updateReceiver,
   deleteReceiver,
 } from "../services/receiverService";
-import "../../fonctionnel/pages/FileInPage.css";
+import "../../fonctionnel/styles/FileInPage.css";
 
 const ITEMS_PER_PAGE = 10;
 
 export default function ReceiversPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
-
-  const [formData, setFormData] = useState({
-    receiver: "",
-  });
+  const [formData, setFormData] = useState({ receiver: "" });
 
   useEffect(() => {
     fetchData();
@@ -50,9 +46,7 @@ export default function ReceiversPage() {
 
   const handleOpenEdit = (row) => {
     setEditingRow(row);
-    setFormData({
-      receiver: row.receiver || "",
-    });
+    setFormData({ receiver: row.receiver || "" });
     setShowModal(true);
   };
 
@@ -96,51 +90,86 @@ export default function ReceiversPage() {
   };
 
   return (
-    <div className="filein-page">
-      <div className="filein-search-card">
-        <div className="filein-card-title">Receivers Management</div>
+    <div className="filein-page-bootstrap">
+      <div className="filein-card mb-4">
+        <div className="filein-card-title">
+          <span>
+            Technical Management :{" "}
+            <span style={{ color: "#a371f7" }}>Receivers</span>
+          </span>
+        </div>
 
-        <div className="filein-search-actions" style={{ paddingTop: "16px" }}>
-          <div />
-          <button className="btn search" onClick={handleOpenAdd}>
-            + Add Receiver
-          </button>
+        <div className="filein-card-body">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <h4 style={{ color: "#e6edf3", marginBottom: "6px" }}>
+                Receivers Management
+              </h4>
+              <p style={{ color: "#8b949e", margin: 0, fontSize: "13px" }}>
+                Add, update, and maintain receiver reference data.
+              </p>
+            </div>
+
+            <button className="btn filein-btn-search" onClick={handleOpenAdd}>
+              + Add Receiver
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="filein-result-card">
-        <div className="filein-card-title">Receivers List</div>
+      <div className="filein-card">
+        <div className="filein-card-title">
+          <span>
+            Search Result : <span style={{ color: "#a371f7" }}>Receivers</span>
+          </span>
 
-        <div className="filein-table-wrapper">
-          <table className="filein-table">
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: "11px",
+              color: "#8b949e",
+              background: "#21262d",
+              padding: "3px 10px",
+              borderRadius: "20px",
+              border: "1px solid #30363d",
+            }}
+          >
+            {rows.length.toLocaleString()} results
+          </span>
+        </div>
+
+        <div className="filein-table-wrap">
+          <table className="table filein-table align-middle mb-0">
             <thead>
               <tr>
-                <th>ID Receiver</th>
+                <th style={{ width: "140px" }}>ID Receiver</th>
                 <th>Receiver</th>
-                <th style={{ width: "180px" }}>Actions</th>
+                <th style={{ width: "220px" }}>Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {paginatedRows.length === 0 ? (
                 <tr>
-                  <td colSpan="3">No receiver found</td>
+                  <td colSpan="3" style={{ textAlign: "center", padding: "40px" }}>
+                    No receiver found
+                  </td>
                 </tr>
               ) : (
                 paginatedRows.map((row) => (
                   <tr key={row.idReceiver}>
                     <td className="mono">{row.idReceiver}</td>
-                    <td>{row.receiver}</td>
+                    <td title={row.receiver}>{row.receiver}</td>
                     <td>
-                      <div className="action-buttons">
+                      <div className="d-flex gap-2">
                         <button
-                          className="action-btn"
+                          className="filein-btn-edit"
                           onClick={() => handleOpenEdit(row)}
                         >
                           Edit
                         </button>
                         <button
-                          className="action-btn danger"
+                          className="filein-btn-force"
                           onClick={() => handleDelete(row)}
                         >
                           Delete
@@ -154,18 +183,22 @@ export default function ReceiversPage() {
           </table>
         </div>
 
-        <div className="filein-footer">
-          <div className="pagination">
+        <div className="filein-action-bar">
+          <div className="filein-pagination">
             <button
+              className="filein-btn-page"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
               Prev
             </button>
+
             <span>
-              Page {currentPage} / {totalPages}
+              Page {currentPage} of {totalPages}
             </span>
+
             <button
+              className="filein-btn-page"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
@@ -176,15 +209,37 @@ export default function ReceiversPage() {
       </div>
 
       {showModal && (
-        <div className="preview-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-header">
-              <h3>{editingRow ? "Edit Receiver" : "Add Receiver"}</h3>
-              <button onClick={() => setShowModal(false)}>✕</button>
+        <div className="filein-modal-backdrop preview-overlay" onClick={() => setShowModal(false)}>
+          <div
+            className="filein-modal-content modal-content"
+            style={{ maxWidth: "500px", margin: "80px auto", padding: "0" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="d-flex justify-content-between align-items-center"
+              style={{
+                padding: "18px 20px",
+                borderBottom: "1px solid #21262d",
+              }}
+            >
+              <h5 style={{ margin: 0 }}>
+                {editingRow ? "Edit Receiver" : "Add Receiver"}
+              </h5>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#c9d1d9",
+                  fontSize: "20px",
+                }}
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="modal-content">
-              <label>Receiver</label>
+            <div style={{ padding: "20px" }}>
+              <label className="filein-label mb-2">Receiver</label>
               <input
                 type="text"
                 value={formData.receiver}
@@ -192,18 +247,19 @@ export default function ReceiversPage() {
                   setFormData((prev) => ({ ...prev, receiver: e.target.value }))
                 }
                 placeholder="Enter receiver"
+                className="form-control filein-input"
               />
             </div>
 
-            <div className="modal-actions">
-              <button className="action-btn" onClick={handleSave}>
-                Save
-              </button>
-              <button
-                className="action-btn danger"
-                onClick={() => setShowModal(false)}
-              >
+            <div
+              className="d-flex justify-content-end gap-2"
+              style={{ padding: "0 20px 20px" }}
+            >
+              <button className="btn filein-btn-reset" onClick={() => setShowModal(false)}>
                 Cancel
+              </button>
+              <button className="btn filein-btn-search" onClick={handleSave}>
+                Save
               </button>
             </div>
           </div>

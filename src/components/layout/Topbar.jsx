@@ -1,21 +1,17 @@
 export default function Topbar({ email, role, onLogout }) {
   return (
-    <div className="palm-topbar">
-      <div className="palm-logo">⬡ CURE</div>
+    <div className="app-topbar">
+      <div className="app-logo">⬡ CURE</div>
 
-      <div className="palm-topbar-right">
+      <div className="app-topbar-right">
         <span>Cure Dashboard</span>
         <span style={{ opacity: 0.4 }}>|</span>
 
-        {email && <div className="palm-user-chip">{email}</div>}
+        {email && <div className="app-user-chip">{email}</div>}
 
-        {role && (
-          <span className={`palm-badge ${String(role).toLowerCase()}`}>
-            {role}
-          </span>
-        )}
+        {role && <span className="app-badge">{role}</span>}
 
-        <button className="palm-logout-btn" onClick={onLogout}>
+        <button className="app-logout-btn" onClick={onLogout}>
           Logout
         </button>
       </div>

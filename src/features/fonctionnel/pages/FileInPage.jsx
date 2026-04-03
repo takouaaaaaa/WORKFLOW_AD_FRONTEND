@@ -6,7 +6,12 @@ import {
   forceFileIn,
   rejectFileIn,
 } from "../services/fileInService";
-import "./FileInPage.css";
+
+import FileInFilters from "../components/FileInFilters";
+import FileInTable from "../components/FileInTable";
+import FileInViewModal from "../components/FileInViewModal";
+import FileInEditModal from "../components/FileInEditModal";
+import "../styles/FileInPage.css";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -36,10 +41,15 @@ export default function FileInPage() {
   }, []);
 
   const fetchData = async () => {
-    const res = await getFileIns();
-    const data = Array.isArray(res.data) ? res.data : res.data.content || [];
-    setRows(data);
-    setFilteredRows(data);
+    try {
+      const res = await getFileIns();
+      const data = Array.isArray(res.data) ? res.data : res.data.content || [];
+      setRows(data);
+      setFilteredRows(data);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to load File IN data");
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -169,32 +179,6 @@ export default function FileInPage() {
     }
   };
 
-  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
-
-  const paginatedRows = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredRows.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredRows, currentPage]);
-
-  const formatDate = (d) => {
-    if (!d) return "—";
-    const date = new Date(d);
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-  };
-
-  const truncate = (text, max = 28) => {
-    if (!text) return "—";
-    return text.length > max ? text.substring(0, max) + "..." : text;
-  };
-
-  const statusClass = (s) => {
-    if (!s) return "";
-    if (["PROCESSED", "ARCHIVED"].includes(s)) return "processed";
-    if (["INPROCESS", "INIT", "INITIATED"].includes(s)) return "inprocess";
-    if (["REJECTED", "BLOCKED", "INTECHNICALERROR", "INBUSINESSERROR"].includes(s)) return "error";
-    return "wait";
-  };
-
   const handleDownload = async () => {
     if (!selectedRow) {
       alert("Select one row first");
@@ -255,262 +239,109 @@ export default function FileInPage() {
     }
   };
 
+  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
+
+  const paginatedRows = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredRows.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredRows, currentPage]);
+
+  const formatDate = (d) => {
+    if (!d) return "—";
+    const date = new Date(d);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
+  const truncate = (text, max = 28) => {
+    if (!text) return "—";
+    return text.length > max ? text.substring(0, max) + "..." : text;
+  };
+
+  const statusClass = (s) => {
+    if (!s) return "";
+    if (["PROCESSED", "ARCHIVED"].includes(s)) return "processed";
+    if (["INPROCESS", "INIT", "INITIATED"].includes(s)) return "inprocess";
+    if (
+      ["REJECTED", "BLOCKED", "INTECHNICALERROR", "INBUSINESSERROR"].includes(s)
+    )
+      return "error";
+    return "wait";
+  };
+
   return (
-    <div className="filein-page">
-      <div className="filein-search-card">
-        <div className="filein-card-title">Detailed Search : File IN</div>
+    <div className="filein-page-bootstrap">
+      <FileInFilters
+        filters={filters}
+        onChange={handleFilterChange}
+        onReset={handleReset}
+        onSearch={handleSearch}
+      />
 
-        <div className="filein-search-grid">
-          <div className="field">
-            <label>App Reference</label>
-            <input
-              name="appReference"
-              value={filters.appReference}
-              onChange={handleFilterChange}
-              placeholder="Search app reference"
-            />
-          </div>
+      <FileInTable
+        rows={paginatedRows}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        formatDate={formatDate}
+        truncate={truncate}
+        statusClass={statusClass}
+      />
 
-          <div className="field">
-            <label>Sender Reference</label>
-            <input
-              name="senderReference"
-              value={filters.senderReference}
-              onChange={handleFilterChange}
-              placeholder="Search sender reference"
-            />
-          </div>
+      <div className="filein-action-bar d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div className="filein-pagination d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-light btn-sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Prev
+          </button>
 
-          <div className="field">
-            <label>Status</label>
-            <select name="status" value={filters.status} onChange={handleFilterChange}>
-              <option value="">All</option>
-              <option value="PROCESSED">PROCESSED</option>
-              <option value="INPROCESS">INPROCESS</option>
-              <option value="REJECTED">REJECTED</option>
-              <option value="BLOCKED">BLOCKED</option>
-              <option value="INITIATED">INITIATED</option>
-            </select>
-          </div>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
 
-          <div className="field">
-            <label>Category</label>
-            <select name="category" value={filters.category} onChange={handleFilterChange}>
-              <option value="">All</option>
-              <option value="ACQUISITION">ACQUISITION</option>
-              <option value="RESTITUTION">RESTITUTION</option>
-            </select>
-          </div>
-
-          <div className="field">
-            <label>Sender</label>
-            <input
-              name="sender"
-              value={filters.sender}
-              onChange={handleFilterChange}
-              placeholder="Search sender"
-            />
-          </div>
-
-          <div className="field">
-            <label>Receiver</label>
-            <input
-              name="receiver"
-              value={filters.receiver}
-              onChange={handleFilterChange}
-              placeholder="Search receiver"
-            />
-          </div>
-
-          <div className="field">
-            <label>Sending Date From</label>
-            <input
-              type="date"
-              name="sendingDateFrom"
-              value={filters.sendingDateFrom}
-              onChange={handleFilterChange}
-            />
-          </div>
-
-          <div className="field">
-            <label>Sending Date To</label>
-            <input
-              type="date"
-              name="sendingDateTo"
-              value={filters.sendingDateTo}
-              onChange={handleFilterChange}
-            />
-          </div>
+          <button
+            className="btn btn-outline-light btn-sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Next
+          </button>
         </div>
 
-        <div className="filein-search-actions">
-          <button className="btn reset" onClick={handleReset}>Reinitialize</button>
-          <button className="btn search" onClick={handleSearch}>Search</button>
+        <div className="d-flex flex-wrap gap-2">
+          <button className="btn filein-btn-primary btn-sm" onClick={handleView}>
+            View
+          </button>
+          <button className="btn filein-btn-primary btn-sm" onClick={handleEdit}>
+            Edit
+          </button>
+          <button className="btn filein-btn-primary btn-sm" onClick={handleDownload}>
+            Download
+          </button>
+          <button className="btn filein-btn-primary btn-sm" onClick={handleForce}>
+            Force
+          </button>
+          <button className="btn filein-btn-danger btn-sm" onClick={handleReject}>
+            Reject
+          </button>
         </div>
       </div>
 
-      <div className="filein-result-card">
-        <div className="filein-card-title">Search Result : File IN</div>
+      <FileInViewModal
+        show={showView}
+        onClose={() => setShowView(false)}
+        selectedRow={selectedRow}
+        formatDate={formatDate}
+      />
 
-        <div className="filein-table-wrapper">
-          <table className="filein-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>App Ref</th>
-                <th>Sender Ref</th>
-                <th>Sender</th>
-                <th>Sending Date</th>
-                <th>Status</th>
-                <th>Flow Type</th>
-                <th>Total Amount</th>
-                <th>Settlement Date</th>
-                <th>Category</th>
-                <th>Message</th>
-                <th>Receiver</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedRows.map((row) => (
-                <tr
-                  key={row.idFluxIn}
-                  className={selectedRow?.idFluxIn === row.idFluxIn ? "selected-row" : ""}
-                >
-                  <td>
-                    <input
-                      type="radio"
-                      checked={selectedRow?.idFluxIn === row.idFluxIn}
-                      onChange={() => setSelectedRow(row)}
-                    />
-                  </td>
-
-                  <td className="mono">{row.flux?.appReference || "—"}</td>
-                  <td className="mono">{row.senderReference || "—"}</td>
-                  <td>{row.flux?.sender?.sender || "—"}</td>
-                  <td>{formatDate(row.sendingDate)}</td>
-
-                  <td>
-                    <span className={`status-badge ${statusClass(row.statutFluxIn)}`}>
-                      {row.statutFluxIn}
-                    </span>
-                  </td>
-
-                  <td>{row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "—"}</td>
-                  <td>{row.flux?.totalAmount ?? "—"}</td>
-                  <td>{formatDate(row.settlementDate)}</td>
-                  <td>{row.category || "—"}</td>
-                  <td title={row.message}>{truncate(row.message, 28)}</td>
-                  <td>{row.flux?.receiver?.receiver || "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="filein-footer">
-          <div className="pagination">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
-              Prev
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
-              Next
-            </button>
-          </div>
-
-          <div className="action-buttons">
-            <button className="action-btn" onClick={handleView}>View</button>
-            <button className="action-btn" onClick={handleEdit}>Edit</button>
-            <button className="action-btn" onClick={handleDownload}>Download</button>
-            <button className="action-btn" onClick={handleForce}>Force</button>
-            <button className="action-btn danger" onClick={handleReject}>Reject</button>
-          </div>
-        </div>
-      </div>
-
-      {showView && selectedRow && (
-        <div className="preview-overlay" onClick={() => setShowView(false)}>
-          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-header">
-              <h3>File IN Details</h3>
-              <button onClick={() => setShowView(false)}>✕</button>
-            </div>
-
-            <div className="modal-content">
-              <p><b>ID:</b> {selectedRow.idFluxIn}</p>
-              <p><b>Status:</b> {selectedRow.statutFluxIn}</p>
-              <p><b>Sender Ref:</b> {selectedRow.senderReference}</p>
-              <p><b>Sending Date:</b> {formatDate(selectedRow.sendingDate)}</p>
-              <p><b>Settlement Date:</b> {formatDate(selectedRow.settlementDate)}</p>
-              <p><b>Category:</b> {selectedRow.category}</p>
-              <p><b>Message:</b> {selectedRow.message}</p>
-
-              <hr />
-
-              <p><b>App Ref:</b> {selectedRow.flux?.appReference || "—"}</p>
-              <p><b>Flow Type:</b> {selectedRow.flux?.typeFlux?.flowType || selectedRow.flux?.typeFlux?.FlowType || "—"}</p>
-              <p><b>Sender:</b> {selectedRow.flux?.sender?.sender || "—"}</p>
-              <p><b>Receiver:</b> {selectedRow.flux?.receiver?.receiver || "—"}</p>
-              <p><b>Total Amount:</b> {selectedRow.flux?.totalAmount ?? "—"}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showEdit && selectedRow && (
-        <div className="preview-overlay" onClick={() => setShowEdit(false)}>
-          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-header">
-              <h3>Edit File IN</h3>
-              <button onClick={() => setShowEdit(false)}>✕</button>
-            </div>
-
-            <div className="modal-content">
-              <label>Status</label>
-              <select
-                value={editData.statutFluxIn || ""}
-                onChange={(e) =>
-                  setEditData((prev) => ({ ...prev, statutFluxIn: e.target.value }))
-                }
-              >
-                <option value="PROCESSED">PROCESSED</option>
-                <option value="INPROCESS">INPROCESS</option>
-                <option value="REJECTED">REJECTED</option>
-                <option value="BLOCKED">BLOCKED</option>
-                <option value="INITIATED">INITIATED</option>
-              </select>
-
-              <label>Category</label>
-              <select
-                value={editData.category || ""}
-                onChange={(e) =>
-                  setEditData((prev) => ({ ...prev, category: e.target.value }))
-                }
-              >
-                <option value="ACQUISITION">ACQUISITION</option>
-                <option value="RESTITUTION">RESTITUTION</option>
-              </select>
-
-              <label>Message</label>
-              <textarea
-                rows="5"
-                value={editData.message || ""}
-                onChange={(e) =>
-                  setEditData((prev) => ({ ...prev, message: e.target.value }))
-                }
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button className="action-btn" onClick={handleSaveEdit}>Save</button>
-              <button className="action-btn danger" onClick={() => setShowEdit(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FileInEditModal
+        show={showEdit}
+        onClose={() => setShowEdit(false)}
+        editData={editData}
+        setEditData={setEditData}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

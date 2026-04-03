@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { getFileOuts } from "../services/fileOutService";
-import "./FileInPage.css"; // on réutilise le même CSS
+import FileOutSearchCard from "../components/FileOutSearchCard";
+import FileOutTable from "../components/FileOutTable";
+import FileOutPagination from "../components/FileOutPagination";
+import "../styles/FileInPage.css";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -17,15 +20,39 @@ export default function FileOutPage() {
     status: "",
   });
 
+  const statusLabel = {
+    NACKED: "Nacked",
+    BLOCKED: "Blocked",
+    ARCHIVED: "Archived",
+    INERROR: "Error",
+    INITIAL: "Initial",
+    WAITTOBESENT: "Waiting",
+    ERRORREPORTEDTOSENDER: "Error Reported",
+    ACKED: "Acknowledged",
+    SENTANDWAITINGACK: "Waiting Ack",
+    SENT: "Sent",
+    INITIATED: "Initiated",
+    CANCELLED: "Cancelled",
+    PUTINQUEUEOUTFAILED: "Queue Failed",
+  };
+
+  const statusOptions = Object.keys(statusLabel);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    const res = await getFileOuts();
-    const data = Array.isArray(res.data) ? res.data : res.data.content || [];
-    setRows(data);
-    setFilteredRows(data);
+    try {
+      const res = await getFileOuts();
+      const data = Array.isArray(res.data) ? res.data : res.data.content || [];
+      setRows(data);
+      setFilteredRows(data);
+    } catch (err) {
+      console.error("Error loading File OUT:", err);
+      setRows([]);
+      setFilteredRows([]);
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -36,13 +63,12 @@ export default function FileOutPage() {
   };
 
   const handleSearch = () => {
-    let result = [...rows];
-
-    result = result.filter((row) => {
+    const result = rows.filter((row) => {
       const appReference = row.flux?.appReference || "";
       const sender = row.flux?.sender?.sender || "";
       const receiver = row.flux?.receiver?.receiver || "";
-      const flowType = row.flux?.typeFlux?.flowType || "";
+      const flowType =
+        row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "";
       const status = row.statutFluxOUT || "";
 
       return (
@@ -77,123 +103,91 @@ export default function FileOutPage() {
     return filteredRows.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredRows, currentPage]);
 
-  const formatDate = (d) => {
-    if (!d) return "—";
-    const date = new Date(d);
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  const formatDate = (value) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleString("fr-FR");
   };
 
-  const statusClass = (s) => {
-    if (!s) return "";
-    if (["SENT", "ACKED"].includes(s)) return "processed";
-    if (["WAITTOBESENT"].includes(s)) return "wait";
-    if (["INERROR", "BLOCKED"].includes(s)) return "error";
-    return "inprocess";
+  const truncate = (value, max = 18) => {
+    if (!value) return "—";
+    return value.length > max ? `${value.slice(0, max)}...` : value;
+  };
+
+  const statusClass = (status) => {
+    if (!status) return "";
+
+    switch (status) {
+      case "SENT":
+      case "ACKED":
+      case "ARCHIVED":
+        return "processed";
+
+      case "WAITTOBESENT":
+      case "SENTANDWAITINGACK":
+      case "INITIAL":
+      case "INITIATED":
+        return "wait";
+
+      case "INERROR":
+      case "ERRORREPORTEDTOSENDER":
+      case "PUTINQUEUEOUTFAILED":
+      case "BLOCKED":
+      case "NACKED":
+      case "CANCELLED":
+        return "error";
+
+      default:
+        return "inprocess";
+    }
   };
 
   return (
-    <div className="filein-page">
+    <div className="filein-page-bootstrap">
+      <FileOutSearchCard
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onSearch={handleSearch}
+        onReset={handleReset}
+        statusOptions={statusOptions}
+      />
 
-      {/* SEARCH */}
-      <div className="filein-search-card">
-        <div className="filein-card-title">Detailed Search : File OUT</div>
+      <div className="filein-card">
+        <div className="filein-card-title">
+          <span>
+            Search Result : <span style={{ color: "#a371f7" }}>File OUT</span>
+          </span>
 
-        <div className="filein-search-grid">
-
-          <div className="field">
-            <label>App Reference</label>
-            <input name="appReference" value={filters.appReference} onChange={handleFilterChange}/>
-          </div>
-
-          <div className="field">
-            <label>Sender</label>
-            <input name="sender" value={filters.sender} onChange={handleFilterChange}/>
-          </div>
-
-          <div className="field">
-            <label>Receiver</label>
-            <input name="receiver" value={filters.receiver} onChange={handleFilterChange}/>
-          </div>
-
-          <div className="field">
-            <label>Flow Type</label>
-            <input name="flowType" value={filters.flowType} onChange={handleFilterChange}/>
-          </div>
-
-          <div className="field">
-            <label>Status</label>
-            <select name="status" value={filters.status} onChange={handleFilterChange}>
-              <option value="">All</option>
-              <option value="SENT">SENT</option>
-              <option value="ACKED">ACKED</option>
-              <option value="INERROR">INERROR</option>
-              <option value="BLOCKED">BLOCKED</option>
-            </select>
-          </div>
-
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: "11px",
+              color: "#8b949e",
+              background: "#21262d",
+              padding: "3px 10px",
+              borderRadius: "20px",
+              border: "1px solid #30363d",
+            }}
+          >
+            {filteredRows.length.toLocaleString()} results
+          </span>
         </div>
 
-        <div className="filein-search-actions">
-          <button className="btn reset" onClick={handleReset}>Reinitialize</button>
-          <button className="btn search" onClick={handleSearch}>Search</button>
-        </div>
-      </div>
+        <FileOutTable
+          rows={paginatedRows}
+          truncate={truncate}
+          formatDate={formatDate}
+          statusClass={statusClass}
+          statusLabel={statusLabel}
+        />
 
-      {/* TABLE */}
-      <div className="filein-result-card">
-        <div className="filein-card-title">Search Result : File OUT</div>
-
-        <div className="filein-table-wrapper">
-          <table className="filein-table">
-            <thead>
-              <tr>
-                <th>App Ref</th>
-                <th>Sender</th>
-                <th>Receiver</th>
-                <th>Flow Type</th>
-                <th>Status</th>
-                <th>Creation Date</th>
-                <th>Update Date</th>
-                <th>Address</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedRows.map((row) => (
-                <tr key={row.idFluxOut}>
-                  <td className="mono">{row.flux?.appReference || "—"}</td>
-                  <td>{row.flux?.sender?.sender || "—"}</td>
-                  <td>{row.flux?.receiver?.receiver || "—"}</td>
-                  <td>{row.flux?.typeFlux?.flowType || "—"}</td>
-
-                  <td>
-                    <span className={`status-badge ${statusClass(row.statutFluxOUT)}`}>
-                      {row.statutFluxOUT}
-                    </span>
-                  </td>
-
-                  <td>{formatDate(row.creationDate)}</td>
-                  <td>{formatDate(row.updateDate)}</td>
-                  <td>{row.usedAddress || "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div className="filein-footer">
-          <div className="pagination">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-              Prev
-            </button>
-            <span>Page {currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-              Next
-            </button>
-          </div>
-        </div>
-
+        <FileOutPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrev={() => setCurrentPage((p) => p - 1)}
+          onNext={() => setCurrentPage((p) => p + 1)}
+        />
       </div>
     </div>
   );
