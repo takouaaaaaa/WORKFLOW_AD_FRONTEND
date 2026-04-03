@@ -22,10 +22,9 @@ export default function UserManagementPage() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [registerForm, setRegisterForm] = useState({
-    nom: "",
-    prenom: "",
     email: "",
     motDePasse: "",
+    numTel: "",
     role: "USER_FONCTIONNEL",
   });
 
@@ -57,10 +56,26 @@ export default function UserManagementPage() {
 
   const handleAddUser = async () => {
     try {
-      await registerUser(registerForm);
+      const payload = {
+        email: registerForm.email,
+        motDePasse: registerForm.motDePasse,
+        numTel: Number(registerForm.numTel),
+        role: registerForm.role,
+      };
+
+      await registerUser(payload);
+
       setShowAddModal(false);
+      setRegisterForm({
+        email: "",
+        motDePasse: "",
+        numTel: "",
+        role: "USER_FONCTIONNEL",
+      });
+
       fetchData();
     } catch (e) {
+      console.error(e);
       alert("Error adding user");
     }
   };
@@ -69,8 +84,10 @@ export default function UserManagementPage() {
     try {
       await updateUserRole(selectedUser.id, roleForm.role);
       setShowRoleModal(false);
+      setSelectedUser(null);
       fetchData();
     } catch (e) {
+      console.error(e);
       alert("Error updating role");
     }
   };
@@ -87,7 +104,17 @@ export default function UserManagementPage() {
         <div className="user-card-header d-flex justify-content-between align-items-center">
           <span>Users Management</span>
         </div>
-        <div className="user-card-body d-flex justify-content-end">
+
+        <div className="user-card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <h4 style={{ color: "#e6edf3", marginBottom: "6px" }}>
+              Users Management
+            </h4>
+            <p style={{ color: "#8b949e", margin: 0, fontSize: "13px" }}>
+              Add users, update roles, and manage platform access.
+            </p>
+          </div>
+
           <button
             className="btn user-btn-primary"
             onClick={() => setShowAddModal(true)}
@@ -98,7 +125,23 @@ export default function UserManagementPage() {
       </div>
 
       <div className="user-card">
-        <div className="user-card-header">Users List</div>
+        <div className="user-card-header d-flex justify-content-between align-items-center">
+          <span>Users List</span>
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: "11px",
+              color: "#8b949e",
+              background: "#21262d",
+              padding: "3px 10px",
+              borderRadius: "20px",
+              border: "1px solid #30363d",
+            }}
+          >
+            {rows.length.toLocaleString()} results
+          </span>
+        </div>
+
         <div className="user-card-body">
           <UserTable
             rows={paginatedRows}
@@ -112,7 +155,6 @@ export default function UserManagementPage() {
 
           <div className="d-flex justify-content-between align-items-center mt-3 user-pagination">
             <button
-              className="btn btn-outline-light"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
@@ -124,7 +166,6 @@ export default function UserManagementPage() {
             </span>
 
             <button
-              className="btn btn-outline-light"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >

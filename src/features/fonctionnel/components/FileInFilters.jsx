@@ -1,4 +1,12 @@
-export default function FileInFilters({ filters, onChange, onReset, onSearch }) {
+export default function FileInFilters({
+  filters,
+  onChange,
+  onReset,
+  onSearch,
+  senderOptions = [],
+  receiverOptions = [],
+  flowTypeOptions = [],
+}) {
   return (
     <div className="filein-card mb-4">
       <div className="filein-card-title">Detailed Search : File IN</div>
@@ -41,6 +49,15 @@ export default function FileInFilters({ filters, onChange, onReset, onSearch }) 
               <option value="REJECTED">REJECTED</option>
               <option value="BLOCKED">BLOCKED</option>
               <option value="INITIATED">INITIATED</option>
+              <option value="ARCHIVED">ARCHIVED</option>
+              <option value="INTECHNICALERROR">INTECHNICALERROR</option>
+              <option value="INBUSINESSERROR">INBUSINESSERROR</option>
+              <option value="WAITACTION">WAITACTION</option>
+              <option value="SUSPENDED">SUSPENDED</option>
+              <option value="CANCELED">CANCELED</option>
+              <option value="INIT">INIT</option>
+              <option value="NOCONTRACTFOUND">NOCONTRACTFOUND</option>
+              <option value="PUTINQUEUEFAILED">PUTINQUEUEFAILED</option>
             </select>
           </div>
 
@@ -60,24 +77,53 @@ export default function FileInFilters({ filters, onChange, onReset, onSearch }) 
 
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Sender</label>
-            <input
-              className="form-control filein-input"
+            <select
+              className="form-select filein-input"
               name="sender"
               value={filters.sender}
               onChange={onChange}
-              placeholder="Search sender"
-            />
+            >
+              <option value="">All</option>
+              {senderOptions.map((sender, index) => (
+                <option key={index} value={sender}>
+                  {sender}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Receiver</label>
-            <input
-              className="form-control filein-input"
+            <select
+              className="form-select filein-input"
               name="receiver"
               value={filters.receiver}
               onChange={onChange}
-              placeholder="Search receiver"
-            />
+            >
+              <option value="">All</option>
+              {receiverOptions.map((receiver, index) => (
+                <option key={index} value={receiver}>
+                  {receiver}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <label className="form-label filein-label">Flow Type</label>
+            <select
+              className="form-select filein-input"
+              name="flowType"
+              value={filters.flowType}
+              onChange={onChange}
+            >
+              <option value="">All</option>
+              {flowTypeOptions.map((flowType, index) => (
+                <option key={index} value={flowType}>
+                  {flowType}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="col-12 col-md-6 col-xl-3">
@@ -104,11 +150,11 @@ export default function FileInFilters({ filters, onChange, onReset, onSearch }) 
         </div>
 
         <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-          <button className="btn filein-btn-reset" onClick={onReset}>
+          <button type="button" className="btn filein-btn-reset" onClick={onReset}>
             Reinitialize
           </button>
 
-          <button className="btn filein-btn-search" onClick={onSearch}>
+          <button type="button" className="btn filein-btn-search" onClick={onSearch}>
             Search
           </button>
         </div>

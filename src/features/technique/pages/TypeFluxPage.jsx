@@ -31,12 +31,12 @@ export default function TypeFluxPage() {
     }
   };
 
-  const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE) || 1;
-
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return rows.slice(start, start + ITEMS_PER_PAGE);
   }, [rows, currentPage]);
+
+  const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE) || 1;
 
   const handleOpenAdd = () => {
     setEditingRow(null);
@@ -170,13 +170,13 @@ export default function TypeFluxPage() {
                     <td>
                       <div className="d-flex gap-2">
                         <button
-                          className="filein-btn-edit"
+                          className="btn filein-btn-edit"
                           onClick={() => handleOpenEdit(row)}
                         >
                           Edit
                         </button>
                         <button
-                          className="filein-btn-force"
+                          className="btn filein-btn-force"
                           onClick={() => handleDelete(row)}
                         >
                           Delete
@@ -216,15 +216,37 @@ export default function TypeFluxPage() {
       </div>
 
       {showModal && (
-        <div className="filein-modal-backdrop preview-overlay" onClick={() => setShowModal(false)}>
+        <div
+          onClick={() => setShowModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.65)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+        >
           <div
-            className="filein-modal-content modal-content"
-            style={{ maxWidth: "500px", margin: "80px auto", padding: "0" }}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "520px",
+              background: "#0d1117",
+              color: "#e2e8f0",
+              border: "1px solid rgba(139, 92, 246, 0.25)",
+              borderRadius: "14px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+              overflow: "hidden",
+            }}
           >
             <div
-              className="d-flex justify-content-between align-items-center"
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 padding: "18px 20px",
                 borderBottom: "1px solid #21262d",
               }}
@@ -232,6 +254,7 @@ export default function TypeFluxPage() {
               <h5 style={{ margin: 0 }}>
                 {editingRow ? "Edit Type Flux" : "Add Type Flux"}
               </h5>
+
               <button
                 onClick={() => setShowModal(false)}
                 style={{
@@ -239,6 +262,7 @@ export default function TypeFluxPage() {
                   border: "none",
                   color: "#c9d1d9",
                   fontSize: "20px",
+                  cursor: "pointer",
                 }}
               >
                 ✕
@@ -259,10 +283,17 @@ export default function TypeFluxPage() {
             </div>
 
             <div
-              className="d-flex justify-content-end gap-2"
-              style={{ padding: "0 20px 20px" }}
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                padding: "0 20px 20px",
+              }}
             >
-              <button className="btn filein-btn-reset" onClick={() => setShowModal(false)}>
+              <button
+                className="btn filein-btn-reset"
+                onClick={() => setShowModal(false)}
+              >
                 Cancel
               </button>
               <button className="btn filein-btn-search" onClick={handleSave}>

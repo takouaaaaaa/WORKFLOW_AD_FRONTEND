@@ -1,13 +1,25 @@
 export default function UserTable({ rows, onEdit, onDelete }) {
+  const roleClass = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "processed";
+      case "USER_TECHNIQUE":
+        return "wait";
+      case "USER_FONCTIONNEL":
+        return "inprocess";
+      default:
+        return "error";
+    }
+  };
+
   return (
     <div className="user-table-wrap">
       <table className="table user-table align-middle">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nom</th>
-            <th>Prenom</th>
             <th>Email</th>
+            <th>Phone Number</th>
             <th>Role</th>
             <th style={{ width: "220px" }}>Actions</th>
           </tr>
@@ -16,19 +28,20 @@ export default function UserTable({ rows, onEdit, onDelete }) {
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan="6" className="text-center">
+              <td colSpan="5" className="text-center">
                 No users found
               </td>
             </tr>
           ) : (
             rows.map((u) => (
               <tr key={u.id}>
-                <td>{u.id}</td>
-                <td>{u.nom}</td>
-                <td>{u.prenom}</td>
+                <td className="mono">{u.id}</td>
                 <td>{u.email}</td>
+                <td>{u.numTel}</td>
                 <td>
-                  <span className="user-role-badge">{u.role}</span>
+                  <span className={`status-badge ${roleClass(u.role)}`}>
+                    {u.role}
+                  </span>
                 </td>
                 <td>
                   <button

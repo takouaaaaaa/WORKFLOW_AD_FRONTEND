@@ -25,6 +25,10 @@ export default function FileInPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [editData, setEditData] = useState({});
 
+  const [senderOptions, setSenderOptions] = useState([]);
+  const [receiverOptions, setReceiverOptions] = useState([]);
+  const [flowTypeOptions, setFlowTypeOptions] = useState([]);
+
   const [filters, setFilters] = useState({
     appReference: "",
     senderReference: "",
@@ -32,6 +36,7 @@ export default function FileInPage() {
     category: "",
     sender: "",
     receiver: "",
+    flowType: "",
     sendingDateFrom: "",
     sendingDateTo: "",
   });
@@ -44,8 +49,42 @@ export default function FileInPage() {
     try {
       const res = await getFileIns();
       const data = Array.isArray(res.data) ? res.data : res.data.content || [];
+
       setRows(data);
       setFilteredRows(data);
+
+      const senders = [
+        ...new Set(
+          data
+            .map((row) => row?.flux?.sender?.sender)
+            .filter((value) => value && value.trim() !== "")
+        ),
+      ].sort((a, b) => a.localeCompare(b));
+
+      const receivers = [
+        ...new Set(
+          data
+            .map((row) => row?.flux?.receiver?.receiver)
+            .filter((value) => value && value.trim() !== "")
+        ),
+      ].sort((a, b) => a.localeCompare(b));
+
+      const flowTypes = [
+        ...new Set(
+          data
+            .map(
+              (row) =>
+                row?.flux?.typeFlux?.flowType ||
+                row?.flux?.typeFlux?.FlowType ||
+                ""
+            )
+            .filter((value) => value && value.trim() !== "")
+        ),
+      ].sort((a, b) => a.localeCompare(b));
+
+      setSenderOptions(senders);
+      setReceiverOptions(receivers);
+      setFlowTypeOptions(flowTypes);
     } catch (error) {
       console.error(error);
       alert("Failed to load File IN data");
@@ -63,13 +102,15 @@ export default function FileInPage() {
     let result = [...rows];
 
     result = result.filter((row) => {
-      const appReference = row.flux?.appReference || "";
-      const senderReference = row.senderReference || "";
-      const status = row.statutFluxIn || "";
-      const category = row.category || "";
-      const sender = row.flux?.sender?.sender || "";
-      const receiver = row.flux?.receiver?.receiver || "";
-      const sendingDate = row.sendingDate ? new Date(row.sendingDate) : null;
+      const appReference = row?.flux?.appReference || "";
+      const senderReference = row?.senderReference || "";
+      const status = row?.statutFluxIn || "";
+      const category = row?.category || "";
+      const sender = row?.flux?.sender?.sender || "";
+      const receiver = row?.flux?.receiver?.receiver || "";
+      const flowType =
+        row?.flux?.typeFlux?.flowType || row?.flux?.typeFlux?.FlowType || "";
+      const sendingDate = row?.sendingDate ? new Date(row.sendingDate) : null;
 
       const matchAppReference = appReference
         .toLowerCase()
@@ -81,26 +122,29 @@ export default function FileInPage() {
 
       const matchStatus = !filters.status || status === filters.status;
       const matchCategory = !filters.category || category === filters.category;
-
-      const matchSender = sender
-        .toLowerCase()
-        .includes(filters.sender.toLowerCase());
-
-      const matchReceiver = receiver
-        .toLowerCase()
-        .includes(filters.receiver.toLowerCase());
+      const matchSender = !filters.sender || sender === filters.sender;
+      const matchReceiver = !filters.receiver || receiver === filters.receiver;
+      const matchFlowType = !filters.flowType || flowType === filters.flowType;
 
       let matchDateFrom = true;
       let matchDateTo = true;
 
-      if (filters.sendingDateFrom && sendingDate) {
-        matchDateFrom = sendingDate >= new Date(filters.sendingDateFrom);
+      if (filters.sendingDateFrom) {
+        if (!sendingDate) {
+          matchDateFrom = false;
+        } else {
+          matchDateFrom = sendingDate >= new Date(filters.sendingDateFrom);
+        }
       }
 
-      if (filters.sendingDateTo && sendingDate) {
-        const endDate = new Date(filters.sendingDateTo);
-        endDate.setHours(23, 59, 59, 999);
-        matchDateTo = sendingDate <= endDate;
+      if (filters.sendingDateTo) {
+        if (!sendingDate) {
+          matchDateTo = false;
+        } else {
+          const endDate = new Date(filters.sendingDateTo);
+          endDate.setHours(23, 59, 59, 999);
+          matchDateTo = sendingDate <= endDate;
+        }
       }
 
       return (
@@ -110,6 +154,7 @@ export default function FileInPage() {
         matchCategory &&
         matchSender &&
         matchReceiver &&
+        matchFlowType &&
         matchDateFrom &&
         matchDateTo
       );
@@ -128,9 +173,11 @@ export default function FileInPage() {
       category: "",
       sender: "",
       receiver: "",
+      flowType: "",
       sendingDateFrom: "",
       sendingDateTo: "",
     });
+
     setFilteredRows(rows);
     setCurrentPage(1);
     setSelectedRow(null);
@@ -263,8 +310,9 @@ export default function FileInPage() {
     if (["INPROCESS", "INIT", "INITIATED"].includes(s)) return "inprocess";
     if (
       ["REJECTED", "BLOCKED", "INTECHNICALERROR", "INBUSINESSERROR"].includes(s)
-    )
+    ) {
       return "error";
+    }
     return "wait";
   };
 
@@ -275,6 +323,9 @@ export default function FileInPage() {
         onChange={handleFilterChange}
         onReset={handleReset}
         onSearch={handleSearch}
+        senderOptions={senderOptions}
+        receiverOptions={receiverOptions}
+        flowTypeOptions={flowTypeOptions}
       />
 
       <FileInTable

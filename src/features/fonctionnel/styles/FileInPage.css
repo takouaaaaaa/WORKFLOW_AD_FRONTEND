@@ -515,3 +515,61 @@
   font-size: 12px;
   line-height: 1.2;
 }
+.crud-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.crud-modal-box {
+  background: #0d1117;
+  padding: 20px;
+  border-radius: 12px;
+  width: 400px;
+  border: 1px solid #30363d;
+}
+
+.crud-modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.crud-modal-body {
+  margin-bottom: 10px;
+}
+
+.crud-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+/* ===== FIX DROPDOWN SELECT ===== */
+
+.filein-page-bootstrap select.filein-input {
+  background: #161b22 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* options (le menu déroulant) */
+.filein-page-bootstrap select.filein-input option {
+  background: #0d1117;
+  color: #ffffff;
+}
+
+/* option sélectionnée */
+.filein-page-bootstrap select.filein-input option:checked {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+/* hover option (Chrome limité mais utile) */
+.filein-page-bootstrap select.filein-input option:hover {
+  background: #6d28d9;
+  color: #fff;
+}
