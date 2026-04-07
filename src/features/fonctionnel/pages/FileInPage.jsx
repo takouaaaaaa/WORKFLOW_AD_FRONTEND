@@ -328,15 +328,13 @@ export default function FileInPage() {
         flowTypeOptions={flowTypeOptions}
       />
 
-      <FileInTable
-        rows={paginatedRows}
-        selectedRow={selectedRow}
-        setSelectedRow={setSelectedRow}
-        formatDate={formatDate}
-        truncate={truncate}
-        statusClass={statusClass}
-      />
-
+    <FileInTable
+  rows={filteredRows}
+  totalCount={rows.length}
+  truncate={truncate}
+  formatDate={formatDate}
+  statusClass={statusClass}
+/>
       <div className="filein-action-bar d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div className="filein-pagination d-flex align-items-center gap-2">
           <button

@@ -222,19 +222,21 @@ export default function FileOutPage() {
             Search Result : <span style={{ color: "#a371f7" }}>File OUT</span>
           </span>
 
-          <span
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: "11px",
-              color: "#8b949e",
-              background: "#21262d",
-              padding: "3px 10px",
-              borderRadius: "20px",
-              border: "1px solid #30363d",
-            }}
-          >
-            {filteredRows.length.toLocaleString()} results
-          </span>
+        <span
+  style={{
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: "11px",
+    color: "#8b949e",
+    background: "#21262d",
+    padding: "3px 10px",
+    borderRadius: "20px",
+    border: "1px solid #30363d",
+  }}
+>
+  {filteredRows.length === rows.length
+    ? `${rows.length.toLocaleString()} total`
+    : `${filteredRows.length.toLocaleString()} results`}
+</span>
         </div>
 
         <FileOutTable
