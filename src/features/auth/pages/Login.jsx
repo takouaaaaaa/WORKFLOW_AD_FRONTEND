@@ -4,12 +4,14 @@ import { loginUser } from "../services/authService";
 import { getUserFromToken, setTokens } from "../utils/auth";
 import { ROLES } from "../../../app/routeConfig";
 import "./login.css";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -41,20 +43,16 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("FORM SUBMITTED");
 
     setError("");
     setLoading(true);
 
     try {
       const res = await loginUser({ email, motDePasse });
-      console.log("LOGIN RESPONSE:", res.data);
 
       setTokens(res.data.accessToken, res.data.refreshToken);
 
       const user = getUserFromToken();
-      console.log("DECODED USER:", user);
-
       redirectByRole(user);
     } catch (err) {
       console.log("LOGIN ERROR:", err.response?.data || err.message);
@@ -88,14 +86,25 @@ export default function Login() {
 
           <div className="login-field">
             <label className="login-label">Password</label>
-            <input
-              type="password"
-              className="login-input"
-              value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+
+           <div className="login-password-wrap">
+  <input
+    type={showPassword ? "text" : "password"}
+    className="login-input login-input-password"
+    value={motDePasse}
+    onChange={(e) => setMotDePasse(e.target.value)}
+    placeholder="••••••••"
+    required
+  />
+
+  <button
+    type="button"
+    className="login-password-toggle"
+    onClick={() => setShowPassword((prev) => !prev)}
+  >
+    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+</div>
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
