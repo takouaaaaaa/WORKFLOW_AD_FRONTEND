@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
 import { ROLES } from "../../app/routeConfig";
 import {
   House,
@@ -7,13 +6,10 @@ import {
   Send,
   Inbox,
   FolderOpen,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
-export default function Sidebar({ roles }) {
+export default function Sidebar({ roles, collapsed }) {
   const role = roles?.[0];
-  const [collapsed, setCollapsed] = useState(false);
 
   let items = [];
 
@@ -43,34 +39,26 @@ export default function Sidebar({ roles }) {
   }
 
   return (
-    <div className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
-      <div className="app-sidebar-header">
-        {!collapsed && <div className="app-sidebar-title">Navigation</div>}
-
-        <button
-          className="app-sidebar-toggle btn btn-sm"
-          onClick={() => setCollapsed(!collapsed)}
-          type="button"
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
-      </div>
+    <aside className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
+      
 
       <div className="app-sidebar-section">{!collapsed && "Menu"}</div>
 
-      {items.map((item) => (
-        <NavLink
-          key={item.path}
-          to={item.path}
-          className={({ isActive }) =>
-            isActive ? "app-nav-item active" : "app-nav-item"
-          }
-          title={collapsed ? item.label : ""}
-        >
-          <span className="app-nav-icon">{item.icon}</span>
-          {!collapsed && <span className="app-nav-label">{item.label}</span>}
-        </NavLink>
-      ))}
-    </div>
+      <nav className="app-sidebar-nav">
+        {items.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              isActive ? "app-nav-item active" : "app-nav-item"
+            }
+            title={collapsed ? item.label : ""}
+          >
+            <span className="app-nav-icon">{item.icon}</span>
+            {!collapsed && <span className="app-nav-label">{item.label}</span>}
+          </NavLink>
+        ))}
+      </nav>
+    </aside>
   );
 }

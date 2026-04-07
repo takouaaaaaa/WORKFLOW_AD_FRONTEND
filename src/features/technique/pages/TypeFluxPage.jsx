@@ -12,6 +12,15 @@ const ITEMS_PER_PAGE = 10;
 export default function TypeFluxPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [searchIdInput, setSearchIdInput] = useState("");
+  const [searchFlowTypeInput, setSearchFlowTypeInput] = useState("");
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    idTypeFlux: "",
+    flowType: "",
+  });
+
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [formData, setFormData] = useState({ flowType: "" });
@@ -31,12 +40,47 @@ export default function TypeFluxPage() {
     }
   };
 
+  const filteredRows = useMemo(() => {
+    const idFilter = appliedFilters.idTypeFlux.trim().toLowerCase();
+    const flowTypeFilter = appliedFilters.flowType.trim().toLowerCase();
+
+    return rows.filter((row) => {
+      const rowId = String(row.idTypeFlux || "").toLowerCase();
+      const rowFlowType = String(row.flowType || row.FlowType || "").toLowerCase();
+
+      const matchId = !idFilter || rowId.includes(idFilter);
+      const matchFlowType = !flowTypeFilter || rowFlowType.includes(flowTypeFilter);
+
+      return matchId && matchFlowType;
+    });
+  }, [rows, appliedFilters]);
+
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return rows.slice(start, start + ITEMS_PER_PAGE);
-  }, [rows, currentPage]);
+    return filteredRows.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredRows, currentPage]);
 
-  const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
+
+  const handleSearch = () => {
+    const cleanId = searchIdInput.trim();
+    const cleanFlowType = searchFlowTypeInput.trim();
+
+    if (!cleanId && !cleanFlowType) {
+      setAppliedFilters({
+        flowType: "",
+      });
+      setSearchIdInput("");
+      setSearchFlowTypeInput("");
+      setCurrentPage(1);
+      return;
+    }
+
+    setAppliedFilters({
+      flowType: cleanFlowType,
+    });
+    setCurrentPage(1);
+  };
 
   const handleOpenAdd = () => {
     setEditingRow(null);
@@ -139,8 +183,33 @@ export default function TypeFluxPage() {
               border: "1px solid #30363d",
             }}
           >
-            {rows.length.toLocaleString()} results
+            {filteredRows.length.toLocaleString()} results
           </span>
+        </div>
+
+        <div className="filein-card-body">
+          <div className="row g-3 align-items-end">
+
+            <div className="col-12 col-md-5">
+              <label className="form-label filein-label">Flow Type</label>
+              <input
+                type="text"
+                value={searchFlowTypeInput}
+                onChange={(e) => setSearchFlowTypeInput(e.target.value)}
+                placeholder="Search by flow type"
+                className="form-control filein-input"
+              />
+            </div>
+
+            <div className="col-12 col-md-auto">
+              <button
+                className="btn filein-btn-search"
+                onClick={handleSearch}
+              >
+                Search
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="filein-table-wrap">

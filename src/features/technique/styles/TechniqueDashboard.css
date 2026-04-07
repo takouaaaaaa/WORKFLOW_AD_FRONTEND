@@ -1,0 +1,282 @@
+/* ── LAYOUT ── */
+.td-main {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── STAT CARDS ── */
+.td-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.td-stat-card {
+  background: linear-gradient(180deg, rgba(8, 26, 56, 0.95), rgba(5, 18, 40, 0.98));
+  border: 1px solid rgba(0, 207, 255, 0.14);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  transition: 0.2s ease;
+}
+
+/* 🔵 TOP LINE */
+.td-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #00cfff, #7cf7d4);
+}
+
+/* HOVER EFFECT */
+.td-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 207, 255, 0.28);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(0, 207, 255, 0.15);
+}
+
+.td-stat-icon {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.td-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fb4d9;
+  margin-bottom: 6px;
+}
+
+.td-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #eef7ff;
+}
+
+.td-stat-value.ok {
+  color: #00d9ff;
+}
+
+.td-stat-value.warn {
+  color: #7cf7d4;
+}
+
+.td-stat-sub {
+  font-size: 12px;
+  color: #6f97bd;
+}
+
+/* ── MAIN GRID ── */
+.td-main-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 16px;
+}
+
+/* ── AI CARD ── */
+.td-ai-card {
+  background: linear-gradient(180deg, rgba(8, 26, 56, 0.96), rgba(5, 18, 38, 0.98));
+  border: 1px solid rgba(0, 207, 255, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.td-brain-wrap {
+  width: 170px;
+  height: 170px;
+  margin: 0 auto 18px;
+}
+
+.brain-canvas {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  display: block;
+}
+
+.td-ai-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #00cfff;
+  margin-bottom: 8px;
+}
+
+.td-ai-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #7cf7d4;
+  margin-bottom: 14px;
+}
+
+.td-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7cf7d4;
+  box-shadow: 0 0 10px rgba(124, 247, 212, 0.8);
+  animation: td-blink 1.8s infinite;
+}
+
+@keyframes td-blink {
+  0%,100% { opacity:1 }
+  50% { opacity:.3 }
+}
+
+/* AI THINKING TEXT */
+.td-cog-bar {
+  width: 100%;
+  background: rgba(0, 207, 255, 0.06);
+  border: 1px solid rgba(0, 207, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.td-cog-label {
+  font-size: 11px;
+  color: #00cfff;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.td-cog-ticker {
+  font-size: 13px;
+  color: #c8e7ff;
+}
+
+/* METRICS */
+.td-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.td-metric {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,207,255,0.08);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.td-metric-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00d9ff;
+}
+
+.td-metric-lbl {
+  font-size: 11px;
+  color: #7b9cc0;
+}
+
+/* ── TASKS ── */
+.td-tasks-card {
+  background: linear-gradient(180deg, rgba(8, 26, 56, 0.96), rgba(5, 18, 38, 0.98));
+  border: 1px solid rgba(0, 207, 255, 0.12);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.td-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00cfff;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.td-task-item {
+  border: 1px solid rgba(0,207,255,0.10);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.td-task-item:hover {
+  background: rgba(0,207,255,0.05);
+}
+
+.td-task-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #eef7ff;
+}
+
+.td-task-desc {
+  font-size: 12px;
+  color: #89acd1;
+  margin: 8px 0;
+}
+
+.td-task-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg,#00cfff,#7cf7d4);
+  color: #041221;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── CHARTS ── */
+.td-chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.td-chart-card {
+  background: linear-gradient(180deg, rgba(8, 26, 56, 0.96), rgba(5, 18, 38, 0.98));
+  border: 1px solid rgba(0, 207, 255, 0.12);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.td-chart-title {
+  color: #eef7ff;
+  font-size: 12px;
+}
+
+.td-chart-sub {
+  color: #7b9cc0;
+  font-size: 11px;
+}
+
+.chart-wrap {
+  height: 180px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .td-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .td-main-grid,
+  .td-chart-row {
+    grid-template-columns: 1fr;
+  }
+}

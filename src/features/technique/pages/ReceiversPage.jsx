@@ -12,6 +12,15 @@ const ITEMS_PER_PAGE = 10;
 export default function ReceiversPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [searchIdInput, setSearchIdInput] = useState("");
+  const [searchReceiverInput, setSearchReceiverInput] = useState("");
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    idReceiver: "",
+    receiver: "",
+  });
+
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [formData, setFormData] = useState({ receiver: "" });
@@ -31,12 +40,47 @@ export default function ReceiversPage() {
     }
   };
 
+  const filteredRows = useMemo(() => {
+    const idFilter = appliedFilters.idReceiver.trim().toLowerCase();
+    const receiverFilter = appliedFilters.receiver.trim().toLowerCase();
+
+    return rows.filter((row) => {
+      const rowId = String(row.idReceiver || "").toLowerCase();
+      const rowReceiver = String(row.receiver || "").toLowerCase();
+
+      const matchId = !idFilter || rowId.includes(idFilter);
+      const matchReceiver = !receiverFilter || rowReceiver.includes(receiverFilter);
+
+      return matchId && matchReceiver;
+    });
+  }, [rows, appliedFilters]);
+
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return rows.slice(start, start + ITEMS_PER_PAGE);
-  }, [rows, currentPage]);
+    return filteredRows.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredRows, currentPage]);
 
-  const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
+
+  const handleSearch = () => {
+    const cleanId = searchIdInput.trim();
+    const cleanReceiver = searchReceiverInput.trim();
+
+    if (!cleanId && !cleanReceiver) {
+      setAppliedFilters({
+        receiver: "",
+      });
+      setSearchIdInput("");
+      setSearchReceiverInput("");
+      setCurrentPage(1);
+      return;
+    }
+
+    setAppliedFilters({
+      receiver: cleanReceiver,
+    });
+    setCurrentPage(1);
+  };
 
   const handleOpenAdd = () => {
     setEditingRow(null);
@@ -134,8 +178,33 @@ export default function ReceiversPage() {
               border: "1px solid #30363d",
             }}
           >
-            {rows.length.toLocaleString()} results
+            {filteredRows.length.toLocaleString()} results
           </span>
+        </div>
+
+        <div className="filein-card-body">
+          <div className="row g-3 align-items-end">
+
+            <div className="col-12 col-md-5">
+              <label className="form-label filein-label">Receiver</label>
+              <input
+                type="text"
+                value={searchReceiverInput}
+                onChange={(e) => setSearchReceiverInput(e.target.value)}
+                placeholder="Search by receiver name"
+                className="form-control filein-input"
+              />
+            </div>
+
+            <div className="col-12 col-md-auto">
+              <button
+                className="btn filein-btn-search"
+                onClick={handleSearch}
+              >
+                Search
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="filein-table-wrap">

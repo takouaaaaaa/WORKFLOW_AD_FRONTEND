@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Topbar from "./Topbar";
 import Sidebar from "./Sidebar";
 
@@ -15,7 +15,13 @@ import "./layout.css";
 
 export default function AppLayout() {
   const navigate = useNavigate();
-  const user = getUserFromToken();
+
+  const user = useMemo(() => getUserFromToken(), []);
+  const role = user?.roles?.[0];
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    role === "USER_TECHNIQUE"
+  );
 
   useEffect(() => {
     if (!user) {
@@ -37,18 +43,24 @@ export default function AppLayout() {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed((prev) => !prev);
+  };
+
   if (!user) return null;
 
   return (
     <div className="app-shell">
       <Topbar
         email={user.email}
-        role={user.roles?.[0]}
+        role={role}
         onLogout={handleLogout}
+        onToggleSidebar={handleToggleSidebar}
+        sidebarCollapsed={sidebarCollapsed}
       />
 
       <div className="app-layout">
-        <Sidebar roles={user.roles || []} />
+        <Sidebar roles={user.roles || []} collapsed={sidebarCollapsed} />
 
         <div className="app-content">
           <div className="app-main-scroll">
