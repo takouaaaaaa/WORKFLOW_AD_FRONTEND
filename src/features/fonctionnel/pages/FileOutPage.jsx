@@ -12,13 +12,18 @@ export default function FileOutPage() {
   const [filteredRows, setFilteredRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [filters, setFilters] = useState({
+  const initialFilters = {
     appReference: "",
+    senderReference: "",
     sender: "",
     receiver: "",
     flowType: "",
     status: "",
-  });
+    creationDateFrom: "",
+    creationDateTo: "",
+  };
+
+  const [filters, setFilters] = useState(initialFilters);
 
   const statusLabel = {
     NACKED: "Nacked",
@@ -56,27 +61,70 @@ export default function FileOutPage() {
   };
 
   const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+
     setFilters((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+  };
+
+  const normalizeDate = (dateValue) => {
+    if (!dateValue) return null;
+    const d = new Date(dateValue);
+    return isNaN(d.getTime()) ? null : d;
   };
 
   const handleSearch = () => {
     const result = rows.filter((row) => {
       const appReference = row.flux?.appReference || "";
+      const senderReference = row.flux?.senderReference || "";
       const sender = row.flux?.sender?.sender || "";
       const receiver = row.flux?.receiver?.receiver || "";
       const flowType =
         row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "";
       const status = row.statutFluxOUT || "";
+      const creationDate = normalizeDate(row.creationDate);
+
+      const filterCreationDateFrom = filters.creationDateFrom
+        ? new Date(`${filters.creationDateFrom}T00:00:00`)
+        : null;
+
+      const filterCreationDateTo = filters.creationDateTo
+        ? new Date(`${filters.creationDateTo}T23:59:59`)
+        : null;
+
+      const matchesAppReference = appReference
+        .toLowerCase()
+        .includes(filters.appReference.toLowerCase());
+
+      const matchesSenderReference = senderReference
+        .toLowerCase()
+        .includes(filters.senderReference.toLowerCase());
+
+      const matchesSender = !filters.sender || sender === filters.sender;
+
+      const matchesReceiver = !filters.receiver || receiver === filters.receiver;
+
+      const matchesFlowType = !filters.flowType || flowType === filters.flowType;
+
+      const matchesStatus = !filters.status || status === filters.status;
+
+      const matchesCreationDateFrom =
+        !filterCreationDateFrom || (creationDate && creationDate >= filterCreationDateFrom);
+
+      const matchesCreationDateTo =
+        !filterCreationDateTo || (creationDate && creationDate <= filterCreationDateTo);
 
       return (
-        appReference.toLowerCase().includes(filters.appReference.toLowerCase()) &&
-        sender.toLowerCase().includes(filters.sender.toLowerCase()) &&
-        receiver.toLowerCase().includes(filters.receiver.toLowerCase()) &&
-        flowType.toLowerCase().includes(filters.flowType.toLowerCase()) &&
-        (!filters.status || status === filters.status)
+        matchesAppReference &&
+        matchesSenderReference &&
+        matchesSender &&
+        matchesReceiver &&
+        matchesFlowType &&
+        matchesStatus &&
+        matchesCreationDateFrom &&
+        matchesCreationDateTo
       );
     });
 
@@ -85,16 +133,28 @@ export default function FileOutPage() {
   };
 
   const handleReset = () => {
-    setFilters({
-      appReference: "",
-      sender: "",
-      receiver: "",
-      flowType: "",
-      status: "",
-    });
+    setFilters(initialFilters);
     setFilteredRows(rows);
     setCurrentPage(1);
   };
+
+  const senderOptions = useMemo(() => {
+    return [...new Set(rows.map((row) => row.flux?.sender?.sender).filter(Boolean))].sort();
+  }, [rows]);
+
+  const receiverOptions = useMemo(() => {
+    return [...new Set(rows.map((row) => row.flux?.receiver?.receiver).filter(Boolean))].sort();
+  }, [rows]);
+
+  const flowTypeOptions = useMemo(() => {
+    return [
+      ...new Set(
+        rows
+          .map((row) => row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType)
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [rows]);
 
   const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
@@ -151,6 +211,9 @@ export default function FileOutPage() {
         onSearch={handleSearch}
         onReset={handleReset}
         statusOptions={statusOptions}
+        senderOptions={senderOptions}
+        receiverOptions={receiverOptions}
+        flowTypeOptions={flowTypeOptions}
       />
 
       <div className="filein-card">
