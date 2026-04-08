@@ -13,6 +13,8 @@ export default function FileInFilters({
 
       <div className="filein-card-body">
         <div className="row g-3">
+
+          {/* App Reference */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">App Reference</label>
             <input
@@ -24,6 +26,7 @@ export default function FileInFilters({
             />
           </div>
 
+          {/* Sender Reference */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Sender Reference</label>
             <input
@@ -35,6 +38,7 @@ export default function FileInFilters({
             />
           </div>
 
+          {/* Status */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Status</label>
             <select
@@ -61,6 +65,7 @@ export default function FileInFilters({
             </select>
           </div>
 
+          {/* Category */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Category</label>
             <select
@@ -75,6 +80,7 @@ export default function FileInFilters({
             </select>
           </div>
 
+          {/* Sender */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Sender</label>
             <select
@@ -92,6 +98,7 @@ export default function FileInFilters({
             </select>
           </div>
 
+          {/* Receiver */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Receiver</label>
             <select
@@ -109,6 +116,7 @@ export default function FileInFilters({
             </select>
           </div>
 
+          {/* Flow Type */}
           <div className="col-12 col-md-6 col-xl-3">
             <label className="form-label filein-label">Flow Type</label>
             <select
@@ -126,35 +134,91 @@ export default function FileInFilters({
             </select>
           </div>
 
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Sending Date From</label>
-            <input
-              type="date"
-              className="form-control filein-input"
-              name="sendingDateFrom"
-              value={filters.sendingDateFrom}
-              onChange={onChange}
-            />
+          {/* EMPTY SLOT FOR ALIGNMENT */}
+          <div className="col-12 col-md-6 col-xl-3"></div>
+
+          {/* Sending Date INTERVAL */}
+          <div className="col-12 col-md-6 col-xl-6">
+            <label className="form-label filein-label">Sending Date</label>
+
+            <div className="d-flex align-items-center gap-2">
+              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
+                from
+              </span>
+
+              <input
+                type="date"
+                className="form-control filein-input"
+                name="sendingDateFrom"
+                value={filters.sendingDateFrom}
+                onChange={onChange}
+              />
+
+              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
+                to
+              </span>
+
+              <input
+                type="date"
+                className="form-control filein-input"
+                name="sendingDateTo"
+                value={filters.sendingDateTo}
+                onChange={onChange}
+              />
+            </div>
           </div>
 
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Sending Date To</label>
-            <input
-              type="date"
-              className="form-control filein-input"
-              name="sendingDateTo"
-              value={filters.sendingDateTo}
-              onChange={onChange}
-            />
+          {/* Total Amount INTERVAL */}
+          <div className="col-12 col-md-6 col-xl-6">
+            <label className="form-label filein-label">Total Amount</label>
+
+            <div className="d-flex align-items-center gap-2">
+              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
+                from
+              </span>
+
+              <input
+                type="number"
+                step="0.01"
+                className="form-control filein-input"
+                name="totalAmountFrom"
+                value={filters.totalAmountFrom}
+                onChange={onChange}
+                placeholder="Min"
+              />
+
+              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
+                to
+              </span>
+
+              <input
+                type="number"
+                step="0.01"
+                className="form-control filein-input"
+                name="totalAmountTo"
+                value={filters.totalAmountTo}
+                onChange={onChange}
+                placeholder="Max"
+              />
+            </div>
           </div>
         </div>
 
+        {/* Buttons */}
         <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-          <button type="button" className="btn filein-btn-reset" onClick={onReset}>
+          <button
+            type="button"
+            className="btn filein-btn-reset"
+            onClick={onReset}
+          >
             Reinitialize
           </button>
 
-          <button type="button" className="btn filein-btn-search" onClick={onSearch}>
+          <button
+            type="button"
+            className="btn filein-btn-search"
+            onClick={onSearch}
+          >
             Search
           </button>
         </div>

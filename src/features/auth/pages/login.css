@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
 }
 
 .login-card {
@@ -76,6 +76,7 @@
 }
 
 .login-input {
+  width: 100%;
   padding: 11px 14px;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
@@ -87,6 +88,34 @@
 
 .login-input:focus {
   border-color: #6366f1;
+}
+
+.login-password-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.login-input-password {
+  padding-right: 46px;
+}
+
+.login-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #6c63ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.login-password-toggle:hover {
+  opacity: 0.8;
 }
 
 .login-button {
