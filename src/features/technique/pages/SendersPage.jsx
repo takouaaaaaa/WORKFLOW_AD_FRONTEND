@@ -13,13 +13,8 @@ export default function SendersPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [searchIdInput, setSearchIdInput] = useState("");
   const [searchSenderInput, setSearchSenderInput] = useState("");
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    idSender: "",
-    sender: "",
-  });
+  const [appliedSenderFilter, setAppliedSenderFilter] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
@@ -41,19 +36,13 @@ export default function SendersPage() {
   };
 
   const filteredRows = useMemo(() => {
-    const idFilter = appliedFilters.idSender.trim().toLowerCase();
-    const senderFilter = appliedFilters.sender.trim().toLowerCase();
+    const senderFilter = appliedSenderFilter.trim().toLowerCase();
 
     return rows.filter((row) => {
-      const rowId = String(row.idSender || "").toLowerCase();
       const rowSender = String(row.sender || "").toLowerCase();
-
-      const matchId = !idFilter || rowId.includes(idFilter);
-      const matchSender = !senderFilter || rowSender.includes(senderFilter);
-
-      return matchId && matchSender;
+      return !senderFilter || rowSender.includes(senderFilter);
     });
-  }, [rows, appliedFilters]);
+  }, [rows, appliedSenderFilter]);
 
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -63,22 +52,16 @@ export default function SendersPage() {
   const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
   const handleSearch = () => {
-    const cleanId = searchIdInput.trim();
     const cleanSender = searchSenderInput.trim();
 
-    if (!cleanId && !cleanSender) {
-      setAppliedFilters({
-        sender: "",
-      });
-      setSearchIdInput("");
+    if (!cleanSender) {
+      setAppliedSenderFilter("");
       setSearchSenderInput("");
       setCurrentPage(1);
       return;
     }
 
-    setAppliedFilters({
-      sender: cleanSender,
-    });
+    setAppliedSenderFilter(cleanSender);
     setCurrentPage(1);
   };
 
@@ -184,8 +167,7 @@ export default function SendersPage() {
 
         <div className="filein-card-body">
           <div className="row g-3 align-items-end">
-
-            <div className="col-12 col-md-5">
+            <div className="col-12 col-md-6">
               <label className="form-label filein-label">Sender</label>
               <input
                 type="text"

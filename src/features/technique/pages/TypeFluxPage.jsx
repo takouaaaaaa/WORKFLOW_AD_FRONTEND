@@ -13,13 +13,8 @@ export default function TypeFluxPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [searchIdInput, setSearchIdInput] = useState("");
   const [searchFlowTypeInput, setSearchFlowTypeInput] = useState("");
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    idTypeFlux: "",
-    flowType: "",
-  });
+  const [appliedFlowTypeFilter, setAppliedFlowTypeFilter] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
@@ -41,19 +36,13 @@ export default function TypeFluxPage() {
   };
 
   const filteredRows = useMemo(() => {
-    const idFilter = appliedFilters.idTypeFlux.trim().toLowerCase();
-    const flowTypeFilter = appliedFilters.flowType.trim().toLowerCase();
+    const flowTypeFilter = appliedFlowTypeFilter.trim().toLowerCase();
 
     return rows.filter((row) => {
-      const rowId = String(row.idTypeFlux || "").toLowerCase();
       const rowFlowType = String(row.flowType || row.FlowType || "").toLowerCase();
-
-      const matchId = !idFilter || rowId.includes(idFilter);
-      const matchFlowType = !flowTypeFilter || rowFlowType.includes(flowTypeFilter);
-
-      return matchId && matchFlowType;
+      return !flowTypeFilter || rowFlowType.includes(flowTypeFilter);
     });
-  }, [rows, appliedFilters]);
+  }, [rows, appliedFlowTypeFilter]);
 
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -63,22 +52,16 @@ export default function TypeFluxPage() {
   const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
   const handleSearch = () => {
-    const cleanId = searchIdInput.trim();
     const cleanFlowType = searchFlowTypeInput.trim();
 
-    if (!cleanId && !cleanFlowType) {
-      setAppliedFilters({
-        flowType: "",
-      });
-      setSearchIdInput("");
+    if (!cleanFlowType) {
+      setAppliedFlowTypeFilter("");
       setSearchFlowTypeInput("");
       setCurrentPage(1);
       return;
     }
 
-    setAppliedFilters({
-      flowType: cleanFlowType,
-    });
+    setAppliedFlowTypeFilter(cleanFlowType);
     setCurrentPage(1);
   };
 
@@ -189,8 +172,7 @@ export default function TypeFluxPage() {
 
         <div className="filein-card-body">
           <div className="row g-3 align-items-end">
-
-            <div className="col-12 col-md-5">
+            <div className="col-12 col-md-6">
               <label className="form-label filein-label">Flow Type</label>
               <input
                 type="text"
