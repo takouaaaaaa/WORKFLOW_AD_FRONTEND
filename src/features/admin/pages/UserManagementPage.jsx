@@ -16,7 +16,6 @@ const ITEMS_PER_PAGE = 10;
 export default function UserManagementPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -28,13 +27,9 @@ export default function UserManagementPage() {
     role: "USER_FONCTIONNEL",
   });
 
-  const [roleForm, setRoleForm] = useState({
-    role: "USER_FONCTIONNEL",
-  });
+  const [roleForm, setRoleForm] = useState({ role: "USER_FONCTIONNEL" });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
@@ -56,23 +51,14 @@ export default function UserManagementPage() {
 
   const handleAddUser = async () => {
     try {
-      const payload = {
+      await registerUser({
         email: registerForm.email,
         motDePasse: registerForm.motDePasse,
         numTel: Number(registerForm.numTel),
         role: registerForm.role,
-      };
-
-      await registerUser(payload);
-
-      setShowAddModal(false);
-      setRegisterForm({
-        email: "",
-        motDePasse: "",
-        numTel: "",
-        role: "USER_FONCTIONNEL",
       });
-
+      setShowAddModal(false);
+      setRegisterForm({ email: "", motDePasse: "", numTel: "", role: "USER_FONCTIONNEL" });
       fetchData();
     } catch (e) {
       console.error(e);
@@ -93,30 +79,35 @@ export default function UserManagementPage() {
   };
 
   const handleDeleteUser = async (user) => {
-    if (!window.confirm(`Delete user "${user.email}" ?`)) return;
+    if (!window.confirm(`Delete user "${user.email}"?`)) return;
     await deleteUser(user.id);
     fetchData();
   };
 
   return (
-    <div className="container-fluid user-management-page">
-      <div className="user-card mb-4">
-        <div className="user-card-header d-flex justify-content-between align-items-center">
+    <div className="user-management-page">
+
+      {/* Page header card */}
+      <div className="user-card">
+        <div className="user-card-header">
           <span>Users Management</span>
         </div>
-
-        <div className="user-card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div
+          className="user-card-body"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
           <div>
-            <h4 style={{ color: "#e6edf3", marginBottom: "6px" }}>
-              Users Management
-            </h4>
-            <p style={{ color: "#8b949e", margin: 0, fontSize: "13px" }}>
-              Add users, update roles, and manage platform access.
-            </p>
+            <h4>Users Management</h4>
+            <p>Add users, update roles, and manage platform access.</p>
           </div>
-
           <button
-            className="btn user-btn-primary"
+            className="btn-primary-action"
             onClick={() => setShowAddModal(true)}
           >
             + Add User
@@ -124,22 +115,11 @@ export default function UserManagementPage() {
         </div>
       </div>
 
+      {/* Table card */}
       <div className="user-card">
-        <div className="user-card-header d-flex justify-content-between align-items-center">
+        <div className="user-card-header">
           <span>Users List</span>
-          <span
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: "11px",
-              color: "#8b949e",
-              background: "#21262d",
-              padding: "3px 10px",
-              borderRadius: "20px",
-              border: "1px solid #30363d",
-            }}
-          >
-            {rows.length.toLocaleString()} results
-          </span>
+          <span className="results-badge">{rows.length.toLocaleString()} results</span>
         </div>
 
         <div className="user-card-body">
@@ -153,23 +133,19 @@ export default function UserManagementPage() {
             onDelete={handleDeleteUser}
           />
 
-          <div className="d-flex justify-content-between align-items-center mt-3 user-pagination">
+          <div className="user-pagination">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
-              Prev
+              ← Prev
             </button>
-
-            <span>
-              Page {currentPage} / {totalPages}
-            </span>
-
+            <span>Page {currentPage} / {totalPages}</span>
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
-              Next
+              Next →
             </button>
           </div>
         </div>

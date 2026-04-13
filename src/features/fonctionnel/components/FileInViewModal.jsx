@@ -1,45 +1,47 @@
-export default function FileInViewModal({
-  show,
-  onClose,
-  selectedRow,
-  formatDate,
-}) {
+export default function FileInViewModal({ show, onClose, selectedRow, formatDate }) {
   if (!show || !selectedRow) return null;
 
+  const rows = [
+    { label: "ID",              value: selectedRow.idFluxIn },
+    { label: "Status",          value: selectedRow.flux?.statut || "—" },
+    { label: "Sender Ref",      value: selectedRow.flux?.senderReference || "—" },
+    { label: "Sending Date",    value: formatDate(selectedRow.sendingDate) },
+    { label: "Settlement Date", value: formatDate(selectedRow.settlementDate) },
+    { label: "Category",        value: selectedRow.category || "—" },
+    { label: "Message",         value: selectedRow.flux?.description || "—" },
+  ];
+
+  const rows2 = [
+    { label: "App Ref",   value: selectedRow.appReference || selectedRow.flux?.appReference || "—" },
+    { label: "Flow Type", value: selectedRow.flux?.typeFlux?.flowType || selectedRow.flux?.typeFlux?.FlowType || "—" },
+    { label: "Sender",    value: selectedRow.flux?.sender?.sender || "—" },
+    { label: "Amount",    value: selectedRow.flux?.totalAmount ?? "—" },
+  ];
+
   return (
-    <div className="modal fade show d-block filein-modal-backdrop" tabIndex="-1">
-      <div className="modal-dialog modal-lg modal-dialog-centered">
-        <div className="modal-content filein-modal-content">
-          <div className="modal-header border-0">
-            <h5 className="modal-title">File IN Details</h5>
-            <button
-              type="button"
-              className="btn-close btn-close-white"
-              onClick={onClose}
-            ></button>
-          </div>
+    <div className="fi-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="fi-modal wide">
+        <div className="fi-modal-header">
+          <span className="fi-modal-title">File IN Details</span>
+          <button className="fi-modal-close" onClick={onClose} type="button">✕</button>
+        </div>
 
-          <div className="modal-body">
-            <p><b>ID:</b> {selectedRow.idFluxIn}</p>
-            <p><b>Status:</b> {selectedRow.flux?.statut || "—"}</p>
-            <p><b>Sender Ref:</b> {selectedRow.flux?.senderReference || "—"}</p>
-            <p><b>Sending Date:</b> {formatDate(selectedRow.sendingDate)}</p>
-            <p><b>Settlement Date:</b> {formatDate(selectedRow.settlementDate)}</p>
-            <p><b>Category:</b> {selectedRow.category || "—"}</p>
-            <p><b>Message:</b> {selectedRow.flux?.description || "—"}</p>
+        <div className="fi-modal-body">
+          {rows.map((r) => (
+            <div className="fi-detail-row" key={r.label}>
+              <b>{r.label}</b>
+              <span>{r.value}</span>
+            </div>
+          ))}
 
-            <hr />
+          <div className="fi-divider" />
 
-            <p><b>App Ref:</b> {selectedRow.appReference || selectedRow.flux?.appReference || "—"}</p>
-            <p>
-              <b>Flow Type:</b>{" "}
-              {selectedRow.flux?.typeFlux?.flowType ||
-                selectedRow.flux?.typeFlux?.FlowType ||
-                "—"}
-            </p>
-            <p><b>Sender:</b> {selectedRow.flux?.sender?.sender || "—"}</p>
-            <p><b>Total Amount:</b> {selectedRow.flux?.totalAmount ?? "—"}</p>
-          </div>
+          {rows2.map((r) => (
+            <div className="fi-detail-row" key={r.label}>
+              <b>{r.label}</b>
+              <span>{r.value}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -2,11 +2,13 @@ import { NavLink } from "react-router-dom";
 import { ROLES } from "../../app/routeConfig";
 import {
   House,
-  Users,
   Send,
   Inbox,
   FolderOpen,
+  Users,
+  Briefcase,
 } from "lucide-react";
+import "./sidebar.css";
 
 export default function Sidebar({ roles, collapsed }) {
   const role = roles?.[0];
@@ -20,13 +22,13 @@ export default function Sidebar({ roles, collapsed }) {
       { label: "Senders", path: "/admin/senders", icon: <Send size={18} /> },
       { label: "Receivers", path: "/admin/receivers", icon: <Inbox size={18} /> },
       { label: "Type Flux", path: "/admin/typeflux", icon: <FolderOpen size={18} /> },
-      { label: "File IN", path: "/admin/file-in", icon: <Inbox size={18} /> },
+      { label: "File IN", path: "/admin/file-in", icon: <Briefcase size={18} /> },
       { label: "File OUT", path: "/admin/file-out", icon: <Send size={18} /> },
     ];
   } else if (role === ROLES.USER_FONCTIONNEL) {
     items = [
       { label: "Dashboard", path: "/fonctionnel", icon: <House size={18} /> },
-      { label: "File IN", path: "/fonctionnel/file-in", icon: <Inbox size={18} /> },
+      { label: "File IN", path: "/fonctionnel/file-in", icon: <Briefcase size={18} /> },
       { label: "File OUT", path: "/fonctionnel/file-out", icon: <Send size={18} /> },
     ];
   } else if (role === ROLES.USER_TECHNIQUE) {
@@ -40,7 +42,12 @@ export default function Sidebar({ roles, collapsed }) {
 
   return (
     <aside className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
-      
+      {!collapsed && (
+        <div className="app-sidebar-top">
+          <div className="app-sidebar-title">Navigation</div>
+          <div className="app-sidebar-subtitle">Workflow monitoring</div>
+        </div>
+      )}
 
       <div className="app-sidebar-section">{!collapsed && "Menu"}</div>
 
@@ -54,7 +61,10 @@ export default function Sidebar({ roles, collapsed }) {
             }
             title={collapsed ? item.label : ""}
           >
-            <span className="app-nav-icon">{item.icon}</span>
+            <span className="app-nav-active-bar" />
+            <span className="app-nav-icon-wrap">
+              <span className="app-nav-icon">{item.icon}</span>
+            </span>
             {!collapsed && <span className="app-nav-label">{item.label}</span>}
           </NavLink>
         ))}

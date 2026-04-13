@@ -1,50 +1,61 @@
-export default function EditRoleModal({
-  show,
-  onClose,
-  user,
-  form,
-  setForm,
-  onSave,
-}) {
-  if (!show || !user) return null;
+export default function EditRoleModal({ show, onClose, user, form, setForm, onSave }) {
+  if (!show) return null;
 
   return (
-    <div className="modal d-block bg-dark bg-opacity-75">
-      <div className="modal-dialog">
-        <div className="modal-content bg-dark text-light">
-          <div className="modal-header">
-            <h5>Edit Role</h5>
-            <button
-              className="btn-close btn-close-white"
-              onClick={onClose}
-            ></button>
-          </div>
+    <div className="um-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="um-modal">
 
-          <div className="modal-body">
-            <p>
-              <b>User:</b> {user.email}
-            </p>
+        <div className="um-modal-header">
+          <span className="um-modal-title">Edit Role</span>
+          <button className="um-modal-close" onClick={onClose} type="button">
+            ✕
+          </button>
+        </div>
 
+        <div className="um-modal-body">
+
+          {user && (
+            <div className="um-field">
+              <label className="um-label">User</label>
+              <div
+                style={{
+                  padding: "9px 12px",
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: "9px",
+                  fontSize: "13px",
+                  color: "rgba(255,255,255,0.45)",
+                }}
+              >
+                {user.email}
+              </div>
+            </div>
+          )}
+
+          <div className="um-field">
+            <label className="um-label">New Role</label>
             <select
-              className="form-select"
+              className="um-select"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
-              <option value="ADMIN">ADMIN</option>
-              <option value="USER_TECHNIQUE">USER_TECHNIQUE</option>
-              <option value="USER_FONCTIONNEL">USER_FONCTIONNEL</option>
+              <option value="ADMIN">Admin</option>
+              <option value="USER_TECHNIQUE">Technique</option>
+              <option value="USER_FONCTIONNEL">Fonctionnel</option>
             </select>
           </div>
 
-          <div className="modal-footer">
-            <button className="btn btn-success" onClick={onSave}>
-              Save
-            </button>
-            <button className="btn btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-          </div>
         </div>
+
+        <div className="um-modal-footer">
+          <button className="um-btn-cancel" type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="um-btn-save" type="button" onClick={onSave}>
+            Save Changes
+          </button>
+        </div>
+
       </div>
     </div>
   );

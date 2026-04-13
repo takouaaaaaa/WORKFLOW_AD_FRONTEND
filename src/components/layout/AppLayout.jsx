@@ -9,7 +9,10 @@ import {
   getUserFromToken,
 } from "../../features/auth/utils/auth";
 
-import { logoutUser } from "../../features/auth/services/authService";
+import {
+  logoutUser,
+  updateMyProfile,
+} from "../../features/auth/services/authService";
 
 import "./layout.css";
 
@@ -47,6 +50,10 @@ export default function AppLayout() {
     setSidebarCollapsed((prev) => !prev);
   };
 
+  const handleSaveProfile = async (data) => {
+    return await updateMyProfile(data);
+  };
+
   if (!user) return null;
 
   return (
@@ -57,6 +64,7 @@ export default function AppLayout() {
         onLogout={handleLogout}
         onToggleSidebar={handleToggleSidebar}
         sidebarCollapsed={sidebarCollapsed}
+        onSaveProfile={handleSaveProfile}
       />
 
       <div className="app-layout">

@@ -5,6 +5,7 @@ import {
   updateReceiver,
   deleteReceiver,
 } from "../services/receiverService";
+import CrudModal from "./CrudModal";
 import "../../fonctionnel/styles/FileInPage.css";
 
 const ITEMS_PER_PAGE = 10;
@@ -12,13 +13,11 @@ const ITEMS_PER_PAGE = 10;
 export default function ReceiversPage() {
   const [rows, setRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [searchReceiverInput, setSearchReceiverInput] = useState("");
-  const [appliedReceiverFilter, setAppliedReceiverFilter] = useState("");
-
+  const [searchInput, setSearchInput] = useState("");
+  const [appliedFilter, setAppliedFilter] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
-  const [formData, setFormData] = useState({ receiver: "" });
+  const [formValue, setFormValue] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -27,22 +26,21 @@ export default function ReceiversPage() {
   const fetchData = async () => {
     try {
       const res = await getReceivers();
-      const data = Array.isArray(res.data) ? res.data : res.data.content || [];
-      setRows(data);
+      setRows(Array.isArray(res.data) ? res.data : res.data.content || []);
     } catch (error) {
-      console.error("Error loading receivers:", error);
+      console.error(error);
       alert("Failed to load receivers");
     }
   };
 
   const filteredRows = useMemo(() => {
-    const receiverFilter = appliedReceiverFilter.trim().toLowerCase();
-
-    return rows.filter((row) => {
-      const rowReceiver = String(row.receiver || "").toLowerCase();
-      return !receiverFilter || rowReceiver.includes(receiverFilter);
-    });
-  }, [rows, appliedReceiverFilter]);
+    const f = appliedFilter.trim().toLowerCase();
+    return !f
+      ? rows
+      : rows.filter((r) =>
+          String(r.receiver || "").toLowerCase().includes(f)
+        );
+  }, [rows, appliedFilter]);
 
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -52,48 +50,37 @@ export default function ReceiversPage() {
   const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
   const handleSearch = () => {
-    const cleanReceiver = searchReceiverInput.trim();
-
-    if (!cleanReceiver) {
-      setAppliedReceiverFilter("");
-      setSearchReceiverInput("");
-      setCurrentPage(1);
-      return;
-    }
-
-    setAppliedReceiverFilter(cleanReceiver);
+    setAppliedFilter(searchInput.trim());
     setCurrentPage(1);
   };
 
   const handleOpenAdd = () => {
     setEditingRow(null);
-    setFormData({ receiver: "" });
+    setFormValue("");
     setShowModal(true);
   };
 
   const handleOpenEdit = (row) => {
     setEditingRow(row);
-    setFormData({ receiver: row.receiver || "" });
+    setFormValue(row.receiver || "");
     setShowModal(true);
   };
 
   const handleSave = async () => {
-    if (!formData.receiver.trim()) {
+    if (!formValue.trim()) {
       alert("Receiver is required");
       return;
     }
 
     try {
       if (editingRow) {
-        await updateReceiver(editingRow.idReceiver, formData);
-        alert("Receiver updated successfully");
+        await updateReceiver(editingRow.idReceiver, { receiver: formValue });
       } else {
-        await addReceiver(formData);
-        alert("Receiver added successfully");
+        await addReceiver({ receiver: formValue });
       }
 
       setShowModal(false);
-      setFormData({ receiver: "" });
+      setFormValue("");
       setEditingRow(null);
       await fetchData();
     } catch (error) {
@@ -103,12 +90,10 @@ export default function ReceiversPage() {
   };
 
   const handleDelete = async (row) => {
-    const confirmed = window.confirm(`Delete receiver "${row.receiver}" ?`);
-    if (!confirmed) return;
+    if (!window.confirm(`Delete receiver "${row.receiver}"?`)) return;
 
     try {
       await deleteReceiver(row.idReceiver);
-      alert("Receiver deleted successfully");
       await fetchData();
     } catch (error) {
       console.error(error);
@@ -118,26 +103,21 @@ export default function ReceiversPage() {
 
   return (
     <div className="filein-page-bootstrap">
-      <div className="filein-card mb-4">
+      <div className="filein-card">
         <div className="filein-card-title">
           <span>
-            Technical Management :{" "}
-            <span style={{ color: "#a371f7" }}>Receivers</span>
+            Technical Management : <span className="accent">Receivers</span>
           </span>
         </div>
 
         <div className="filein-card-body">
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div className="filein-page-header">
             <div>
-              <h4 style={{ color: "#e6edf3", marginBottom: "6px" }}>
-                Receivers Management
-              </h4>
-              <p style={{ color: "#8b949e", margin: 0, fontSize: "13px" }}>
-                Add, update, and maintain receiver reference data.
-              </p>
+              <h4>Receivers Management</h4>
+              <p>Add, update, and maintain receiver reference data.</p>
             </div>
 
-            <button className="btn filein-btn-search" onClick={handleOpenAdd}>
+            <button className="filein-btn-search" onClick={handleOpenAdd}>
               + Add Receiver
             </button>
           </div>
@@ -147,50 +127,35 @@ export default function ReceiversPage() {
       <div className="filein-card">
         <div className="filein-card-title">
           <span>
-            Search Result : <span style={{ color: "#a371f7" }}>Receivers</span>
+            Search Result : <span className="accent">Receivers</span>
           </span>
-
-          <span
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: "11px",
-              color: "#8b949e",
-              background: "#21262d",
-              padding: "3px 10px",
-              borderRadius: "20px",
-              border: "1px solid #30363d",
-            }}
-          >
+          <span className="filein-results-badge">
             {filteredRows.length.toLocaleString()} results
           </span>
         </div>
 
         <div className="filein-card-body">
-          <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-6">
-              <label className="form-label filein-label">Receiver</label>
+          <div className="filein-search-row">
+            <div className="filein-filter-field filein-filter-grow">
+              <label className="filein-label">Receiver</label>
               <input
                 type="text"
-                value={searchReceiverInput}
-                onChange={(e) => setSearchReceiverInput(e.target.value)}
+                className="filein-input"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search by receiver name"
-                className="form-control filein-input"
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
 
-            <div className="col-12 col-md-auto">
-              <button
-                className="btn filein-btn-search"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-            </div>
+            <button className="filein-btn-search" onClick={handleSearch}>
+              Search
+            </button>
           </div>
         </div>
 
         <div className="filein-table-wrap">
-          <table className="table filein-table align-middle mb-0">
+          <table className="filein-table">
             <thead>
               <tr>
                 <th style={{ width: "140px" }}>ID Receiver</th>
@@ -202,8 +167,8 @@ export default function ReceiversPage() {
             <tbody>
               {paginatedRows.length === 0 ? (
                 <tr>
-                  <td colSpan="3" style={{ textAlign: "center", padding: "40px" }}>
-                    No receiver found
+                  <td colSpan={3} className="filein-table-empty">
+                    No receiver found.
                   </td>
                 </tr>
               ) : (
@@ -212,15 +177,15 @@ export default function ReceiversPage() {
                     <td className="mono">{row.idReceiver}</td>
                     <td title={row.receiver}>{row.receiver}</td>
                     <td>
-                      <div className="d-flex gap-2">
+                      <div className="filein-row-actions">
                         <button
-                          className="btn filein-btn-edit"
+                          className="filein-btn-edit"
                           onClick={() => handleOpenEdit(row)}
                         >
                           Edit
                         </button>
                         <button
-                          className="btn filein-btn-force"
+                          className="filein-btn-force"
                           onClick={() => handleDelete(row)}
                         >
                           Delete
@@ -241,11 +206,11 @@ export default function ReceiversPage() {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
-              Prev
+              ← Prev
             </button>
 
             <span>
-              Page {currentPage} of {totalPages}
+              Page {currentPage} / {totalPages}
             </span>
 
             <button
@@ -253,100 +218,22 @@ export default function ReceiversPage() {
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
-              Next
+              Next →
             </button>
           </div>
         </div>
       </div>
 
-      {showModal && (
-        <div
-          onClick={() => setShowModal(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.65)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "20px",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              maxWidth: "520px",
-              background: "#0d1117",
-              color: "#e2e8f0",
-              border: "1px solid rgba(139, 92, 246, 0.25)",
-              borderRadius: "14px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "18px 20px",
-                borderBottom: "1px solid #21262d",
-              }}
-            >
-              <h5 style={{ margin: 0 }}>
-                {editingRow ? "Edit Receiver" : "Add Receiver"}
-              </h5>
-
-              <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#c9d1d9",
-                  fontSize: "20px",
-                  cursor: "pointer",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ padding: "20px" }}>
-              <label className="filein-label mb-2">Receiver</label>
-              <input
-                type="text"
-                value={formData.receiver}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, receiver: e.target.value }))
-                }
-                placeholder="Enter receiver"
-                className="form-control filein-input"
-              />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                padding: "0 20px 20px",
-              }}
-            >
-              <button
-                className="btn filein-btn-reset"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn filein-btn-search" onClick={handleSave}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CrudModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingRow ? "Edit Receiver" : "Add Receiver"}
+        label="Receiver"
+        value={formValue}
+        onChange={setFormValue}
+        placeholder="Enter receiver name"
+        onSave={handleSave}
+      />
     </div>
   );
 }

@@ -2,63 +2,75 @@ export default function AddUserModal({ show, onClose, form, setForm, onSave }) {
   if (!show) return null;
 
   return (
-    <div className="modal d-block bg-dark bg-opacity-75">
-      <div className="modal-dialog">
-        <div className="modal-content bg-dark text-light">
-          <div className="modal-header">
-            <h5>Add User</h5>
-            <button
-              className="btn-close btn-close-white"
-              onClick={onClose}
-            ></button>
-          </div>
+    <div className="um-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="um-modal">
 
-          <div className="modal-body">
+        <div className="um-modal-header">
+          <span className="um-modal-title">Add User</span>
+          <button className="um-modal-close" onClick={onClose} type="button">
+            ✕
+          </button>
+        </div>
+
+        <div className="um-modal-body">
+
+          <div className="um-field">
+            <label className="um-label">Email</label>
             <input
-              className="form-control mb-2"
-              placeholder="Email"
+              className="um-input"
+              type="email"
+              placeholder="user@example.com"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
+          </div>
 
+          <div className="um-field">
+            <label className="um-label">Password</label>
             <input
+              className="um-input"
               type="password"
-              className="form-control mb-2"
-              placeholder="Password"
+              placeholder="Min 8 chars"
               value={form.motDePasse}
-              onChange={(e) =>
-                setForm({ ...form, motDePasse: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, motDePasse: e.target.value })}
             />
+          </div>
 
+          <div className="um-field">
+            <label className="um-label">Phone Number</label>
             <input
-              type="number"
-              className="form-control mb-2"
-              placeholder="Phone Number"
+              className="um-input"
+              type="tel"
+              placeholder="12345678"
               value={form.numTel}
               onChange={(e) => setForm({ ...form, numTel: e.target.value })}
             />
+          </div>
 
+          <div className="um-field">
+            <label className="um-label">Role</label>
             <select
-              className="form-select"
+              className="um-select"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
-              <option value="ADMIN">ADMIN</option>
-              <option value="USER_TECHNIQUE">USER_TECHNIQUE</option>
-              <option value="USER_FONCTIONNEL">USER_FONCTIONNEL</option>
+              <option value="ADMIN">Admin</option>
+              <option value="USER_TECHNIQUE">Technique</option>
+              <option value="USER_FONCTIONNEL">Fonctionnel</option>
             </select>
           </div>
 
-          <div className="modal-footer">
-            <button className="btn btn-success" onClick={onSave}>
-              Save
-            </button>
-            <button className="btn btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-          </div>
         </div>
+
+        <div className="um-modal-footer">
+          <button className="um-btn-cancel" type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="um-btn-save" type="button" onClick={onSave}>
+            Add User
+          </button>
+        </div>
+
       </div>
     </div>
   );

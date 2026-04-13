@@ -1,14 +1,105 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@600;700&display=swap');
 
 /* ════════════════════════════════════════
-   ADMIN CHARTS SECTION
+   ADMIN DASHBOARD PAGE
 ════════════════════════════════════════ */
 
-.acd-section-title {
-  font-size: 11px;
+.admin-dashboard-page {
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+
+.admin-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.admin-refresh-btn:hover:not(:disabled) {
+  background: rgba(108, 92, 231, 0.14);
+  border-color: rgba(108, 92, 231, 0.28);
+  color: #a78bfa;
+}
+
+.admin-refresh-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Spin animation */
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* State banners */
+.admin-loading,
+.admin-error,
+.admin-empty {
+  text-align: center;
+  margin-top: 40px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.admin-loading {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-error {
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #f87171;
+}
+
+.admin-empty {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ════════════════════════════════════════
+   CHARTS SECTION
+════════════════════════════════════════ */
+
+.acd-section-label {
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #64748b;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.2);
   margin-bottom: 16px;
 }
 
@@ -16,63 +107,62 @@
 .acd-row4 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .acd-row2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 /* ── Card base ── */
 .acd-card {
-  background: #101f38;
-  border: 1px solid rgba(99, 90, 240, 0.18);
-  border-radius: 16px;
-  padding: 20px;
+  background: #0d1220;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s, transform 0.15s;
+  transition: border-color 0.18s ease;
 }
 
 .acd-card:hover {
-  border-color: rgba(124, 111, 247, 0.4);
-  transform: translateY(-2px);
+  border-color: rgba(108, 92, 231, 0.25);
 }
 
+/* Subtle top accent line */
 .acd-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #7c6ff7, #06b6d4);
-  border-radius: 2px 2px 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(108, 92, 231, 0.6), rgba(6, 182, 212, 0.4));
 }
 
 /* ── Card text ── */
 .acd-card-title {
   font-size: 12px;
-  font-weight: 500;
-  color: #94a3b8;
-  margin-bottom: 3px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2px;
 }
 
 .acd-card-sub {
   font-size: 11px;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.25);
   margin-bottom: 14px;
 }
 
 /* ── Donut ── */
 .acd-donut-wrap {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 14px;
 }
 
@@ -93,22 +183,23 @@
 
 .acd-donut-num {
   font-family: 'Orbitron', monospace;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: #f8fafc;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
 }
 
 .acd-donut-lbl {
   font-size: 10px;
-  color: #64748b;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.25);
+  margin-top: 3px;
 }
 
 /* ── Donut legend ── */
 .acd-legend-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .acd-legend-row {
@@ -121,21 +212,30 @@
 .acd-legend-left {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #94a3b8;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.45);
+  min-width: 0;
+}
+
+.acd-legend-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
 }
 
 .acd-legend-sq {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 2px;
   flex-shrink: 0;
 }
 
-.acd-legend-pct {
+.acd-legend-val {
   font-family: 'Orbitron', monospace;
   font-size: 11px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 /* ── Line card header ── */
@@ -159,12 +259,12 @@
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .acd-il-sq {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   flex-shrink: 0;
 }
 
@@ -172,7 +272,7 @@
 .acd-chart-h {
   position: relative;
   width: 100%;
-  height: 170px;
+  height: 175px;
 }
 
 .acd-chart-h canvas {
@@ -187,16 +287,10 @@
 ════════════════════════════════════════ */
 
 @media (max-width: 1100px) {
-  .acd-row4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .acd-row2 {
-    grid-template-columns: 1fr;
-  }
+  .acd-row4 { grid-template-columns: repeat(2, 1fr); }
+  .acd-row2 { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
-  .acd-row4 {
-    grid-template-columns: 1fr;
-  }
+  .acd-row4 { grid-template-columns: 1fr; }
 }

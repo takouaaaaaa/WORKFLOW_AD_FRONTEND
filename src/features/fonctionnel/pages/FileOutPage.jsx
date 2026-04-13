@@ -68,7 +68,6 @@ export default function FileOutPage() {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-
     setFilters((prev) => ({
       ...prev,
       [name]: value,
@@ -114,10 +113,12 @@ export default function FileOutPage() {
       const matchesStatus = !filters.status || status === filters.status;
 
       const matchesCreationDateFrom =
-        !filterCreationDateFrom || (creationDate && creationDate >= filterCreationDateFrom);
+        !filterCreationDateFrom ||
+        (creationDate && creationDate >= filterCreationDateFrom);
 
       const matchesCreationDateTo =
-        !filterCreationDateTo || (creationDate && creationDate <= filterCreationDateTo);
+        !filterCreationDateTo ||
+        (creationDate && creationDate <= filterCreationDateTo);
 
       return (
         matchesAppReference &&
@@ -228,20 +229,10 @@ export default function FileOutPage() {
       <div className="filein-card">
         <div className="filein-card-title">
           <span>
-            Search Result : <span style={{ color: "#a371f7" }}>File OUT</span>
+            Search Result : <span className="accent">File OUT</span>
           </span>
 
-          <span
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: "11px",
-              color: "#8b949e",
-              background: "#21262d",
-              padding: "3px 10px",
-              borderRadius: "20px",
-              border: "1px solid #30363d",
-            }}
-          >
+          <span className="filein-results-badge">
             {filteredRows.length === rows.length
               ? `${rows.length.toLocaleString()} total`
               : `${filteredRows.length.toLocaleString()} results`}

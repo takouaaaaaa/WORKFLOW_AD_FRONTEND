@@ -8,17 +8,18 @@ export default function FileInFilters({
   flowTypeOptions = [],
 }) {
   return (
-    <div className="filein-card mb-4">
-      <div className="filein-card-title">Detailed Search : File IN</div>
+    <div className="filein-card">
+      <div className="filein-card-title">
+        <span>Detailed Search : <span className="accent">File IN</span></span>
+      </div>
 
       <div className="filein-card-body">
-        <div className="row g-3">
+        <div className="filein-filter-grid">
 
-          {/* App Reference */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">App Reference</label>
+          <div className="filein-filter-field">
+            <label className="filein-label">App Reference</label>
             <input
-              className="form-control filein-input"
+              className="filein-input"
               name="appReference"
               value={filters.appReference}
               onChange={onChange}
@@ -26,11 +27,10 @@ export default function FileInFilters({
             />
           </div>
 
-          {/* Sender Reference */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Sender Reference</label>
+          <div className="filein-filter-field">
+            <label className="filein-label">Sender Reference</label>
             <input
-              className="form-control filein-input"
+              className="filein-input"
               name="senderReference"
               value={filters.senderReference}
               onChange={onChange}
@@ -38,15 +38,9 @@ export default function FileInFilters({
             />
           </div>
 
-          {/* Status */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Status</label>
-            <select
-              className="form-select filein-input"
-              name="status"
-              value={filters.status}
-              onChange={onChange}
-            >
+          <div className="filein-filter-field">
+            <label className="filein-label">Status</label>
+            <select className="filein-input" name="status" value={filters.status} onChange={onChange}>
               <option value="">All</option>
               <option value="PROCESSED">PROCESSED</option>
               <option value="INPROCESS">INPROCESS</option>
@@ -65,162 +59,67 @@ export default function FileInFilters({
             </select>
           </div>
 
-          {/* Category */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Category</label>
-            <select
-              className="form-select filein-input"
-              name="category"
-              value={filters.category}
-              onChange={onChange}
-            >
+          <div className="filein-filter-field">
+            <label className="filein-label">Category</label>
+            <select className="filein-input" name="category" value={filters.category} onChange={onChange}>
               <option value="">All</option>
               <option value="ACQUISITION">ACQUISITION</option>
               <option value="RESTITUTION">RESTITUTION</option>
             </select>
           </div>
 
-          {/* Sender */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Sender</label>
-            <select
-              className="form-select filein-input"
-              name="sender"
-              value={filters.sender}
-              onChange={onChange}
-            >
+          <div className="filein-filter-field">
+            <label className="filein-label">Sender</label>
+            <select className="filein-input" name="sender" value={filters.sender} onChange={onChange}>
               <option value="">All</option>
-              {senderOptions.map((sender, index) => (
-                <option key={index} value={sender}>
-                  {sender}
-                </option>
-              ))}
+              {senderOptions.map((s, i) => <option key={i} value={s}>{s}</option>)}
             </select>
           </div>
 
-          {/* Receiver */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Receiver</label>
-            <select
-              className="form-select filein-input"
-              name="receiver"
-              value={filters.receiver}
-              onChange={onChange}
-            >
+          <div className="filein-filter-field">
+            <label className="filein-label">Receiver</label>
+            <select className="filein-input" name="receiver" value={filters.receiver} onChange={onChange}>
               <option value="">All</option>
-              {receiverOptions.map((receiver, index) => (
-                <option key={index} value={receiver}>
-                  {receiver}
-                </option>
-              ))}
+              {receiverOptions.map((r, i) => <option key={i} value={r}>{r}</option>)}
             </select>
           </div>
 
-          {/* Flow Type */}
-          <div className="col-12 col-md-6 col-xl-3">
-            <label className="form-label filein-label">Flow Type</label>
-            <select
-              className="form-select filein-input"
-              name="flowType"
-              value={filters.flowType}
-              onChange={onChange}
-            >
+          <div className="filein-filter-field">
+            <label className="filein-label">Flow Type</label>
+            <select className="filein-input" name="flowType" value={filters.flowType} onChange={onChange}>
               <option value="">All</option>
-              {flowTypeOptions.map((flowType, index) => (
-                <option key={index} value={flowType}>
-                  {flowType}
-                </option>
-              ))}
+              {flowTypeOptions.map((f, i) => <option key={i} value={f}>{f}</option>)}
             </select>
           </div>
 
-          {/* EMPTY SLOT FOR ALIGNMENT */}
-          <div className="col-12 col-md-6 col-xl-3"></div>
+          {/* spacer */}
+          <div />
 
-          {/* Sending Date INTERVAL */}
-          <div className="col-12 col-md-6 col-xl-6">
-            <label className="form-label filein-label">Sending Date</label>
-
-            <div className="d-flex align-items-center gap-2">
-              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
-                from
-              </span>
-
-              <input
-                type="date"
-                className="form-control filein-input"
-                name="sendingDateFrom"
-                value={filters.sendingDateFrom}
-                onChange={onChange}
-              />
-
-              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
-                to
-              </span>
-
-              <input
-                type="date"
-                className="form-control filein-input"
-                name="sendingDateTo"
-                value={filters.sendingDateTo}
-                onChange={onChange}
-              />
+          <div className="filein-filter-field" style={{ gridColumn: "span 2" }}>
+            <label className="filein-label">Sending Date</label>
+            <div className="filein-filter-range">
+              <span className="filein-filter-range-sep">from</span>
+              <input type="date" className="filein-input" name="sendingDateFrom" value={filters.sendingDateFrom} onChange={onChange} style={{ flex: 1 }} />
+              <span className="filein-filter-range-sep">to</span>
+              <input type="date" className="filein-input" name="sendingDateTo" value={filters.sendingDateTo} onChange={onChange} style={{ flex: 1 }} />
             </div>
           </div>
 
-          {/* Total Amount INTERVAL */}
-          <div className="col-12 col-md-6 col-xl-6">
-            <label className="form-label filein-label">Total Amount</label>
-
-            <div className="d-flex align-items-center gap-2">
-              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
-                from
-              </span>
-
-              <input
-                type="number"
-                step="0.01"
-                className="form-control filein-input"
-                name="totalAmountFrom"
-                value={filters.totalAmountFrom}
-                onChange={onChange}
-                placeholder="Min"
-              />
-
-              <span className="filein-label" style={{ fontSize: "11px", opacity: 0.7 }}>
-                to
-              </span>
-
-              <input
-                type="number"
-                step="0.01"
-                className="form-control filein-input"
-                name="totalAmountTo"
-                value={filters.totalAmountTo}
-                onChange={onChange}
-                placeholder="Max"
-              />
+          <div className="filein-filter-field" style={{ gridColumn: "span 2" }}>
+            <label className="filein-label">Total Amount</label>
+            <div className="filein-filter-range">
+              <span className="filein-filter-range-sep">from</span>
+              <input type="number" step="0.01" className="filein-input" name="totalAmountFrom" value={filters.totalAmountFrom || ""} onChange={onChange} placeholder="Min" style={{ flex: 1 }} />
+              <span className="filein-filter-range-sep">to</span>
+              <input type="number" step="0.01" className="filein-input" name="totalAmountTo" value={filters.totalAmountTo || ""} onChange={onChange} placeholder="Max" style={{ flex: 1 }} />
             </div>
           </div>
+
         </div>
 
-        {/* Buttons */}
-        <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn filein-btn-reset"
-            onClick={onReset}
-          >
-            Reinitialize
-          </button>
-
-          <button
-            type="button"
-            className="btn filein-btn-search"
-            onClick={onSearch}
-          >
-            Search
-          </button>
+        <div className="filein-filter-actions" style={{ marginTop: "16px" }}>
+          <button type="button" className="filein-btn-reset" onClick={onReset}>Reinitialize</button>
+          <button type="button" className="filein-btn-search" onClick={onSearch}>Search</button>
         </div>
       </div>
     </div>
