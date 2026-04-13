@@ -39,6 +39,12 @@ export default function FileOutPage() {
     INITIATED: "Initiated",
     CANCELLED: "Cancelled",
     PUTINQUEUEOUTFAILED: "Queue Failed",
+    PROCESSED: "Processed",
+    INPROCESS: "In Process",
+    REJECTED: "Rejected",
+    INTECHNICALERROR: "Technical Error",
+    INBUSINESSERROR: "Business Error",
+    NOCONTRACTFOUND: "No Contract",
   };
 
   const statusOptions = Object.keys(statusLabel);
@@ -77,13 +83,13 @@ export default function FileOutPage() {
 
   const handleSearch = () => {
     const result = rows.filter((row) => {
-      const appReference = row.flux?.appReference || "";
+      const appReference = row.appReference || row.flux?.appReference || "";
       const senderReference = row.flux?.senderReference || "";
       const sender = row.flux?.sender?.sender || "";
-      const receiver = row.flux?.receiver?.receiver || "";
+      const receiver = row.receiver?.receiver || "";
       const flowType =
         row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "";
-      const status = row.statutFluxOUT || "";
+      const status = row.flux?.statut || "";
       const creationDate = normalizeDate(row.creationDate);
 
       const filterCreationDateFrom = filters.creationDateFrom
@@ -103,11 +109,8 @@ export default function FileOutPage() {
         .includes(filters.senderReference.toLowerCase());
 
       const matchesSender = !filters.sender || sender === filters.sender;
-
       const matchesReceiver = !filters.receiver || receiver === filters.receiver;
-
       const matchesFlowType = !filters.flowType || flowType === filters.flowType;
-
       const matchesStatus = !filters.status || status === filters.status;
 
       const matchesCreationDateFrom =
@@ -143,7 +146,7 @@ export default function FileOutPage() {
   }, [rows]);
 
   const receiverOptions = useMemo(() => {
-    return [...new Set(rows.map((row) => row.flux?.receiver?.receiver).filter(Boolean))].sort();
+    return [...new Set(rows.map((row) => row.receiver?.receiver).filter(Boolean))].sort();
   }, [rows]);
 
   const flowTypeOptions = useMemo(() => {
@@ -182,12 +185,14 @@ export default function FileOutPage() {
       case "SENT":
       case "ACKED":
       case "ARCHIVED":
+      case "PROCESSED":
         return "processed";
 
       case "WAITTOBESENT":
       case "SENTANDWAITINGACK":
       case "INITIAL":
       case "INITIATED":
+      case "INPROCESS":
         return "wait";
 
       case "INERROR":
@@ -196,6 +201,10 @@ export default function FileOutPage() {
       case "BLOCKED":
       case "NACKED":
       case "CANCELLED":
+      case "REJECTED":
+      case "INTECHNICALERROR":
+      case "INBUSINESSERROR":
+      case "NOCONTRACTFOUND":
         return "error";
 
       default:
@@ -222,21 +231,21 @@ export default function FileOutPage() {
             Search Result : <span style={{ color: "#a371f7" }}>File OUT</span>
           </span>
 
-        <span
-  style={{
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: "11px",
-    color: "#8b949e",
-    background: "#21262d",
-    padding: "3px 10px",
-    borderRadius: "20px",
-    border: "1px solid #30363d",
-  }}
->
-  {filteredRows.length === rows.length
-    ? `${rows.length.toLocaleString()} total`
-    : `${filteredRows.length.toLocaleString()} results`}
-</span>
+          <span
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: "11px",
+              color: "#8b949e",
+              background: "#21262d",
+              padding: "3px 10px",
+              borderRadius: "20px",
+              border: "1px solid #30363d",
+            }}
+          >
+            {filteredRows.length === rows.length
+              ? `${rows.length.toLocaleString()} total`
+              : `${filteredRows.length.toLocaleString()} results`}
+          </span>
         </div>
 
         <FileOutTable

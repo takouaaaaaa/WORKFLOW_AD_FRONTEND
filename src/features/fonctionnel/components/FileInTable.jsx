@@ -1,6 +1,8 @@
 export default function FileInTable({
   rows,
   totalCount = 0,
+  selectedRow,
+  setSelectedRow,
   truncate,
   formatDate,
   statusClass,
@@ -68,28 +70,34 @@ export default function FileInTable({
               <th className="col-date">Settlement</th>
               <th className="col-category">Category</th>
               <th className="col-message">Message</th>
-              <th className="col-receiver">Receiver</th>
             </tr>
           </thead>
 
           <tbody>
             {rows.map((row) => {
-              const status = statusClass(row.statutFluxIn);
+              const fluxStatus = row.flux?.statut || "";
+              const status = statusClass(fluxStatus);
+              const isSelected = selectedRow?.idFluxIn === row.idFluxIn;
 
               return (
-                <tr key={row.idFluxIn}>
+                <tr
+                  key={row.idFluxIn}
+                  onClick={() => setSelectedRow(row)}
+                  className={isSelected ? "table-active" : ""}
+                  style={{ cursor: "pointer" }}
+                >
                   <td
                     className="mono col-app"
-                    title={row.flux?.appReference || "—"}
+                    title={row.appReference || row.flux?.appReference || "—"}
                   >
-                    {truncate(row.flux?.appReference || "—", 16)}
+                    {truncate(row.appReference || row.flux?.appReference || "—", 16)}
                   </td>
 
                   <td
                     className="mono col-sender-ref"
-                    title={row.senderReference || "—"}
+                    title={row.flux?.senderReference || "—"}
                   >
-                    {truncate(row.senderReference || "—", 16)}
+                    {truncate(row.flux?.senderReference || "—", 20)}
                   </td>
 
                   <td
@@ -105,7 +113,7 @@ export default function FileInTable({
 
                   <td className="col-status">
                     <span className={`status-badge ${status}`}>
-                      {statusLabel[row.statutFluxIn] || row.statutFluxIn || "—"}
+                      {statusLabel[fluxStatus] || fluxStatus || "—"}
                     </span>
                   </td>
 
@@ -132,6 +140,7 @@ export default function FileInTable({
                       <span className="amount-val">
                         {Number(row.flux.totalAmount).toLocaleString("fr-FR", {
                           minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}
                       </span>
                     ) : (
@@ -149,15 +158,11 @@ export default function FileInTable({
                     </span>
                   </td>
 
-                  <td className="col-message" title={row.message || "—"}>
-                    {truncate(row.message || "—", 18)}
-                  </td>
-
                   <td
-                    className="col-receiver"
-                    title={row.flux?.receiver?.receiver || "—"}
+                    className="col-message"
+                    title={row.flux?.description || "—"}
                   >
-                    {truncate(row.flux?.receiver?.receiver || "—", 14)}
+                    {truncate(row.flux?.description || "—", 24)}
                   </td>
                 </tr>
               );
@@ -166,7 +171,7 @@ export default function FileInTable({
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan={11}
+                  colSpan={10}
                   style={{
                     textAlign: "center",
                     padding: "40px",

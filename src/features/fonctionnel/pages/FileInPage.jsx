@@ -52,6 +52,8 @@ export default function FileInPage() {
 
       setRows(data);
       setFilteredRows(data);
+      setSelectedRow(null);
+      setCurrentPage(1);
 
       const senders = [
         ...new Set(
@@ -61,13 +63,8 @@ export default function FileInPage() {
         ),
       ].sort((a, b) => a.localeCompare(b));
 
-      const receivers = [
-        ...new Set(
-          data
-            .map((row) => row?.flux?.receiver?.receiver)
-            .filter((value) => value && value.trim() !== "")
-        ),
-      ].sort((a, b) => a.localeCompare(b));
+      // Receiver n'existe pas dans FileIn -> on laisse vide
+      const receivers = [];
 
       const flowTypes = [
         ...new Set(
@@ -102,12 +99,12 @@ export default function FileInPage() {
     let result = [...rows];
 
     result = result.filter((row) => {
-      const appReference = row?.flux?.appReference || "";
-      const senderReference = row?.senderReference || "";
-      const status = row?.statutFluxIn || "";
+      const appReference = row?.appReference || row?.flux?.appReference || "";
+      const senderReference = row?.flux?.senderReference || "";
+      const status = row?.flux?.statut || "";
       const category = row?.category || "";
       const sender = row?.flux?.sender?.sender || "";
-      const receiver = row?.flux?.receiver?.receiver || "";
+      const receiver = "";
       const flowType =
         row?.flux?.typeFlux?.flowType || row?.flux?.typeFlux?.FlowType || "";
       const sendingDate = row?.sendingDate ? new Date(row.sendingDate) : null;
@@ -198,9 +195,8 @@ export default function FileInPage() {
     }
 
     setEditData({
-      statutFluxIn: selectedRow.statutFluxIn || "",
       category: selectedRow.category || "",
-      message: selectedRow.message || "",
+      description: selectedRow?.flux?.description || "",
     });
 
     setShowEdit(true);
@@ -212,9 +208,7 @@ export default function FileInPage() {
     try {
       await updateFileIn(selectedRow.idFluxIn, {
         ...selectedRow,
-        statutFluxIn: editData.statutFluxIn,
         category: editData.category,
-        message: editData.message,
       });
 
       alert("Updated successfully");
@@ -328,13 +322,16 @@ export default function FileInPage() {
         flowTypeOptions={flowTypeOptions}
       />
 
-    <FileInTable
-  rows={filteredRows}
-  totalCount={rows.length}
-  truncate={truncate}
-  formatDate={formatDate}
-  statusClass={statusClass}
-/>
+      <FileInTable
+        rows={paginatedRows}
+        totalCount={filteredRows.length}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        truncate={truncate}
+        formatDate={formatDate}
+        statusClass={statusClass}
+      />
+
       <div className="filein-action-bar d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div className="filein-pagination d-flex align-items-center gap-2">
           <button
@@ -365,7 +362,10 @@ export default function FileInPage() {
           <button className="btn filein-btn-primary btn-sm" onClick={handleEdit}>
             Edit
           </button>
-          <button className="btn filein-btn-primary btn-sm" onClick={handleDownload}>
+          <button
+            className="btn filein-btn-primary btn-sm"
+            onClick={handleDownload}
+          >
             Download
           </button>
           <button className="btn filein-btn-primary btn-sm" onClick={handleForce}>

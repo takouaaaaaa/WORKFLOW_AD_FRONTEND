@@ -21,16 +21,16 @@ export default function FileInViewModal({
 
           <div className="modal-body">
             <p><b>ID:</b> {selectedRow.idFluxIn}</p>
-            <p><b>Status:</b> {selectedRow.statutFluxIn}</p>
-            <p><b>Sender Ref:</b> {selectedRow.senderReference}</p>
+            <p><b>Status:</b> {selectedRow.flux?.statut || "—"}</p>
+            <p><b>Sender Ref:</b> {selectedRow.flux?.senderReference || "—"}</p>
             <p><b>Sending Date:</b> {formatDate(selectedRow.sendingDate)}</p>
             <p><b>Settlement Date:</b> {formatDate(selectedRow.settlementDate)}</p>
-            <p><b>Category:</b> {selectedRow.category}</p>
-            <p><b>Message:</b> {selectedRow.message}</p>
+            <p><b>Category:</b> {selectedRow.category || "—"}</p>
+            <p><b>Message:</b> {selectedRow.flux?.description || "—"}</p>
 
             <hr />
 
-            <p><b>App Ref:</b> {selectedRow.flux?.appReference || "—"}</p>
+            <p><b>App Ref:</b> {selectedRow.appReference || selectedRow.flux?.appReference || "—"}</p>
             <p>
               <b>Flow Type:</b>{" "}
               {selectedRow.flux?.typeFlux?.flowType ||
@@ -38,7 +38,6 @@ export default function FileInViewModal({
                 "—"}
             </p>
             <p><b>Sender:</b> {selectedRow.flux?.sender?.sender || "—"}</p>
-            <p><b>Receiver:</b> {selectedRow.flux?.receiver?.receiver || "—"}</p>
             <p><b>Total Amount:</b> {selectedRow.flux?.totalAmount ?? "—"}</p>
           </div>
         </div>
