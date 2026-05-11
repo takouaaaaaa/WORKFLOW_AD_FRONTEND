@@ -1,0 +1,76 @@
+/* ── Layout ──────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: #F5F4F0;
+  overflow: auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F5F4F0;
+  color: #1A1A2E;
+  overflow: hidden;
+   isolation: isolate;
+}
+
+.app-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  background: #F5F4F0;
+}
+
+.app-main-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+/* Scrollbar for main content */
+.app-main-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.app-main-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.app-main-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+}
+.app-main-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 900px) {
+  .app-main-scroll {
+    padding: 0;
+  }
+}
