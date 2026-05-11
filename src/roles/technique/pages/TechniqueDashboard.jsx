@@ -1,349 +1,348 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/TechniqueDashboard.css";
 
 import {
   Chart,
   BarController,
   LineController,
+  DoughnutController,
   BarElement,
   LineElement,
+  ArcElement,
   PointElement,
   CategoryScale,
   LinearScale,
   Filler,
   Tooltip,
+  Legend,
 } from "chart.js";
 
 import {
+  createLogStream,
   getTechniqueDashboardData,
-  getGeneratorLogs,
 } from "../services/techniqueDashboardService";
 
 Chart.register(
   BarController,
   LineController,
+  DoughnutController,
   BarElement,
   LineElement,
+  ArcElement,
   PointElement,
   CategoryScale,
   LinearScale,
   Filler,
-  Tooltip
+  Tooltip,
+  Legend
 );
 
-const AI_TASKS = [
+const QUICK_LINKS = [
   {
-    title: "Sender Supervision",
-    desc: "Monitor sender references and keep technical data clean and up to date.",
+    title: "Senders Registry",
+    desc: "Monitor sender references and clean technical mapping data.",
     badge: "Monitoring",
-    badgeCls: "ok",
+    badgeCls: "success",
     link: "/technique/senders",
     btn: "Open Senders",
   },
   {
-    title: "Receiver Control",
-    desc: "Review receiver references and maintain correct receiver mappings.",
-    badge: "Reference",
-    badgeCls: "learn",
+    title: "Receivers Registry",
+    desc: "Control receiver mapping, routing details, and destination health.",
+    badge: "Routing",
+    badgeCls: "primary",
     link: "/technique/receivers",
     btn: "Open Receivers",
   },
   {
-    title: "Flow Type Tracking",
-    desc: "Check flow type integrity and supervise technical routing data.",
+    title: "Type Flux Control",
+    desc: "Supervise technical flow categories used by generator and downstream services.",
     badge: "Structure",
-    badgeCls: "ai",
+    badgeCls: "warning",
     link: "/technique/typeflux",
     btn: "Open Type Flux",
   },
 ];
 
-const LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+function formatDateTime(value) {
+  if (!value) return "No timestamp";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
+}
 
-/* ─── LOGS TERMINAL ─── */
-function LogsTerminal({ logs, cogPhrase }) {
-  const bottomRef = useRef(null);
+function levelClass(level) {
+  const v = String(level || "").toUpperCase();
+  if (v === "ERROR") return "danger";
+  if (v === "WARN" || v === "WARNING") return "warning";
+  if (v === "INFO") return "success";
+  return "secondary";
+}
+
+function sourceClass(source) {
+  return source === "AUTOENCODER" ? "autoencoder" : "generator";
+}
+
+function LogsTerminal({ logs }) {
+  const bodyRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!bodyRef.current) return;
+    bodyRef.current.scrollTop = 0;
   }, [logs]);
 
   return (
-    <div className="td-logs-terminal">
-      <div className="td-logs-header">
-        <span className="td-dot-green" />
-        <span className="td-logs-title">flux-generator · Live Logs</span>
-        <span className="td-logs-cognition">{cogPhrase}</span>
+    <div className="monitor-terminal">
+      <div className="monitor-terminal-header">
+        <div className="d-flex align-items-center gap-2">
+          <span className="monitor-live-dot" />
+          <span className="monitor-terminal-title">Live Monitoring Feed</span>
+        </div>
+        <span className="monitor-terminal-subtitle">
+          generator + autoencoder
+        </span>
       </div>
-      <div className="td-logs-body">
-        {logs.map((line, i) => {
-          const isError  = line.includes("ERROR") || line.includes("failed");
-          const isInsert = line.includes("Inserted");
-          const isRun    = line.includes("Run #");
-          const isSleep  = line.includes("Sleeping");
-          return (
-            <div
-              key={i}
-              className={`td-log-line ${
-                isError  ? "error"  :
-                isInsert ? "insert" :
-                isRun    ? "run"    :
-                isSleep  ? "sleep"  : ""
-              }`}
-            >
-              {line}
+
+      <div className="monitor-terminal-body" ref={bodyRef}>
+        {logs.length === 0 ? (
+          <div className="monitor-empty-log">No logs available.</div>
+        ) : (
+          logs.map((log) => (
+            <div key={log.id} className={`monitor-log-line ${levelClass(log.level)}`}>
+              <div className="monitor-log-meta">
+                <span className={`monitor-source-pill ${sourceClass(log.source)}`}>
+                  {log.source}
+                </span>
+                <span className={`badge text-bg-${levelClass(log.level)} monitor-level-badge`}>
+                  {log.level}
+                </span>
+                <span className="monitor-phase-pill">{log.phase}</span>
+                <span className="monitor-log-time">{formatDateTime(log.timestamp)}</span>
+              </div>
+              <div className="monitor-log-message">{log.message}</div>
             </div>
-          );
-        })}
-        <div ref={bottomRef} />
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-/* ─── BRAIN CANVAS ─── */
-function BrainCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const W = 320, H = 320, cx = W / 2, cy = H / 2;
-
-    const nodes = Array.from({ length: 22 }, () => {
-      const angle = Math.random() * Math.PI * 2;
-      const r = 30 + Math.random() * 100;
-      return {
-        x: cx + Math.cos(angle) * r,
-        y: cy + Math.sin(angle) * r,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: 2 + Math.random() * 3,
-        pulse: Math.random() * Math.PI * 2,
-        pulseSpeed: 0.02 + Math.random() * 0.03,
-        active: Math.random() > 0.4,
-      };
-    });
-
-    const signals = [];
-    const CONNECTION_RANGE = 110;
-
-    const fireInterval = setInterval(() => {
-      const a = Math.floor(Math.random() * nodes.length);
-      let b;
-      do { b = Math.floor(Math.random() * nodes.length); } while (b === a);
-      const na = nodes[a], nb = nodes[b];
-      if (Math.hypot(na.x - nb.x, na.y - nb.y) < CONNECTION_RANGE) {
-        signals.push({ ax: na.x, ay: na.y, bx: nb.x, by: nb.y, t: 0, duration: 40 + Math.random() * 30 });
-      }
-    }, 180);
-
-    let frame = 0;
-    let rafId;
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      frame++;
-
-      const nodeColor   = "#7C4DFF";
-      const nodeGlow    = "rgba(124,77,255,0.16)";
-      const lineColor   = "rgba(124,77,255,0.12)";
-      const signalColor = "#5DA8FF";
-      const coreLight   = "#5DA8FF";
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, 155, 0, Math.PI * 2);
-      ctx.fillStyle = "#0f1728";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(124,77,255,0.16)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      nodes.forEach((n) => {
-        n.x += n.vx; n.y += n.vy; n.pulse += n.pulseSpeed;
-        if (Math.hypot(n.x - cx, n.y - cy) > 140) { n.vx *= -1; n.vy *= -1; }
-        if (n.x < 20 || n.x > W - 20) n.vx *= -1;
-        if (n.y < 20 || n.y > H - 20) n.vy *= -1;
-      });
-
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          if (Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y) < CONNECTION_RANGE) {
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = lineColor;
-            ctx.stroke();
-          }
-        }
-      }
-
-      for (let i = signals.length - 1; i >= 0; i--) {
-        signals[i].t++;
-        const p = signals[i].t / signals[i].duration;
-        if (p <= 1) {
-          const sx = signals[i].ax + (signals[i].bx - signals[i].ax) * p;
-          const sy = signals[i].ay + (signals[i].by - signals[i].ay) * p;
-          ctx.beginPath();
-          ctx.arc(sx, sy, 3, 0, Math.PI * 2);
-          ctx.fillStyle = signalColor;
-          ctx.fill();
-          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 10);
-          g.addColorStop(0, "rgba(93,168,255,0.5)");
-          g.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.beginPath();
-          ctx.arc(sx, sy, 10, 0, Math.PI * 2);
-          ctx.fillStyle = g;
-          ctx.fill();
-        } else {
-          signals.splice(i, 1);
-        }
-      }
-
-      nodes.forEach((n) => {
-        const pulsed = n.size + Math.sin(n.pulse) * 0.8;
-        if (n.active) {
-          const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, pulsed * 4);
-          g.addColorStop(0, nodeGlow);
-          g.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.beginPath();
-          ctx.arc(n.x, n.y, pulsed * 4, 0, Math.PI * 2);
-          ctx.fillStyle = g;
-          ctx.fill();
-        }
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, pulsed, 0, Math.PI * 2);
-        ctx.fillStyle = n.active ? nodeColor : "rgba(124,77,255,0.25)";
-        ctx.fill();
-      });
-
-      const pulse = 0.5 + 0.5 * Math.sin(frame * 0.04);
-      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22 + pulse * 6);
-      cg.addColorStop(0, "rgba(93,168,255,0.95)");
-      cg.addColorStop(0.5, "rgba(124,77,255,0.45)");
-      cg.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath();
-      ctx.arc(cx, cy, 22 + pulse * 6, 0, Math.PI * 2);
-      ctx.fillStyle = cg;
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-      ctx.fillStyle = coreLight;
-      ctx.fill();
-
-      rafId = requestAnimationFrame(draw);
-    }
-
-    draw();
-    return () => { cancelAnimationFrame(rafId); clearInterval(fireInterval); };
-  }, []);
-
-  return <canvas ref={canvasRef} className="brain-canvas" width={320} height={320} />;
-}
-
-/* ─── CHARTS ─── */
-function SenderChart({ values }) {
+function SenderChart({ labels, values }) {
   const ref = useRef(null);
+
   useEffect(() => {
     const chart = new Chart(ref.current, {
       type: "bar",
       data: {
-        labels: LABELS,
+        labels,
         datasets: [
-          { label: "OK",      data: values.ok,     backgroundColor: "rgba(93,168,255,0.72)", borderRadius: 4, borderSkipped: false },
-          { label: "Flagged", data: values.flagged, backgroundColor: "rgba(124,77,255,0.65)", borderRadius: 4, borderSkipped: false },
+          {
+            label: "Normal",
+            data: values.ok,
+            backgroundColor: "rgba(93,168,255,0.72)",
+            borderRadius: 10,
+            borderSkipped: false,
+          },
+          {
+            label: "Flagged",
+            data: values.flagged,
+            backgroundColor: "rgba(124,77,255,0.68)",
+            borderRadius: 10,
+            borderSkipped: false,
+          },
         ],
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { mode: "index" } },
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900 },
+        plugins: {
+          legend: { labels: { boxWidth: 10, usePointStyle: true } },
+        },
         scales: {
-          x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 }, color: "#8ea3bf" } },
-          y: { stacked: true, grid: { color: "rgba(255,255,255,0.06)" }, ticks: { font: { size: 10 }, color: "#8ea3bf", maxTicksLimit: 5 }, border: { display: false } },
+          x: { stacked: true, grid: { display: false } },
+          y: { stacked: true, beginAtZero: true, border: { display: false } },
         },
       },
     });
+
     return () => chart.destroy();
-  }, [values]);
-  return <div className="chart-wrap"><canvas ref={ref} /></div>;
+  }, [labels, values]);
+
+  return (
+    <div className="monitor-chart-wrap">
+      <canvas ref={ref} />
+    </div>
+  );
 }
 
-function ReceiverChart({ values }) {
+function AutoencoderChart({ labels, values }) {
   const ref = useRef(null);
+
   useEffect(() => {
     const chart = new Chart(ref.current, {
       type: "line",
       data: {
-        labels: LABELS,
+        labels,
         datasets: [
-          { label: "Received",  data: values.received,  borderColor: "#5DA8FF", backgroundColor: "rgba(93,168,255,0.08)",  tension: 0.45, fill: true, pointRadius: 3, pointBackgroundColor: "#5DA8FF", borderWidth: 1.5 },
-          { label: "Processed", data: values.processed, borderColor: "#7C4DFF", backgroundColor: "rgba(124,77,255,0.06)", tension: 0.45, fill: true, pointRadius: 3, pointBackgroundColor: "#7C4DFF", borderWidth: 1.5, borderDash: [4, 3] },
+          {
+            label: "Autoencoder Events",
+            data: values.received,
+            borderColor: "#5DA8FF",
+            backgroundColor: "rgba(93,168,255,0.10)",
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: "#5DA8FF",
+          },
+          {
+            label: "Alerts",
+            data: values.alerts,
+            borderColor: "#7C4DFF",
+            backgroundColor: "rgba(124,77,255,0.08)",
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: "#7C4DFF",
+            borderDash: [6, 4],
+          },
         ],
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { mode: "index" } },
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900 },
+        plugins: {
+          legend: { labels: { boxWidth: 10, usePointStyle: true } },
+        },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10 }, color: "#8ea3bf" } },
-          y: { grid: { color: "rgba(255,255,255,0.06)" }, ticks: { font: { size: 10 }, color: "#8ea3bf", maxTicksLimit: 5 }, border: { display: false } },
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, border: { display: false } },
         },
       },
     });
+
     return () => chart.destroy();
-  }, [values]);
-  return <div className="chart-wrap"><canvas ref={ref} /></div>;
+  }, [labels, values]);
+
+  return (
+    <div className="monitor-chart-wrap">
+      <canvas ref={ref} />
+    </div>
+  );
 }
 
-/* ─── MAIN COMPONENT ─── */
+function HealthDonut({ healthyRate, totalErrors, totalWarnings }) {
+  const ref = useRef(null);
+  const healthy = Number(String(healthyRate).replace("%", "")) || 0;
+  const unhealthy = Math.max(0, 100 - healthy);
+
+  useEffect(() => {
+    const chart = new Chart(ref.current, {
+      type: "doughnut",
+      data: {
+        labels: ["Healthy", "Needs attention"],
+        datasets: [
+          {
+            data: [healthy, unhealthy],
+            backgroundColor: ["rgba(93,168,255,0.82)", "rgba(124,77,255,0.35)"],
+            borderWidth: 0,
+            hoverOffset: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "76%",
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true },
+        },
+      },
+    });
+
+    return () => chart.destroy();
+  }, [healthy, unhealthy]);
+
+  return (
+    <div className="monitor-health-card">
+      <div className="monitor-health-chart">
+        <canvas ref={ref} />
+        <div className="monitor-health-center">
+          <div className="monitor-health-value">{healthyRate}</div>
+          <div className="monitor-health-label">Healthy rate</div>
+        </div>
+      </div>
+
+      <div className="monitor-health-meta">
+        <div className="monitor-mini-kpi">
+          <span className="label">Errors</span>
+          <strong>{totalErrors}</strong>
+        </div>
+        <div className="monitor-mini-kpi">
+          <span className="label">Warnings</span>
+          <strong>{totalWarnings}</strong>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TechniqueDashboard() {
   const [dashboard, setDashboard] = useState({
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     totalSenders: 0,
     totalReceivers: 0,
     totalTypeFlux: 0,
-    stats: { aiDecisions: 0, manualReviews: 0, learnedPatterns: 0, confidenceAvg: "0%" },
-    senderChart:   { ok: [0,0,0,0,0,0,0], flagged: [0,0,0,0,0,0,0] },
-    receiverChart: { received: [0,0,0,0,0,0,0], processed: [0,0,0,0,0,0,0] },
+    stats: {
+      totalLogs: 0,
+      totalErrors: 0,
+      totalWarnings: 0,
+      healthyRate: "100%",
+      generatorCount: 0,
+      autoencoderCount: 0,
+    },
+    generatorStats: {},
+    autoencoderStats: {},
+    logs: [],
+    senderChart: { ok: [0, 0, 0, 0, 0, 0, 0], flagged: [0, 0, 0, 0, 0, 0, 0] },
+    autoencoderChart: { received: [0, 0, 0, 0, 0, 0, 0], alerts: [0, 0, 0, 0, 0, 0, 0] },
   });
 
-  const [logs,    setLogs]    = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cogIdx,  setCogIdx]  = useState(0);
 
-  const COG_PHRASES = useMemo(() => [
-    `Monitoring ${dashboard.totalSenders} active senders in the network...`,
-    `${dashboard.totalReceivers} receivers mapped and verified...`,
-    `${dashboard.totalTypeFlux} flow types tracked across the system...`,
-    `Inserting 5 new Flux / FileIn / FileOut records every 10 minutes...`,
-    `FileIN flows carry app_reference — FileOUT flows carry app_reference_out...`,
-    `${dashboard.stats.manualReviews} flows flagged for manual review...`,
-    `60% of flux records generate a linked FileOut entry...`,
-    `Settlement dates extended by 2–10 days on INBUSINESSERROR status...`,
-    `Confidence threshold: ${dashboard.stats.confidenceAvg} — system stable.`,
-    `Scanning for duplicate app_reference across ${dashboard.totalSenders + dashboard.totalReceivers} entities...`,
-    `FileOUT status pool: INITIAL, SENT, SENTANDWAITINGACK, ACKED, REJECTED...`,
-    `FileIN status pool: INIT, INPROCESS, PROCESSED, REJECTED, BLOCKED...`,
-    `Running batch #${Math.floor(Date.now() / 600000) % 1000} — all records committed successfully...`,
-  ], [dashboard]);
+  const heroPhrases = useMemo(
+    () => [
+      `Monitoring ${dashboard.stats.generatorCount} generator events`,
+      `Watching ${dashboard.stats.autoencoderCount} autoencoder events`,
+      `${dashboard.totalSenders} senders currently referenced`,
+      `${dashboard.totalReceivers} receivers mapped`,
+      `${dashboard.totalTypeFlux} type flux entries supervised`,
+      `${dashboard.stats.totalErrors} errors require technical attention`,
+    ],
+    [dashboard]
+  );
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setCogIdx((i) => (i + 1) % COG_PHRASES.length), 3200);
-    return () => clearInterval(t);
-  }, [COG_PHRASES.length]);
+    const timer = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % heroPhrases.length);
+    }, 2500);
+
+    return () => clearInterval(timer);
+  }, [heroPhrases.length]);
 
   const loadDashboard = async () => {
     try {
-      const [data, logsData] = await Promise.all([
-        getTechniqueDashboardData(),
-        getGeneratorLogs(),
-      ]);
+      const data = await getTechniqueDashboardData();
       setDashboard(data);
-      setLogs(logsData);
     } catch (error) {
-      console.error("Failed to load technique dashboard:", error);
+      console.error("Failed to load technique dashboard", error);
     } finally {
       setLoading(false);
     }
@@ -351,114 +350,252 @@ export default function TechniqueDashboard() {
 
   useEffect(() => {
     loadDashboard();
-    const interval = setInterval(loadDashboard, 7000);
-    return () => clearInterval(interval);
   }, []);
 
-  const TECH_STATS = [
-    { label: "AI Decisions",     value: dashboard.stats.aiDecisions,    cls: "ok",   sub: "Validated automatically" },
-    { label: "Manual Reviews",   value: dashboard.stats.manualReviews,  cls: "warn", sub: "Need technician action" },
-    { label: "Learned Patterns", value: dashboard.stats.learnedPatterns, cls: "ok",  sub: "Stored correction logic" },
-    { label: "Confidence Avg",   value: dashboard.stats.confidenceAvg,  cls: "ok",   sub: "Prediction reliability" },
+  useEffect(() => {
+    const generatorStream = createLogStream("/api/generator/logs/stream", (payload) => {
+      const entry = {
+        id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        source: "GENERATOR",
+        level: String(payload?.level || "INFO").toUpperCase(),
+        phase: payload?.phase || payload?.step || "GENERAL",
+        message: payload?.message || payload?.details || JSON.stringify(payload),
+        timestamp: payload?.timestamp || new Date().toISOString(),
+      };
+
+      setDashboard((prev) => ({
+        ...prev,
+        logs: [entry, ...prev.logs].slice(0, 160),
+        stats: {
+          ...prev.stats,
+          totalLogs: prev.stats.totalLogs + 1,
+          generatorCount: prev.stats.generatorCount + 1,
+          totalErrors:
+            entry.level === "ERROR" ? prev.stats.totalErrors + 1 : prev.stats.totalErrors,
+          totalWarnings:
+            entry.level === "WARN" ? prev.stats.totalWarnings + 1 : prev.stats.totalWarnings,
+        },
+      }));
+    });
+
+    const autoencoderStream = createLogStream("/api/autoencoder/logs/stream", (payload) => {
+      const entry = {
+        id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        source: "AUTOENCODER",
+        level: String(payload?.level || "INFO").toUpperCase(),
+        phase: payload?.phase || payload?.step || "GENERAL",
+        message: payload?.message || payload?.details || JSON.stringify(payload),
+        timestamp: payload?.timestamp || new Date().toISOString(),
+      };
+
+      setDashboard((prev) => ({
+        ...prev,
+        logs: [entry, ...prev.logs].slice(0, 160),
+        stats: {
+          ...prev.stats,
+          totalLogs: prev.stats.totalLogs + 1,
+          autoencoderCount: prev.stats.autoencoderCount + 1,
+          totalErrors:
+            entry.level === "ERROR" ? prev.stats.totalErrors + 1 : prev.stats.totalErrors,
+          totalWarnings:
+            entry.level === "WARN" ? prev.stats.totalWarnings + 1 : prev.stats.totalWarnings,
+        },
+      }));
+    });
+
+    return () => {
+      generatorStream?.close?.();
+      autoencoderStream?.close?.();
+    };
+  }, []);
+
+  const topStats = [
+    {
+      label: "Total Logs",
+      value: dashboard.stats.totalLogs,
+      sub: "Generator + Autoencoder",
+      icon: "bi-activity",
+    },
+    {
+      label: "Errors",
+      value: dashboard.stats.totalErrors,
+      sub: "Critical technical events",
+      icon: "bi-exclamation-triangle",
+    },
+    {
+      label: "Warnings",
+      value: dashboard.stats.totalWarnings,
+      sub: "Need technician review",
+      icon: "bi-bell",
+    },
+    {
+      label: "Healthy Rate",
+      value: dashboard.stats.healthyRate,
+      sub: "Current monitoring health",
+      icon: "bi-heart-pulse",
+    },
   ];
 
   if (loading) {
     return (
-      <div className="td-main" style={{ alignItems: "center", justifyContent: "center" }}>
-        <div className="td-loader" />
+      <div className="monitor-page d-flex align-items-center justify-content-center">
+        <div className="text-center">
+          <div className="spinner-border monitor-spinner mb-3" role="status" />
+          <div className="monitor-loading-text">Loading technical monitoring dashboard...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="td-main">
-      {/* ── STATS ── */}
-      <div className="td-stats-row">
-        {TECH_STATS.map((s) => (
-          <div key={s.label} className={`td-stat-card ${s.cls}`}>
-            <div className="td-stat-label">{s.label}</div>
-            <div className={`td-stat-value ${s.cls}`}>{s.value}</div>
-            <div className="td-stat-sub">{s.sub}</div>
-          </div>
-        ))}
-      </div>
+    <div className="monitor-page container-fluid py-4">
+      <div className="monitor-hero mb-4">
+        <div className="row g-4 align-items-stretch">
+          <div className="col-12 col-xl-8">
+            <div className="monitor-panel hero-panel h-100">
+              <div className="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+                <div>
+                  <span className="monitor-overline">CURE · technical supervision</span>
+                  <h2 className="monitor-title mt-2 mb-2">Real-time Monitoring Dashboard</h2>
+                  <p className="monitor-subtitle mb-3">
+                    Live supervision of generator logs, autoencoder logs, technical references,
+                    and system alert activity.
+                  </p>
+                  <div className="monitor-floating-status">
+                    <span className="monitor-live-dot" />
+                    {heroPhrases[phraseIndex]}
+                  </div>
+                </div>
 
-      {/* ── MAIN GRID ── */}
-      <div className="td-main-grid">
-        {/* AI Card */}
-        <div className="td-ai-card">
-          <div className="td-brain-wrap">
-            <BrainCanvas />
-          </div>
-
-          <div className="td-ai-name">CURE · Tech AI Supervisor</div>
-
-          <div className="td-ai-status">
-            <div className="td-dot" />
-            Active · Thinking and assisting technician
-          </div>
-
-          {/* Live Logs Terminal — cognition phrase now lives inside the header */}
-          <LogsTerminal logs={logs} cogPhrase={COG_PHRASES[cogIdx]} />
-
-          <div className="td-metrics">
-            {[
-              { val: dashboard.stats.confidenceAvg,      lbl: "Confidence" },
-              { val: `${dashboard.totalSenders}`,         lbl: "Senders" },
-              { val: `${dashboard.stats.manualReviews}`,  lbl: "Pending reviews" },
-            ].map((m) => (
-              <div key={m.lbl} className="td-metric">
-                <div className="td-metric-val">{m.val}</div>
-                <div className="td-metric-lbl">{m.lbl}</div>
+                <div className="monitor-hero-badges">
+                  <span className="badge rounded-pill text-bg-light border">Soft theme</span>
+                  <span className="badge rounded-pill text-bg-light border">Bootstrap UI</span>
+                  <span className="badge rounded-pill text-bg-light border">Live SSE</span>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Tasks Card */}
-        <div className="td-tasks-card">
-          <div className="td-card-title">AI Functionalities</div>
-          {AI_TASKS.map((task) => (
-            <div key={task.title} className="td-task-item">
-              <div className="td-task-header">
-                <span className="td-task-title">{task.title}</span>
-                <span className={`td-badge ${task.badgeCls}`}>{task.badge}</span>
+              <div className="row g-3 mt-1">
+                {topStats.map((item) => (
+                  <div className="col-12 col-sm-6 col-lg-3" key={item.label}>
+                    <div className="monitor-stat-card h-100">
+                      <div className="monitor-stat-icon">
+                        <i className={`bi ${item.icon}`} />
+                      </div>
+                      <div className="monitor-stat-label">{item.label}</div>
+                      <div className="monitor-stat-value">{item.value}</div>
+                      <div className="monitor-stat-sub">{item.sub}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="td-task-desc">{task.desc}</div>
-              <Link to={task.link} className="td-task-btn">{task.btn}</Link>
             </div>
-          ))}
+          </div>
+
+          <div className="col-12 col-xl-4">
+            <HealthDonut
+              healthyRate={dashboard.stats.healthyRate}
+              totalErrors={dashboard.stats.totalErrors}
+              totalWarnings={dashboard.stats.totalWarnings}
+            />
+          </div>
         </div>
       </div>
 
-      {/* ── CHARTS ── */}
-      <div className="td-chart-row">
-        <div className="td-chart-card">
-          <div className="td-chart-header">
-            <div>
-              <div className="td-chart-title">Sender Activity</div>
-              <div className="td-chart-sub">Last 7 days — flows processed</div>
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-xl-8">
+          <div className="monitor-panel h-100">
+            <div className="monitor-section-header">
+              <div>
+                <h5 className="mb-1">Live Logs Center</h5>
+                <p className="mb-0">Real-time stream from generator and autoencoder services</p>
+              </div>
             </div>
-            <div className="td-legend">
-              <span className="td-legend-item"><span className="td-legend-dot" style={{ background: "#5DA8FF" }} />OK</span>
-              <span className="td-legend-item"><span className="td-legend-dot" style={{ background: "#7C4DFF" }} />Flagged</span>
-            </div>
+            <LogsTerminal logs={dashboard.logs} />
           </div>
-          <SenderChart values={dashboard.senderChart} />
         </div>
 
-        <div className="td-chart-card">
-          <div className="td-chart-header">
-            <div>
-              <div className="td-chart-title">Receiver Load</div>
-              <div className="td-chart-sub">Last 7 days — throughput volume</div>
+        <div className="col-12 col-xl-4">
+          <div className="monitor-panel h-100">
+            <div className="monitor-section-header">
+              <div>
+                <h5 className="mb-1">Technical Scope</h5>
+                <p className="mb-0">Supervised technical reference entities</p>
+              </div>
             </div>
-            <div className="td-legend">
-              <span className="td-legend-item"><span className="td-legend-dot" style={{ background: "#5DA8FF" }} />Received</span>
-              <span className="td-legend-item"><span className="td-legend-dot" style={{ background: "#7C4DFF" }} />Processed</span>
+
+            <div className="row g-3">
+              <div className="col-12">
+                <div className="monitor-soft-card">
+                  <span className="monitor-soft-label">Senders</span>
+                  <h3>{dashboard.totalSenders}</h3>
+                </div>
+              </div>
+              <div className="col-12">
+                <div className="monitor-soft-card">
+                  <span className="monitor-soft-label">Receivers</span>
+                  <h3>{dashboard.totalReceivers}</h3>
+                </div>
+              </div>
+              <div className="col-12">
+                <div className="monitor-soft-card">
+                  <span className="monitor-soft-label">Type Flux</span>
+                  <h3>{dashboard.totalTypeFlux}</h3>
+                </div>
+              </div>
+            </div>
+
+            <hr className="my-4" />
+
+            <div className="monitor-section-header mb-3">
+              <div>
+                <h6 className="mb-1">Quick Access</h6>
+                <p className="mb-0">Open technical data management screens</p>
+              </div>
+            </div>
+
+            <div className="d-flex flex-column gap-3">
+              {QUICK_LINKS.map((task) => (
+                <div className="monitor-task-card" key={task.title}>
+                  <div className="d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                      <h6 className="mb-1">{task.title}</h6>
+                      <p className="mb-2">{task.desc}</p>
+                    </div>
+                    <span className={`badge text-bg-${task.badgeCls}`}>{task.badge}</span>
+                  </div>
+                  <Link to={task.link} className="btn monitor-outline-btn btn-sm">
+                    {task.btn}
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
-          <ReceiverChart values={dashboard.receiverChart} />
+        </div>
+      </div>
+
+      <div className="row g-4">
+        <div className="col-12 col-xl-6">
+          <div className="monitor-panel h-100">
+            <div className="monitor-section-header">
+              <div>
+                <h5 className="mb-1">Generator Activity</h5>
+                <p className="mb-0">Normal vs flagged generator events over the week</p>
+              </div>
+            </div>
+            <SenderChart labels={dashboard.labels} values={dashboard.senderChart} />
+          </div>
+        </div>
+
+        <div className="col-12 col-xl-6">
+          <div className="monitor-panel h-100">
+            <div className="monitor-section-header">
+              <div>
+                <h5 className="mb-1">Autoencoder Activity</h5>
+                <p className="mb-0">All events vs alert events over the week</p>
+              </div>
+            </div>
+            <AutoencoderChart labels={dashboard.labels} values={dashboard.autoencoderChart} />
+          </div>
         </div>
       </div>
     </div>

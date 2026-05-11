@@ -1,15 +1,17 @@
 const STATUS_LABEL = {
-  INIT: "Init",
-  INPROCESS: "In Process",
-  PROCESSED: "Processed",
-  REJECTED: "Rejected",
-  BLOCKED: "Blocked",
-  ARCHIVED: "Archived",
+  INIT:             "Init",
+  WAITPROCESS:      "Wait Process",
+  INPROCESS:        "In Process",
+  PROCESSED:        "Processed",
+  PUTINQUEUEFAILED: "Queue Failed",
   INTECHNICALERROR: "Tech Error",
-  INBUSINESSERROR: "Biz Error",
-  WAITACTION: "Wait Action",
-  SUSPENDED: "Suspended",
-  CANCELED: "Canceled",
+  INBUSINESSERROR:  "Biz Error",
+  REJECTED:         "Rejected",
+  BLOCKED:          "Blocked",
+  ARCHIVED:         "Archived",
+  WAITACTION:       "Wait Action",
+  SUSPENDED:        "Suspended",
+  CANCELED:         "Canceled",
 };
 
 export default function FileInTable({
@@ -47,7 +49,6 @@ export default function FileInTable({
             {rows.length === 0 ? (
               <tr><td colSpan={10} className="filein-table-empty">No results found.</td></tr>
             ) : rows.map((row) => {
-              const fileInStatus = row?.status || "";
               const isSelected = selectedRow?.idFluxIn === row.idFluxIn;
               return (
                 <tr
@@ -55,41 +56,58 @@ export default function FileInTable({
                   onClick={() => setSelectedRow(row)}
                   className={isSelected ? "selected-row" : ""}
                 >
+                  {/* appReference — on FileInDTO directly */}
                   <td className="mono col-app" title={row.appReference || "—"}>
                     {truncate(row.appReference || "—", 16)}
                   </td>
-                  <td className="mono col-sender-ref" title={row.flux?.senderReference || "—"}>
-                    {truncate(row.flux?.senderReference || "—", 20)}
+
+                  {/* senderReference — flat on DTO */}
+                  <td className="mono col-sender-ref" title={row.senderReference || "—"}>
+                    {truncate(row.senderReference || "—", 20)}
                   </td>
-                  <td className="col-sender" title={row.flux?.sender?.sender || "—"}>
-                    {truncate(row.flux?.sender?.sender || "—", 14)}
+
+                  {/* senderName — flat on DTO */}
+                  <td className="col-sender" title={row.senderName || "—"}>
+                    {truncate(row.senderName || "—", 14)}
                   </td>
+
                   <td className="col-date" title={formatDate(row.sendingDate)}>
                     {truncate(formatDate(row.sendingDate), 16)}
                   </td>
+
                   <td className="col-status">
-                    <span className={`status-badge ${statusClass(fileInStatus)}`}>
-                      {STATUS_LABEL[fileInStatus] || fileInStatus || "—"}
+                    <span className={`status-badge ${statusClass(row.status || "")}`}>
+                      {STATUS_LABEL[row.status] || row.status || "—"}
                     </span>
                   </td>
-                  <td className="col-flow" title={row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "—"}>
+
+                  {/* flowType — flat on DTO */}
+                  <td className="col-flow" title={row.flowType || "—"}>
                     <span className="flow-chip">
-                      {truncate(row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "—", 18)}
+                      {truncate(row.flowType || "—", 18)}
                     </span>
                   </td>
+
+                  {/* totalAmount — flat on DTO */}
                   <td className="col-amount">
-                    {row.flux?.totalAmount != null ? (
+                    {row.totalAmount != null ? (
                       <span className="amount-val">
-                        {Number(row.flux.totalAmount).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {Number(row.totalAmount).toLocaleString("fr-FR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </span>
                     ) : <span className="amount-empty">—</span>}
                   </td>
+
                   <td className="col-date" title={formatDate(row.settlementDate)}>
                     {truncate(formatDate(row.settlementDate), 16)}
                   </td>
+
                   <td className="col-category" title={row.category || "—"}>
                     <span className="category-tag">{truncate(row.category || "—", 12)}</span>
                   </td>
+
                   <td className="col-message" title={row.descriptionFileIn || "—"}>
                     {truncate(row.descriptionFileIn || "—", 24)}
                   </td>

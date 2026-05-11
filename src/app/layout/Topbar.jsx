@@ -143,7 +143,7 @@ export default function Topbar({
         </button>
 
         <div className="app-brand-block">
-          <div className="app-logo-mark"><img src="/src/assets/idrlzz2GU9_logos.jpeg" alt="Logo" height="30" /></div>
+          <div className="app-logo-mark"><img src="src/assets/vermegLogo.jpeg" alt="Logo" height="30" /></div>
           <div className="app-brand-text">
             <div className="app-logo">WORKFLOW-AD</div>
             <div className="app-topbar-subtitle">Flow monitoring platform</div>

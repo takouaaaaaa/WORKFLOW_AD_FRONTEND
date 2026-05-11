@@ -1,6 +1,3 @@
-/* ── Layout ──────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 html,
 body,
 #root {
@@ -26,7 +23,7 @@ body {
   background: #F5F4F0;
   color: #1A1A2E;
   overflow: hidden;
-   isolation: isolate;
+  isolation: isolate;
 }
 
 .app-layout {
@@ -52,25 +49,4 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0;
-}
-
-/* Scrollbar for main content */
-.app-main-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-.app-main-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.app-main-scroll::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 999px;
-}
-.app-main-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.18);
-}
-
-@media (max-width: 900px) {
-  .app-main-scroll {
-    padding: 0;
-  }
 }

@@ -20,52 +20,49 @@ export default function FileOutTable({ rows, truncate, formatDate, statusClass, 
             <tr>
               <td colSpan={8} className="filein-table-empty">No results found.</td>
             </tr>
-          ) : (
-            rows.map((row) => {
-              // status lives on FileOut directly
-              const fileOutStatus = row.status || "";
+          ) : rows.map((row) => (
+            <tr key={row.idFluxOut}>
+              {/* appReferenceOut — on FileOutDTO directly */}
+              <td className="mono col-app" title={row.appReferenceOut || "—"}>
+                {truncate(row.appReferenceOut || "—", 16)}
+              </td>
 
-              return (
-                <tr key={row.idFluxOut}>
-                  <td className="mono col-app" title={row.appReferenceOut || "—"}>
-                    {truncate(row.appReferenceOut || "—", 16)}
-                  </td>
+              {/* senderName — flat on DTO */}
+              <td className="col-sender" title={row.senderName || "—"}>
+                {truncate(row.senderName || "—", 14)}
+              </td>
 
-                  <td className="col-sender" title={row.flux?.sender?.sender || "—"}>
-                    {truncate(row.flux?.sender?.sender || "—", 14)}
-                  </td>
+              {/* receiverName — flat on DTO */}
+              <td className="col-receiver" title={row.receiverName || "—"}>
+                {truncate(row.receiverName || "—", 14)}
+              </td>
 
-                  <td className="col-receiver" title={row.receiver?.receiver || "—"}>
-                    {truncate(row.receiver?.receiver || "—", 14)}
-                  </td>
+              {/* flowType — flat on DTO */}
+              <td className="col-flow" title={row.flowType || "—"}>
+                <span className="flow-chip">
+                  {truncate(row.flowType || "—", 18)}
+                </span>
+              </td>
 
-                  <td className="col-flow" title={row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "—"}>
-                    <span className="flow-chip">
-                      {truncate(row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "—", 18)}
-                    </span>
-                  </td>
+              <td className="col-status">
+                <span className={`status-badge ${statusClass(row.status || "")}`}>
+                  {statusLabel[row.status] || row.status || "—"}
+                </span>
+              </td>
 
-                  <td className="col-status">
-                    <span className={`status-badge ${statusClass(fileOutStatus)}`}>
-                      {statusLabel[fileOutStatus] || fileOutStatus || "—"}
-                    </span>
-                  </td>
+              <td className="col-date" title={formatDate(row.creationDate)}>
+                {truncate(formatDate(row.creationDate), 16)}
+              </td>
 
-                  <td className="col-date" title={formatDate(row.creationDate)}>
-                    {truncate(formatDate(row.creationDate), 16)}
-                  </td>
+              <td className="col-date" title={formatDate(row.updateDate)}>
+                {truncate(formatDate(row.updateDate), 16)}
+              </td>
 
-                  <td className="col-date" title={formatDate(row.updateDate)}>
-                    {truncate(formatDate(row.updateDate), 16)}
-                  </td>
-
-                  <td className="col-message" title={row.usedAddress || "—"}>
-                    {truncate(row.usedAddress || "—", 18)}
-                  </td>
-                </tr>
-              );
-            })
-          )}
+              <td className="col-message" title={row.usedAddress || "—"}>
+                {truncate(row.usedAddress || "—", 18)}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

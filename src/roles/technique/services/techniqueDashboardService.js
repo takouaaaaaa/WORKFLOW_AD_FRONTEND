@@ -1,74 +1,301 @@
 import http from "../../../services/http";
 
-function buildSevenDaySeries(baseValue, variance = 0.12) {
-  const safeBase = Math.max(1, Number(baseValue) || 1);
-  const seed = Date.now();
+const API_BASE_URL = "http://localhost:8083";
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  return Array.from({ length: 7 }, (_, i) => {
-    const modifier = 1 + Math.sin(i * 0.9 + seed * 0.0001) * variance;
-    return Math.max(0, Math.round(safeBase * modifier));
-  });
+function normalizeArrayPayload(res) {
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.content)) return res.data.content;
+  return [];
 }
 
-export async function getGeneratorLogs() {
+function normalizeStats(stats = {}) {
+  return {
+    total: Number(stats.total ?? 0),
+    info: Number(stats.info ?? stats.INFO ?? 0),
+    warn: Number(stats.warn ?? stats.warning ?? stats.WARNING ?? 0),
+    error: Number(stats.error ?? stats.ERROR ?? 0),
+    debug: Number(stats.debug ?? stats.DEBUG ?? 0),
+    phases: stats.phases ?? stats.byPhase ?? {},
+    lastUpdated: stats.lastUpdated ?? null,
+  };
+}
+
+function extractTimestamp(item) {
+  return (
+    item?.timestamp ||
+    item?.createdAt ||
+    item?.date ||
+    item?.time ||
+    item?.loggedAt ||
+    null
+  );
+}
+
+function extractLevel(item) {
+  return String(item?.level || "INFO").toUpperCase();
+}
+
+function extractPhase(item) {
+  return item?.phase || item?.step || item?.module || "GENERAL";
+}
+
+function extractMessage(item) {
+  return (
+    item?.message ||
+    item?.details ||
+    item?.description ||
+    item?.log ||
+    JSON.stringify(item)
+  );
+}
+
+function formatLog(source, item, idx = 0) {
+  return {
+    id:
+      item?.id ||
+      `${source}-${extractTimestamp(item) || "no-time"}-${idx}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`,
+    source,
+    level: extractLevel(item),
+    phase: extractPhase(item),
+    message: extractMessage(item),
+    timestamp: extractTimestamp(item),
+    raw: item,
+  };
+}
+
+function safeDate(dateLike) {
+  const d = new Date(dateLike);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function buildSeriesFromLogs(logs, filterFn) {
+  const counts = new Array(7).fill(0);
+
+  logs.forEach((log) => {
+    if (!filterFn(log)) return;
+
+    const dt = safeDate(log.timestamp);
+    if (!dt) return;
+
+    const jsDay = dt.getDay();
+    const mapped = jsDay === 0 ? 6 : jsDay - 1;
+
+    counts[mapped] += 1;
+  });
+
+  return counts;
+}
+
+/* ───────────────────────────────────────────── */
+/* SSE STREAM */
+/* ───────────────────────────────────────────── */
+
+export function createLogStream(path, onMessage) {
+  const token = localStorage.getItem("token");
+
+  const streamUrl = `${API_BASE_URL}${path}${
+    token ? `?token=${encodeURIComponent(token)}` : ""
+  }`;
+
+  console.log("Opening SSE stream:", streamUrl);
+
+  const eventSource = new EventSource(streamUrl);
+
+  const handleEvent = (event) => {
+    try {
+      const parsed = JSON.parse(event.data);
+      console.log("SSE log event:", parsed);
+      onMessage(parsed);
+    } catch (err) {
+      console.error("SSE parse error:", err, event.data);
+    }
+  };
+
+  eventSource.onopen = () => {
+    console.log("SSE connected:", path);
+  };
+
+  eventSource.onmessage = handleEvent;
+
+  // IMPORTANT: backend sends SseEmitter.event().name("log")
+  eventSource.addEventListener("log", handleEvent);
+
+  eventSource.onerror = (err) => {
+    console.error("SSE stream error:", err);
+  };
+
+  return eventSource;
+}
+
+/* ───────────────────────────────────────────── */
+/* GENERATOR */
+/* ───────────────────────────────────────────── */
+
+export async function getGeneratorLogs(params = {}) {
   try {
-    const res = await axios.get("http://localhost:8082/logs/generator");
-    return res.data;
-  } catch {
+    const res = await http.get("/api/generator/logs", {
+      params: {
+        limit: params.limit ?? 100,
+        level: params.level ?? "ALL",
+      },
+    });
+
+    return normalizeArrayPayload(res).map((item, idx) =>
+      formatLog("GENERATOR", item, idx)
+    );
+  } catch (error) {
+    console.error("Failed to load generator logs", error);
     return [];
   }
 }
+
+export async function getGeneratorStats() {
+  try {
+    const res = await http.get("/api/generator/logs/stats");
+    return normalizeStats(res.data);
+  } catch (error) {
+    console.error("Failed to load generator stats", error);
+    return normalizeStats();
+  }
+}
+
+/* ───────────────────────────────────────────── */
+/* AUTOENCODER */
+/* ───────────────────────────────────────────── */
+
+export async function getAutoencoderLogs(params = {}) {
+  try {
+    const res = await http.get("/api/autoencoder/logs", {
+      params: {
+        limit: params.limit ?? 100,
+        level: params.level ?? "ALL",
+        phase: params.phase ?? "ALL",
+      },
+    });
+
+    return normalizeArrayPayload(res).map((item, idx) =>
+      formatLog("AUTOENCODER", item, idx)
+    );
+  } catch (error) {
+    console.error("Failed to load autoencoder logs", error);
+    return [];
+  }
+}
+
+export async function getAutoencoderStats() {
+  try {
+    const res = await http.get("/api/autoencoder/logs/stats");
+    return normalizeStats(res.data);
+  } catch (error) {
+    console.error("Failed to load autoencoder stats", error);
+    return normalizeStats();
+  }
+}
+
+/* ───────────────────────────────────────────── */
+/* DASHBOARD */
+/* ───────────────────────────────────────────── */
+
 export async function getTechniqueDashboardData() {
-  const [sendersRes, receiversRes, typeFluxRes] = await Promise.all([
+  const [
+    sendersRes,
+    receiversRes,
+    typeFluxRes,
+    generatorLogs,
+    autoencoderLogs,
+    generatorStats,
+    autoencoderStats,
+  ] = await Promise.all([
     http.get("/senders"),
     http.get("/receivers"),
     http.get("/typeflux"),
+    getGeneratorLogs({ limit: 120 }),
+    getAutoencoderLogs({ limit: 120 }),
+    getGeneratorStats(),
+    getAutoencoderStats(),
   ]);
 
-  const senders = Array.isArray(sendersRes.data)
-    ? sendersRes.data
-    : sendersRes.data?.content || [];
+  const senders = normalizeArrayPayload(sendersRes);
+  const receivers = normalizeArrayPayload(receiversRes);
+  const typeFlux = normalizeArrayPayload(typeFluxRes);
 
-  const receivers = Array.isArray(receiversRes.data)
-    ? receiversRes.data
-    : receiversRes.data?.content || [];
+  const mergedLogs = [...generatorLogs, ...autoencoderLogs].sort((a, b) => {
+    const da = safeDate(a.timestamp)?.getTime() ?? 0;
+    const db = safeDate(b.timestamp)?.getTime() ?? 0;
+    return db - da;
+  });
 
-  const typeFlux = Array.isArray(typeFluxRes.data)
-    ? typeFluxRes.data
-    : typeFluxRes.data?.content || [];
+  console.log("GENERATOR LOGS:", generatorLogs);
+  console.log("AUTOENCODER LOGS:", autoencoderLogs);
+  console.log("MERGED LOGS:", mergedLogs);
+  console.log("GENERATOR STATS:", generatorStats);
+  console.log("AUTOENCODER STATS:", autoencoderStats);
 
   const totalSenders = senders.length;
   const totalReceivers = receivers.length;
   const totalTypeFlux = typeFlux.length;
 
-  const aiDecisions = totalSenders + totalReceivers;
-  const manualReviews = Math.max(0, Math.round(totalTypeFlux * 0.25));
-  const learnedPatterns = Math.max(1, Math.round(totalTypeFlux * 0.65));
-  const confidenceAvg = totalTypeFlux > 0 ? "94.6%" : "0%";
+  const totalLogs = generatorStats.total + autoencoderStats.total;
+  const totalErrors = generatorStats.error + autoencoderStats.error;
+  const totalWarnings = generatorStats.warn + autoencoderStats.warn;
+
+  const healthyRate =
+    totalLogs > 0
+      ? `${Math.max(
+          0,
+          Math.round(((totalLogs - totalErrors) / totalLogs) * 100)
+        )}%`
+      : "100%";
+
+  const senderOkSeries = buildSeriesFromLogs(
+    generatorLogs,
+    (log) => log.level !== "ERROR"
+  );
+
+  const senderFlaggedSeries = buildSeriesFromLogs(
+    generatorLogs,
+    (log) => ["WARN", "WARNING", "ERROR"].includes(log.level)
+  );
+
+  const autoReceivedSeries = buildSeriesFromLogs(autoencoderLogs, () => true);
+
+  const autoAlertSeries = buildSeriesFromLogs(
+    autoencoderLogs,
+    (log) => ["WARN", "WARNING", "ERROR"].includes(log.level)
+  );
 
   return {
+    labels: DAY_LABELS,
+
     totalSenders,
     totalReceivers,
     totalTypeFlux,
 
     stats: {
-      aiDecisions,
-      manualReviews,
-      learnedPatterns,
-      confidenceAvg,
+      totalLogs,
+      totalErrors,
+      totalWarnings,
+      healthyRate,
+      generatorCount: generatorStats.total,
+      autoencoderCount: autoencoderStats.total,
     },
+
+    generatorStats,
+    autoencoderStats,
+
+    logs: mergedLogs.slice(0, 160),
 
     senderChart: {
-      ok: buildSevenDaySeries(totalSenders || 5, 0.18),
-      flagged: buildSevenDaySeries(Math.max(1, Math.round(totalSenders * 0.18)), 0.22),
+      ok: senderOkSeries,
+      flagged: senderFlaggedSeries,
     },
 
-    receiverChart: {
-      received: buildSevenDaySeries(totalReceivers || 5, 0.14),
-      processed: buildSevenDaySeries(
-        Math.max(1, Math.round(totalReceivers * 0.9)),
-        0.12
-      ),
+    autoencoderChart: {
+      received: autoReceivedSeries,
+      alerts: autoAlertSeries,
     },
   };
 }
