@@ -27,18 +27,6 @@ export default function AppLayout() {
   );
 
   useEffect(() => {
-    console.log("AppLayout mounted, user:", getUserFromToken());
-    console.log("token:", localStorage.getItem("token"));
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      console.log("AppLayout UNMOUNTED");
-      console.log("token at unmount:", localStorage.getItem("token"));
-    };
-  }, []);
-
-  useEffect(() => {
     if (!user) {
       navigate("/");
     }

@@ -1,7 +1,23 @@
 import http from "../../../services/http";
 
-export function getFileIns() {
-  return http.get("/filein");
+// ───────────────── FILE IN ─────────────────
+
+export function getFileIns(filters = {}) {
+  return http.get("/filein", {
+    params: {
+      appReference: filters.appReference || undefined,
+      senderReference: filters.senderReference || undefined,
+      status: filters.status || undefined,
+      category: filters.category || undefined,
+      sender: filters.sender || undefined,
+      receiver: filters.receiver || undefined,
+      flowType: filters.flowType || undefined,
+      sendingDateFrom: filters.sendingDateFrom || undefined,
+      sendingDateTo: filters.sendingDateTo || undefined,
+      totalAmountFrom: filters.totalAmountFrom || undefined,
+      totalAmountTo: filters.totalAmountTo || undefined,
+    },
+  });
 }
 
 export function downloadFileIn(id) {
@@ -20,4 +36,22 @@ export function forceFileIn(id) {
 
 export function rejectFileIn(id) {
   return http.put(`/filein/${id}/reject`);
+}
+
+// ───────────────── SENDERS ─────────────────
+
+export function getSenders() {
+  return http.get("/senders");
+}
+
+// ───────────────── RECEIVERS ───────────────
+
+export function getReceivers() {
+  return http.get("/receivers");
+}
+
+// ───────────────── FLOW TYPES ──────────────
+
+export function getTypeFlux() {
+  return http.get("/typeflux");
 }

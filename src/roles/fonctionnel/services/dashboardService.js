@@ -1,3 +1,4 @@
+// dashboardService.js for FonctionnelDashboard
 import http from "../../../services/http";
 
 export function getAllFlux() {

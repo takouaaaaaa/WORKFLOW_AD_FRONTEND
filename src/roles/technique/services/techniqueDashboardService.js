@@ -25,10 +25,12 @@ function extractTimestamp(item) {
   return (
     item?.timestamp ||
     item?.createdAt ||
+    item?.created_at ||
     item?.date ||
     item?.time ||
     item?.loggedAt ||
-    null
+    item?.logTime ||
+    new Date().toISOString()
   );
 }
 
@@ -89,10 +91,6 @@ function buildSeriesFromLogs(logs, filterFn) {
   return counts;
 }
 
-/* ───────────────────────────────────────────── */
-/* SSE STREAM */
-/* ───────────────────────────────────────────── */
-
 export function createLogStream(path, onMessage) {
   const token = localStorage.getItem("token");
 
@@ -119,8 +117,6 @@ export function createLogStream(path, onMessage) {
   };
 
   eventSource.onmessage = handleEvent;
-
-  // IMPORTANT: backend sends SseEmitter.event().name("log")
   eventSource.addEventListener("log", handleEvent);
 
   eventSource.onerror = (err) => {
@@ -129,10 +125,6 @@ export function createLogStream(path, onMessage) {
 
   return eventSource;
 }
-
-/* ───────────────────────────────────────────── */
-/* GENERATOR */
-/* ───────────────────────────────────────────── */
 
 export async function getGeneratorLogs(params = {}) {
   try {
@@ -161,10 +153,6 @@ export async function getGeneratorStats() {
     return normalizeStats();
   }
 }
-
-/* ───────────────────────────────────────────── */
-/* AUTOENCODER */
-/* ───────────────────────────────────────────── */
 
 export async function getAutoencoderLogs(params = {}) {
   try {
@@ -195,10 +183,6 @@ export async function getAutoencoderStats() {
   }
 }
 
-/* ───────────────────────────────────────────── */
-/* DASHBOARD */
-/* ───────────────────────────────────────────── */
-
 export async function getTechniqueDashboardData() {
   const [
     sendersRes,
@@ -228,12 +212,6 @@ export async function getTechniqueDashboardData() {
     return db - da;
   });
 
-  console.log("GENERATOR LOGS:", generatorLogs);
-  console.log("AUTOENCODER LOGS:", autoencoderLogs);
-  console.log("MERGED LOGS:", mergedLogs);
-  console.log("GENERATOR STATS:", generatorStats);
-  console.log("AUTOENCODER STATS:", autoencoderStats);
-
   const totalSenders = senders.length;
   const totalReceivers = receivers.length;
   const totalTypeFlux = typeFlux.length;
@@ -252,7 +230,7 @@ export async function getTechniqueDashboardData() {
 
   const senderOkSeries = buildSeriesFromLogs(
     generatorLogs,
-    (log) => log.level !== "ERROR"
+    (log) => !["WARN", "WARNING", "ERROR"].includes(log.level)
   );
 
   const senderFlaggedSeries = buildSeriesFromLogs(

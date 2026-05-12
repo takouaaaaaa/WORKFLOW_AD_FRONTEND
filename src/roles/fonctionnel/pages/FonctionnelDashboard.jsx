@@ -3,237 +3,315 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import {
   Chart, LineController, LineElement, PointElement,
-  LinearScale, CategoryScale, Filler, Tooltip, Legend,
+  BarController, BarElement, LinearScale, CategoryScale,
+  Filler, Tooltip, Legend,
 } from "chart.js";
-
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend);
-
 import { getAllFlux, getAllFileIn, getAllFileOut } from "../services/dashboardService";
 
-const STATUS_GROUPS = {
-  ok:     ["PROCESSED", "SENT", "ACKED", "SUCCESS"],
-  danger: ["ERRORREPORTEDTOSENDER","ERROR","FAILED","BLOCKED","REJECTED","CANCELED","INBUSINESSERROR","NOCONTRACTFOUND","INTECHNICALERROR","INITIATIONFAILED","PUTINQUEUEFAILED"],
-  warn:   ["INPROCESS","WAITACTION","INITIATED","WAIT","QUEUE","SUSPENDED"],
-};
+Chart.register(
+  LineController, LineElement, PointElement,
+  BarController, BarElement, LinearScale, CategoryScale,
+  Filler, Tooltip, Legend
+);
 
-const ERROR_STATUSES = [
+/* ─── status maps ───────────────────────────────── */
+const FILEIN_ERRORS = [
+  { key: "PUTINQUEUEFAILED",  label: "Queue failed"    },
+  { key: "INBUSINESSERROR",   label: "Business error"  },
+  { key: "INTECHNICALERROR",  label: "Technical error" },
+  { key: "REJECTED",          label: "Rejected"        },
+  { key: "BLOCKED",           label: "Blocked"         },
+  { key: "CANCELED",          label: "Canceled"        },
+];
+const FILEOUT_ERRORS = [
   { key: "ERRORREPORTEDTOSENDER", label: "Error reported" },
-  { key: "BLOCKED",               label: "Blocked" },
-  { key: "INBUSINESSERROR",       label: "Business error" },
-  { key: "NOCONTRACTFOUND",       label: "No contract" },
-  { key: "REJECTED",              label: "Rejected" },
-  { key: "INTECHNICALERROR",      label: "Technical error" },
+  { key: "NACKED",                label: "Nacked"         },
+  { key: "REJECTED",              label: "Rejected"       },
+  { key: "CANCELED",              label: "Canceled"       },
 ];
-const WARN_STATUSES = [
-  { key: "WAITACTION", label: "Awaiting action" },
-  { key: "SUSPENDED",  label: "Suspended" },
-  { key: "CANCELED",   label: "Canceled" },
+const FILEIN_WAITS = [
+  { key: "WAITACTION",  label: "Wait action"  },
+  { key: "SUSPENDED",   label: "Suspended"    },
+  { key: "INPROCESS",   label: "In process"   },
+  { key: "WAITPROCESS", label: "Wait process" },
 ];
+const FILEOUT_WAITS = [
+  { key: "WAITTOBESENT",      label: "Wait to be sent" },
+  { key: "SENTANDWAITINGACK", label: "Waiting ACK"     },
+  { key: "INITIAL",           label: "Initial"         },
+];
+const OK_STATUSES = ["PROCESSED", "SENT", "ACKED", "SUCCESS"];
 
-function getBadgeClass(status) {
-  const s = (status || "").toUpperCase();
-  if (STATUS_GROUPS.danger.some((k) => s.includes(k))) return "danger";
-  if (STATUS_GROUPS.ok.some((k) => s === k))           return "ok";
-  if (STATUS_GROUPS.warn.some((k) => s.includes(k)))   return "warn";
-  return "unknown";
+/* ─── helpers ───────────────────────────────────── */
+function normalize(res) {
+  if (Array.isArray(res?.data))          return res.data;
+  if (Array.isArray(res?.data?.content)) return res.data.content;
+  return [];
 }
 
-function classifyStatus(status) {
-  const s = (status || "").toUpperCase();
-  if (STATUS_GROUPS.danger.some((k) => s.includes(k))) return "error";
-  if (STATUS_GROUPS.ok.some((k) => s === k))           return "processed";
-  if (STATUS_GROUPS.warn.some((k) => s.includes(k)))   return "waiting";
+function getStatus(item) {
+  return String(
+    item?.status || item?.statusFileIn || item?.statusFileOut ||
+    item?.status_file_in || item?.status_file_out || ""
+  ).toUpperCase();
+}
+
+const isOk = s => OK_STATUSES.includes(String(s || "").toUpperCase());
+const isError = s => [...FILEIN_ERRORS, ...FILEOUT_ERRORS].map(x => x.key).includes(String(s || "").toUpperCase());
+const isWaiting = s => [...FILEIN_WAITS, ...FILEOUT_WAITS].map(x => x.key).includes(String(s || "").toUpperCase());
+
+function classify(s) {
+  if (isOk(s))      return "processed";
+  if (isError(s))   return "error";
+  if (isWaiting(s)) return "waiting";
   return "inProgress";
 }
 
-function formatDate(value) {
-  if (!value) return null;
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? null : d.toLocaleString("fr-FR", {
-    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-  });
+function chipClass(s) {
+  const c = classify(s);
+  if (c === "processed")  return "ok";
+  if (c === "error")      return "err";
+  if (c === "waiting")    return "warn";
+  return "unk";
 }
 
-function resolveDate(item, type) {
-  const candidates = type === "fileOut"
-    ? [item?.updateDate, item?.creationDate]
-    : [item?.sendingDate, item?.settlementDate, item?.creationDate];
-  for (const d of candidates)
-    if (d && !isNaN(new Date(d).getTime())) return d;
+function resolveDate(item) {
+  const candidates = [
+    item?.updateDate, item?.creationDate, item?.sendingDate,
+    item?.settlementDate, item?.createdAt, item?.updatedAt, item?.date,
+  ];
+  for (const v of candidates) {
+    const d = new Date(v);
+    if (v && !isNaN(d.getTime())) return v;
+  }
   return null;
 }
 
-function enrichFluxData(fluxData, fileInData, fileOutData) {
-  const fileInMap  = new Map(fileInData.map((i)  => [i?.appReference, i]));
-  const fileOutMap = new Map(fileOutData.map((i) => [i?.appReferenceOut, i]));
-  return fluxData.map((flux) => {
-    const ref     = flux?.appReference;
-    const fileIn  = ref ? fileInMap.get(ref)  : undefined;
-    const fileOut = ref ? fileOutMap.get(ref) : undefined;
-    const mergedStatus = flux?.status || fileIn?.status || fileOut?.status || null;
-    const mergedDate =
-      resolveDate(fileOut, "fileOut") || resolveDate(fileIn, "fileIn") ||
-      flux?.updateDate || flux?.creationDate || null;
-    return { ...flux, mergedStatus, mergedDate };
+function fmtDate(v) {
+  if (!v) return "—";
+  const d = new Date(v);
+  if (isNaN(d)) return "—";
+  return d.toLocaleString("fr-FR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
   });
 }
 
-function buildNotifications(fileOutData, fileInData) {
-  const notifs = [];
-  fileOutData
-    .filter((i) => STATUS_GROUPS.danger.some((s) => (i?.status || "").toUpperCase().includes(s)))
-    .slice(0, 4)
-    .forEach((i) => notifs.push({
-      type: "error", label: "Critical Error", ref: i?.appReferenceOut,
-      time: formatDate(resolveDate(i, "fileOut")),
-      msg: `FileOut failure: ${i?.status || "unknown error"}`,
-    }));
-  fileInData
-    .filter((i) => STATUS_GROUPS.ok.some((s) => (i?.status || "").toUpperCase() === s))
-    .slice(0, 2)
-    .forEach((i) => notifs.push({
-      type: "success", label: "Flow Completed", ref: i?.appReference,
-      time: formatDate(resolveDate(i, "fileIn")),
-      msg: `Processed successfully: ${i?.status}`,
-    }));
-  fileInData
-    .filter((i) => STATUS_GROUPS.warn.some((s) => (i?.status || "").toUpperCase().includes(s)))
-    .slice(0, 2)
-    .forEach((i) => notifs.push({
-      type: "warning", label: "Pending Action", ref: i?.appReference,
-      time: formatDate(resolveDate(i, "fileIn")),
-      msg: `Flow pending: ${i?.status}`,
-    }));
-  return notifs.slice(0, 6);
+function getRef(item, type) {
+  return (
+    item?.appReference || item?.appReferenceOut || item?.reference ||
+    item?.senderReference ||
+    `${type}-${item?.id || item?.idFluxIn || item?.idFluxOut || Math.random()}`
+  );
 }
 
-function buildChartData(fluxData, fileInData, fileOutData) {
-  const groupByDay = (items, getDate, getStatus) => {
-    const grouped = {};
-    items.forEach((item) => {
-      const raw = getDate(item);
-      if (!raw) return;
-      const date = new Date(raw);
-      if (isNaN(date.getTime())) return;
-      const label = date.toLocaleDateString("fr-FR");
-      if (!grouped[label]) grouped[label] = { total:0, processed:0, error:0, waiting:0, inProgress:0 };
-      grouped[label].total++;
-      if (getStatus) {
-        const cat = classifyStatus(getStatus(item));
-        if      (cat === "processed") grouped[label].processed++;
-        else if (cat === "error")     grouped[label].error++;
-        else if (cat === "waiting")   grouped[label].waiting++;
-        else                          grouped[label].inProgress++;
-      }
-    });
-    return grouped;
+function getId(item) {
+  return item?.id || item?.idFluxIn || item?.idFluxOut || 0;
+}
+
+/* ─── data builders ─────────────────────────────── */
+
+/**
+ * Returns the most recent entries sorted by ID (highest ID first - newest)
+ * Always shows the latest items based on insertion order
+ */
+function buildRecentActivity(fileInData, fileOutData) {
+  const all = [
+    ...fileInData.map(i => ({ 
+      ref: getRef(i, "IN"),  
+      type: "File IN",  
+      status: getStatus(i),  
+      date: resolveDate(i),
+      id: getId(i),
+      rawId: parseInt(getId(i)) || 0
+    })),
+    ...fileOutData.map(i => ({ 
+      ref: getRef(i, "OUT"), 
+      type: "File OUT", 
+      status: getStatus(i),  
+      date: resolveDate(i),
+      id: getId(i),
+      rawId: parseInt(getId(i)) || 0
+    })),
+  ];
+  
+  // Sort by ID (highest first - newest entries typically have higher IDs)
+  return all
+    .sort((a, b) => b.rawId - a.rawId)
+    .slice(0, 10); // Show up to 10 most recent entries by ID
+}
+
+function buildChartData(fileInData, fileOutData) {
+  const grouped = {};
+  const add = (item, type) => {
+    const raw = resolveDate(item);
+    if (!raw) return;
+    const d = new Date(raw);
+    if (isNaN(d)) return;
+    const label = d.toLocaleDateString("fr-FR");
+    const cat = classify(getStatus(item));
+    if (!grouped[label]) grouped[label] = { in: 0, out: 0, processed: 0, error: 0, waiting: 0, inProgress: 0 };
+    if (type === "IN") grouped[label].in++; else grouped[label].out++;
+    grouped[label][cat]++;
   };
-  const fileInGrouped  = groupByDay(fileInData,  (i) => resolveDate(i, "fileIn"));
-  const fileOutGrouped = groupByDay(fileOutData, (i) => resolveDate(i, "fileOut"), (i) => i?.status);
-  const fluxGrouped    = groupByDay(fluxData, (i) => i?.mergedDate || i?.updateDate || i?.creationDate, (i) => i?.mergedStatus || i?.status);
-  const parseFR = (l) => { const [d,m,y] = l.split("/"); return new Date(`${y}-${m}-${d}`); };
-  const labels = Array.from(new Set([
-    ...Object.keys(fileInGrouped), ...Object.keys(fileOutGrouped), ...Object.keys(fluxGrouped),
-  ])).sort((a,b) => parseFR(a) - parseFR(b));
+  fileInData.forEach(i => add(i, "IN"));
+  fileOutData.forEach(i => add(i, "OUT"));
+  const parseFR = l => { const [d, m, y] = l.split("/"); return new Date(`${y}-${m}-${d}`); };
+  const labels = Object.keys(grouped).sort((a, b) => parseFR(a) - parseFR(b));
   return {
     labels,
-    bars:             labels.map((l) => fluxGrouped[l]?.total       || 0),
-    inCounts:         labels.map((l) => fileInGrouped[l]?.total     || 0),
-    outCounts:        labels.map((l) => fileOutGrouped[l]?.total    || 0),
-    processedCounts:  labels.map((l) => fluxGrouped[l]?.processed   || 0),
-    errorCounts:      labels.map((l) => fluxGrouped[l]?.error       || 0),
-    waitingCounts:    labels.map((l) => fluxGrouped[l]?.waiting     || 0),
-    inProgressCounts: labels.map((l) => fluxGrouped[l]?.inProgress  || 0),
+    bars: labels.map(l => grouped[l].in + grouped[l].out),
+    inCounts: labels.map(l => grouped[l].in),
+    outCounts: labels.map(l => grouped[l].out),
+    processedCounts: labels.map(l => grouped[l].processed),
+    errorCounts: labels.map(l => grouped[l].error),
+    waitingCounts: labels.map(l => grouped[l].waiting),
+    inProgressCounts: labels.map(l => grouped[l].inProgress),
   };
 }
 
-function FileInOutChart({ labels, inCounts, outCounts }) {
-  const canvasRef = useRef(null);
-  const chartRef  = useRef(null);
+function buildNotifications(fileInData, fileOutData) {
+  return [
+    ...fileInData.map(x => ({ ...x, sourceType: "File IN" })),
+    ...fileOutData.map(x => ({ ...x, sourceType: "File OUT" })),
+  ]
+    .filter(i => isError(getStatus(i)) || isWaiting(getStatus(i)))
+    .slice(0, 8)
+    .map(i => {
+      const s = getStatus(i);
+      return {
+        type: isError(s) ? "error" : "warning",
+        label: isError(s) ? "Critical Error" : "Pending Action",
+        ref: getRef(i, i.sourceType),
+        time: fmtDate(resolveDate(i)),
+        msg: `${i.sourceType}: ${s}`,
+      };
+    });
+}
+
+/* ─── chart components ──────────────────────────── */
+function LineChartInOut({ labels, inCounts, outCounts }) {
+  const ref = useRef(null);
+  const chart = useRef(null);
   useEffect(() => {
-    if (!canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
+    if (!ref.current) return;
+    chart.current?.destroy();
+    chart.current = new Chart(ref.current, {
       type: "line",
       data: {
         labels,
         datasets: [
-          { label:"File IN",  data:inCounts,  borderColor:"#5B4EE8", backgroundColor:"rgba(91,78,232,0.07)", borderWidth:2, fill:true, tension:0.4, pointRadius:2.5, pointBackgroundColor:"#5B4EE8" },
-          { label:"File OUT", data:outCounts, borderColor:"#1A9E6E", backgroundColor:"rgba(26,158,110,0.05)", borderWidth:2, fill:true, tension:0.4, pointRadius:2.5, pointBackgroundColor:"#1A9E6E" },
+          { label: "File IN", data: inCounts, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,.06)", borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: "#6366f1" },
+          { label: "File OUT", data: outCounts, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,.04)", borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: "#10b981", borderDash: [5, 3] },
         ],
       },
       options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins: { legend:{display:false}, tooltip:{backgroundColor:"#16161E",titleColor:"#fff",bodyColor:"#aaa",padding:10,cornerRadius:8} },
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
         scales: {
-          x: { ticks:{font:{size:10},color:"#8A8A9A"}, grid:{color:"rgba(0,0,0,0.04)"} },
-          y: { beginAtZero:true, ticks:{font:{size:10},color:"#8A8A9A"}, grid:{color:"rgba(0,0,0,0.04)"} },
+          x: { ticks: { font: { size: 10 }, color: "#b0b8cc" }, grid: { color: "rgba(0,0,0,0.04)" } },
+          y: { beginAtZero: true, ticks: { font: { size: 10 }, color: "#b0b8cc" }, grid: { color: "rgba(0,0,0,0.04)" } },
         },
       },
     });
-    return () => chartRef.current?.destroy();
+    return () => chart.current?.destroy();
   }, [labels, inCounts, outCounts]);
-  return <canvas ref={canvasRef} />;
+  return <canvas ref={ref} />;
 }
 
-function FluxAvancementChart({ labels, processedCounts, errorCounts, waitingCounts, inProgressCounts }) {
-  const canvasRef = useRef(null);
-  const chartRef  = useRef(null);
+function LineChartLifecycle({ labels, processedCounts, errorCounts, waitingCounts, inProgressCounts }) {
+  const ref = useRef(null);
+  const chart = useRef(null);
   useEffect(() => {
-    if (!canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
+    if (!ref.current) return;
+    chart.current?.destroy();
+    chart.current = new Chart(ref.current, {
       type: "line",
       data: {
         labels,
         datasets: [
-          { label:"Processed",   data:processedCounts,  borderColor:"#1A9E6E", borderWidth:2, tension:0.4, pointRadius:2 },
-          { label:"Waiting",     data:waitingCounts,    borderColor:"#C47D18", borderWidth:2, tension:0.4, pointRadius:2 },
-          { label:"Errors",      data:errorCounts,      borderColor:"#D63F3F", borderWidth:2, tension:0.4, pointRadius:2 },
-          { label:"In progress", data:inProgressCounts, borderColor:"#5B4EE8", borderWidth:2, tension:0.4, pointRadius:2 },
+          { label: "Processed", data: processedCounts, borderColor: "#10b981", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [] },
+          { label: "Errors", data: errorCounts, borderColor: "#f43f5e", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [3, 2] },
+          { label: "In progress", data: inProgressCounts, borderColor: "#6366f1", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [5, 3] },
+          { label: "Waiting", data: waitingCounts, borderColor: "#f59e0b", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [4, 2] },
         ],
       },
       options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins: { legend:{display:false}, tooltip:{backgroundColor:"#16161E",titleColor:"#fff",bodyColor:"#aaa",padding:10,cornerRadius:8} },
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
         scales: {
-          x: { ticks:{font:{size:10},color:"#8A8A9A"}, grid:{color:"rgba(0,0,0,0.04)"} },
-          y: { beginAtZero:true, ticks:{font:{size:10},color:"#8A8A9A"}, grid:{color:"rgba(0,0,0,0.04)"} },
+          x: { ticks: { font: { size: 9 }, color: "#b0b8cc" }, grid: { color: "rgba(0,0,0,0.04)" } },
+          y: { beginAtZero: true, ticks: { font: { size: 9 }, color: "#b0b8cc" }, grid: { color: "rgba(0,0,0,0.04)" } },
         },
       },
     });
-    return () => chartRef.current?.destroy();
+    return () => chart.current?.destroy();
   }, [labels, processedCounts, errorCounts, waitingCounts, inProgressCounts]);
-  return <canvas ref={canvasRef} />;
+  return <canvas ref={ref} />;
 }
 
-function NotificationPanel({ notifications }) {
+function BarChartVolume({ labels, bars }) {
+  const ref = useRef(null);
+  const chart = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    chart.current?.destroy();
+    chart.current = new Chart(ref.current, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Volume", data: bars,
+          backgroundColor: bars.map((v, i) => {
+            const max = Math.max(...bars, 1);
+            const opacity = 0.3 + 0.6 * (v / max);
+            return `rgba(99,102,241,${opacity.toFixed(2)})`;
+          }),
+          borderColor: "#6366f1", borderWidth: 1, borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 10 }, color: "#b0b8cc" }, grid: { color: "transparent" } },
+          y: { beginAtZero: true, ticks: { font: { size: 10 }, color: "#b0b8cc" }, grid: { color: "rgba(0,0,0,0.04)" } },
+        },
+      },
+    });
+    return () => chart.current?.destroy();
+  }, [labels, bars]);
+  return <canvas ref={ref} />;
+}
+
+/* ─── notification drawer ───────────────────────── */
+function NotifDrawer({ notifications }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`palm-notif-drawer ${open ? "open" : ""}`}>
-      <button className="palm-notif-handle" onClick={() => setOpen(!open)}>
+    <div className={`wd-drawer${open ? " open" : ""}`}>
+      <button className="wd-drawer-handle" onClick={() => setOpen(o => !o)}>
         <span>{open ? "CLOSE" : "ALERTS"}</span>
-        <span style={{ marginTop:6, background:"#D63F3F", borderRadius:40, padding:"2px 6px", fontSize:10 }}>
+        <span style={{ marginTop: 6, background: "#f43f5e", borderRadius: 40, padding: "2px 6px", fontSize: 10 }}>
           {notifications.length}
         </span>
       </button>
-      <div className="palm-notif-panel">
-        <div className="palm-notif-header">
-          <div className="palm-notif-title">Alerts</div>
-          <div className="palm-notif-subtitle">Real-time flow intelligence</div>
+      <div className="wd-drawer-panel">
+        <div className="wd-drawer-hd">
+          <h4>Alerts</h4>
+          <p>Real-time flow intelligence</p>
         </div>
-        <div className="palm-notif-list">
+        <div className="wd-notif-list">
           {notifications.length === 0 ? (
-            <div className="palm-notif-item info">
-              <div className="palm-notif-type">System Idle</div>
-              <div className="palm-notif-msg">No active alerts</div>
+            <div className="wd-notif-item info">
+              <div className="wd-ntype">System</div>
+              <div className="wd-nmsg">No active alerts</div>
             </div>
           ) : notifications.map((n, i) => (
-            <div key={i} className={`palm-notif-item ${n.type}`}>
-              <div className="palm-notif-type">{n.label}</div>
-              <div className="palm-notif-msg">{n.msg}</div>
-              {n.ref  && <div className="palm-notif-ref">{n.ref}</div>}
-              {n.time && <div className="palm-notif-time">{n.time}</div>}
+            <div key={i} className={`wd-notif-item ${n.type}`}>
+              <div className="wd-ntype">{n.label}</div>
+              <div className="wd-nmsg">{n.msg}</div>
+              <div className="wd-nref">{n.ref}</div>
+              <div className="wd-ntime">{n.time}</div>
             </div>
           ))}
         </div>
@@ -242,84 +320,162 @@ function NotificationPanel({ notifications }) {
   );
 }
 
-function ErrorAnalysisCard({ fluxData, loading }) {
+/* ─── error analysis ────────────────────────────── */
+function ErrorCard({ fileInData, fileOutData, loading }) {
   const navigate = useNavigate();
-  const countByStatus = (k) => fluxData.filter((f) => (f?.status || "").toUpperCase() === k).length;
-  const totalErrors = ERROR_STATUSES.reduce((s, e) => s + countByStatus(e.key), 0);
-  const totalWarn   = WARN_STATUSES.reduce((s, w)  => s + countByStatus(w.key), 0);
-  const maxError    = Math.max(...ERROR_STATUSES.map((e) => countByStatus(e.key)), 1);
-  const maxWarn     = Math.max(...WARN_STATUSES.map((w)  => countByStatus(w.key)), 1);
-  const goToFileIn  = (e, key) => { e.preventDefault(); e.stopPropagation(); navigate("/fonctionnel/file-in",  { state: { status: key } }); };
-  const goToFileOut = (e, key) => { e.preventDefault(); e.stopPropagation(); navigate("/fonctionnel/file-out", { state: { status: key } }); };
+  const cntIn = key => fileInData.filter(x => getStatus(x) === key).length;
+  const cntOut = key => fileOutData.filter(x => getStatus(x) === key).length;
+
+  const totalErrIn = FILEIN_ERRORS.reduce((s, x) => s + cntIn(x.key), 0);
+  const totalErrOut = FILEOUT_ERRORS.reduce((s, x) => s + cntOut(x.key), 0);
+  const totalWaitIn = FILEIN_WAITS.reduce((s, x) => s + cntIn(x.key), 0);
+  const totalWaitOut = FILEOUT_WAITS.reduce((s, x) => s + cntOut(x.key), 0);
+  const totalErr = totalErrIn + totalErrOut;
+  const totalWait = totalWaitIn + totalWaitOut;
+  const totalHealthy = fileInData.filter(x => isOk(getStatus(x))).length + fileOutData.filter(x => isOk(getStatus(x))).length;
+
+  const maxErr = Math.max(...FILEIN_ERRORS.map(s => cntIn(s.key)), ...FILEOUT_ERRORS.map(s => cntOut(s.key)), 1);
+  const maxWait = Math.max(...FILEIN_WAITS.map(s => cntIn(s.key)), ...FILEOUT_WAITS.map(s => cntOut(s.key)), 1);
+
+  const row = (key, label, count, total, max, kind, route) => {
+    if (!count) return null;
+    const pct = total ? Math.round((count / total) * 100) : 0;
+    const bar = Math.round((count / max) * 100);
+    return (
+      <div key={key} className="wd-err-row" onClick={() => navigate(route, { state: { status: key } })}>
+        <span className={`wd-ename ${kind}`}>{label}</span>
+        <div className="wd-etrack"><div className={`wd-efill ${kind}`} style={{ width: `${bar}%` }} /></div>
+        <span className="wd-enum">{count}</span>
+        <span className="wd-epct">{pct}%</span>
+      </div>
+    );
+  };
 
   return (
-    <div className="palm-error-card">
-      <div className="palm-card-title">Root cause analytics</div>
-      <div className="palm-error-metrics">
-        <div className="palm-error-metric">
-          <div className="palm-error-metric-val danger">{loading ? "—" : totalErrors}</div>
-          <div style={{fontSize:12,color:"#8A8A9A",marginTop:4}}>Critical errors</div>
-        </div>
-        <div className="palm-error-metric">
-          <div className="palm-error-metric-val warn">{loading ? "—" : totalWarn}</div>
-          <div style={{fontSize:12,color:"#8A8A9A",marginTop:4}}>Pending review</div>
-        </div>
-        <div className="palm-error-metric">
-          <div className="palm-error-metric-val ok">{loading ? "—" : fluxData.length - totalErrors - totalWarn}</div>
-          <div style={{fontSize:12,color:"#8A8A9A",marginTop:4}}>Healthy flows</div>
-        </div>
+    <div className="wd-card">
+      <div className="wd-hd">
+        <div className="wd-title">Root cause analytics</div>
+        <span className={`wd-tag ${totalErr > 0 ? "err" : "ok"}`}>{loading ? "—" : totalErr} errors</span>
       </div>
 
-      <div className="palm-error-section-label">Error breakdown — File IN</div>
-      {ERROR_STATUSES.map(({ key, label }) => {
-        const cnt = countByStatus(key);
-        if (!cnt) return null;
-        const pct = totalErrors ? Math.round((cnt / totalErrors) * 100) : 0;
-        const bar = Math.round((cnt / maxError) * 100);
-        return (
-          <div key={key} className="palm-error-row" onClick={(e) => goToFileIn(e, key)}>
-            <span className="palm-error-badge danger">{label}</span>
-            <div className="palm-error-bar-bg"><div className="palm-error-bar-fill danger" style={{ width:`${bar}%` }} /></div>
-            <span className="palm-error-count">{cnt}</span>
-            <span className="palm-error-pct">{pct}%</span>
-            <span className="palm-error-arrow">→</span>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 16 }}>
+        {[
+          { label: "Critical errors", val: totalErr, color: "#f43f5e" },
+          { label: "Pending review", val: totalWait, color: "#f59e0b" },
+          { label: "Healthy flows", val: totalHealthy, color: "#10b981" },
+        ].map(m => (
+          <div key={m.label} style={{ textAlign: "center", padding: "14px 8px", background: "var(--flat)", borderRadius: "var(--rs)", border: "1px solid var(--border-in)" }}>
+            <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--mono)", color: m.color, marginBottom: 3 }}>{loading ? "—" : m.val}</div>
+            <div style={{ fontSize: 11, color: "var(--t4)" }}>{m.label}</div>
           </div>
-        );
-      })}
-      {totalErrors === 0 && !loading && <p style={{fontSize:12,color:"#8A8A9A",padding:"8px 0"}}>No critical errors.</p>}
+        ))}
+      </div>
 
-      <div className="palm-error-section-label" style={{marginTop:20}}>Awaiting resolution — File OUT</div>
-      {WARN_STATUSES.map(({ key, label }) => {
-        const cnt = countByStatus(key);
-        if (!cnt) return null;
-        const pct = totalWarn ? Math.round((cnt / totalWarn) * 100) : 0;
-        const bar = Math.round((cnt / maxWarn) * 100);
-        return (
-          <div key={key} className="palm-error-row" onClick={(e) => goToFileOut(e, key)}>
-            <span className="palm-error-badge warn">{label}</span>
-            <div className="palm-error-bar-bg"><div className="palm-error-bar-fill warn" style={{ width:`${bar}%` }} /></div>
-            <span className="palm-error-count">{cnt}</span>
-            <span className="palm-error-pct">{pct}%</span>
-            <span className="palm-error-arrow">→</span>
-          </div>
-        );
-      })}
-      {totalWarn === 0 && !loading && <p style={{fontSize:12,color:"#8A8A9A",padding:"8px 0"}}>No pending flows.</p>}
+      <div className="wd-sec">Error breakdown — File IN</div>
+      {FILEIN_ERRORS.map(({ key, label }) => row(key, label, cntIn(key), totalErr, maxErr, "d", "/fonctionnel/file-in"))}
+      {totalErrIn === 0 && !loading && <p style={{ fontSize: 11, color: "var(--t4)", padding: "4px 0" }}>No errors in File IN.</p>}
+
+      <div className="wd-sec">Error breakdown — File OUT</div>
+      {FILEOUT_ERRORS.map(({ key, label }) => row(key, label, cntOut(key), totalErr, maxErr, "d", "/fonctionnel/file-out"))}
+      {totalErrOut === 0 && !loading && <p style={{ fontSize: 11, color: "var(--t4)", padding: "4px 0" }}>No errors in File OUT.</p>}
+
+      <div className="wd-sec">Awaiting resolution — File IN</div>
+      {FILEIN_WAITS.map(({ key, label }) => row(key, label, cntIn(key), totalWait, maxWait, "w", "/fonctionnel/file-in"))}
+      {totalWaitIn === 0 && !loading && <p style={{ fontSize: 11, color: "var(--t4)", padding: "4px 0" }}>No pending in File IN.</p>}
+
+      <div className="wd-sec">Awaiting resolution — File OUT</div>
+      {FILEOUT_WAITS.map(({ key, label }) => row(key, label, cntOut(key), totalWait, maxWait, "w", "/fonctionnel/file-out"))}
+      {totalWaitOut === 0 && !loading && <p style={{ fontSize: 11, color: "var(--t4)", padding: "4px 0" }}>No pending in File OUT.</p>}
     </div>
   );
 }
 
+/* ─── animated Cortex component ──────────────────── */
+function AnimatedCortex({ fluxData, totalErrors, totalProcessed, loading }) {
+  const [isGlowing, setIsGlowing] = useState(true);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsGlowing(prev => !prev);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="wd-cortex-animated">
+      <div className="wd-orb-wrap">
+        <div className="wd-ring2" />
+        <div className="wd-ring" />
+        <div className={`wd-orb ${isGlowing ? 'glowing' : ''}`}>
+          <div className="wd-orb-pulse" />
+        </div>
+      </div>
+      <div className="wd-cortex-name">CURE · CORTEX</div>
+      <div className="wd-cortex-status">
+        <span className="wd-status-dot" />
+        {loading ? "Initializing..." : "Operational · Live"}
+      </div>
+      <div className="wd-cortex-metrics">
+        <div className="wd-cm">
+          <div className="wd-cm-val">{loading ? "—" : fluxData.length}</div>
+          <div className="wd-cm-lbl">Flux</div>
+        </div>
+        <div className="wd-cm">
+          <div className="wd-cm-val" style={{ color: "#f43f5e" }}>{loading ? "—" : totalErrors}</div>
+          <div className="wd-cm-lbl">Errors</div>
+        </div>
+        <div className="wd-cm">
+          <div className="wd-cm-val" style={{ color: "#10b981" }}>{loading ? "—" : totalProcessed}</div>
+          <div className="wd-cm-lbl">Done</div>
+        </div>
+      </div>
+      <div className="wd-cortex-energy">
+        <div className="wd-energy-bar" style={{ width: loading ? '0%' : '100%' }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── main dashboard ────────────────────────────── */
 export default function FonctionnelDashboard() {
-  const [loading,     setLoading]     = useState(true);
-  const [rawFluxData, setRawFluxData] = useState([]);
-  const [stats,       setStats]       = useState({ synthese:0, jobsEnErreur:0, aiProcessed:0, totalFileIn:0 });
-  const [recentFlows,   setRecentFlows]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fluxData, setFluxData] = useState([]);
+  const [fileInData, setFileInData] = useState([]);
+  const [fileOutData, setFileOutData] = useState([]);
+  const [recentFlows, setRecentFlows] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [chartData,     setChartData]     = useState({
-    labels:[], bars:[], inCounts:[], outCounts:[],
-    processedCounts:[], errorCounts:[], waitingCounts:[], inProgressCounts:[],
+  const [chartData, setChartData] = useState({
+    labels: [], bars: [], inCounts: [], outCounts: [],
+    processedCounts: [], errorCounts: [], waitingCounts: [], inProgressCounts: [],
   });
   const [now, setNow] = useState(new Date());
+
+  const loadData = useCallback(async () => {
+    try {
+      const [fluxRes, inRes, outRes] = await Promise.all([
+        getAllFlux(), getAllFileIn(), getAllFileOut(),
+      ]);
+      const flux = normalize(fluxRes);
+      const fileIn = normalize(inRes);
+      const fileOut = normalize(outRes);
+      setFluxData(flux);
+      setFileInData(fileIn);
+      setFileOutData(fileOut);
+      setRecentFlows(buildRecentActivity(fileIn, fileOut));
+      setNotifications(buildNotifications(fileIn, fileOut));
+      setChartData(buildChartData(fileIn, fileOut));
+    } catch (e) {
+      console.error("Dashboard load error:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+    const iv = setInterval(loadData, 30000);
+    return () => clearInterval(iv);
+  }, [loadData]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
@@ -327,251 +483,208 @@ export default function FonctionnelDashboard() {
   }, []);
 
   const { labels, bars, inCounts, outCounts, processedCounts, errorCounts, waitingCounts, inProgressCounts } = chartData;
-  const totalIn         = inCounts.reduce((a,b) => a+b, 0);
-  const totalOut        = outCounts.reduce((a,b) => a+b, 0);
-  const totalProcessed  = processedCounts.reduce((a,b) => a+b, 0);
-  const totalErrors     = errorCounts.reduce((a,b) => a+b, 0);
-  const totalWaiting    = waitingCounts.reduce((a,b) => a+b, 0);
-  const totalInProgress = inProgressCounts.reduce((a,b) => a+b, 0);
-  const successRate     = totalOut ? Math.round((totalProcessed / totalOut) * 100) : null;
-  const errorRate       = totalOut ? Math.round((totalErrors / totalOut) * 100)    : null;
 
-  const processAndSet = useCallback((fluxRes, fileInRes, fileOutRes) => {
-    const fluxData    = fluxRes?.data    || [];
-    const fileInData  = fileInRes?.data  || [];
-    const fileOutData = fileOutRes?.data || [];
-    const enriched = enrichFluxData(fluxData, fileInData, fileOutData);
-    const jobsErr     = fileOutData.filter((i) => STATUS_GROUPS.danger.some((s) => (i?.status || "").toUpperCase().includes(s))).length;
-    const processedIn = fileInData.filter((i)  => STATUS_GROUPS.ok.some((s) => (i?.status || "").toUpperCase() === s)).length;
-    setRawFluxData(fluxData);
-    setStats({ synthese:fluxData.length, jobsEnErreur:jobsErr, aiProcessed:processedIn, totalFileIn:fileInData.length });
-    setRecentFlows([...enriched].filter((f) => f.mergedDate).sort((a,b) => new Date(b.mergedDate) - new Date(a.mergedDate)).slice(0,6));
-    setNotifications(buildNotifications(fileOutData, fileInData));
-    setChartData(buildChartData(enriched, fileInData, fileOutData));
-    setLoading(false);
-  }, []);
-
-  const loadData = useCallback(async () => {
-    try {
-      const [fluxRes, inRes, outRes] = await Promise.all([getAllFlux(), getAllFileIn(), getAllFileOut()]);
-      processAndSet(fluxRes, inRes, outRes);
-    } catch (e) { console.error(e); setLoading(false); }
-  }, [processAndSet]);
-
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(() => {
-      getAllFlux().then((f) => getAllFileIn().then((i) => getAllFileOut().then((o) => processAndSet(f,i,o)))).catch(()=>{});
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [loadData, processAndSet]);
-
-  const STATS = [
-    { label: "Total flux",    value: loading ? "—" : stats.synthese,     cls: "warn",                                    sub: "All flows monitored",  icon: "⬡" },
-    { label: "Jobs in error", value: loading ? "—" : stats.jobsEnErreur, cls: stats.jobsEnErreur > 0 ? "danger" : "ok", sub: "FileOut failures",      icon: "⚠" },
-    { label: "File IN",       value: loading ? "—" : stats.totalFileIn,  cls: "warn",                                    sub: "Records received",      icon: "↙" },
-    { label: "Processed",     value: loading ? "—" : stats.aiProcessed,  cls: "ok",                                      sub: "Completed successfully", icon: "✓" },
-  ];
+  const totalIn = fileInData.length;
+  const totalOut = fileOutData.length;
+  const totalProcessed =
+    fileInData.filter(x => isOk(getStatus(x))).length +
+    fileOutData.filter(x => isOk(getStatus(x))).length;
+  const totalErrors =
+    fileInData.filter(x => isError(getStatus(x))).length +
+    fileOutData.filter(x => isError(getStatus(x))).length;
+  const totalWaiting =
+    fileInData.filter(x => isWaiting(getStatus(x))).length +
+    fileOutData.filter(x => isWaiting(getStatus(x))).length;
+  const totalInProgress = Math.max(0,
+    fileInData.length + fileOutData.length - totalProcessed - totalErrors - totalWaiting
+  );
+  const successRate = totalOut ? Math.round((fileOutData.filter(x => isOk(getStatus(x))).length / totalOut) * 100) : 0;
+  const errorRate = totalOut ? Math.round((fileOutData.filter(x => isError(getStatus(x))).length / totalOut) * 100) : 0;
+  const progTotal = totalProcessed + totalWaiting + totalErrors + totalInProgress || 1;
 
   const PROGRESS = [
-    { lbl:"Processed",   val:totalProcessed,  color:"#1A9E6E" },
-    { lbl:"Waiting",     val:totalWaiting,    color:"#C47D18" },
-    { lbl:"Errors",      val:totalErrors,     color:"#D63F3F" },
-    { lbl:"In progress", val:totalInProgress, color:"#5B4EE8" },
+    { label: "Processed", val: totalProcessed, color: "#10b981" },
+    { label: "Errors", val: totalErrors, color: "#f43f5e" },
+    { label: "In progress", val: totalInProgress, color: "#6366f1" },
+    { label: "Waiting", val: totalWaiting, color: "#f59e0b" },
   ];
-  const progTotal = totalProcessed + totalWaiting + totalErrors + totalInProgress || 1;
 
   return (
     <>
-      <div className="palm-main">
-
-        {/* ── PAGE HEADER ── */}
-        <div className="palm-page-header">
+      <div className="wd-main">
+        {/* ── Topbar ── */}
+        <div className="wd-topbar">
           <div>
-            <div className="palm-page-title">Fonctionnel dashboard</div>
-            <div className="palm-page-sub">Flow monitoring & analytics</div>
+            <h1>Flow monitoring</h1>
+            <p>WORKFLOW-AD · Fonctionnel dashboard</p>
           </div>
-          <div className="palm-page-time">
-            <span className="palm-live-dot" />
-            Live · {now.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" })}
+          <div className="wd-topbar-r">
+            <div className="wd-live">
+              <div className="wd-dot" />
+              Live · {now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </div>
+            <button className="wd-alertbtn">
+              <i className="ti ti-bell" style={{ fontSize: 14, color: "#f43f5e" }} aria-hidden="true" />
+              <span style={{ color: "#f43f5e", fontWeight: 700 }}>{notifications.length}</span>&nbsp;alerts
+            </button>
+            <div className="wd-avatar">TE</div>
           </div>
         </div>
 
-        {/* ── KPI CARDS ── */}
-        <div className="palm-stat-row">
-          {STATS.map((s) => (
-            <div key={s.label} className="palm-stat-card">
-              <div className="palm-stat-icon">{s.icon}</div>
-              <div className="palm-stat-label">{s.label}</div>
-              <div className={`palm-stat-value ${s.cls}`}>{s.value}</div>
-              <div className="palm-stat-sub">{s.sub}</div>
+        {/* ── KPI cards ── */}
+        <div className="wd-kpis">
+          {[
+            { label: "Total flux", val: loading ? "—" : fluxData.length, cls: "", sub: "All flows monitored", icon: "ti-topology-star-3" },
+            { label: "Total errors", val: loading ? "—" : totalErrors, cls: totalErrors > 0 ? "danger" : "ok", sub: "FileIn + FileOut errors", icon: "ti-alert-triangle" },
+            { label: "File IN", val: loading ? "—" : totalIn, cls: "warn", sub: "Records received", icon: "ti-file-import" },
+            { label: "Processed", val: loading ? "—" : totalProcessed, cls: "ok", sub: "Completed successfully", icon: "ti-circle-check" },
+          ].map(k => (
+            <div key={k.label} className="wd-kpi">
+              <div className="wd-kpi-lbl">{k.label}</div>
+              <div className={`wd-kpi-val ${k.cls}`}>{k.val}</div>
+              <div className="wd-kpi-sub">{k.sub}</div>
+              <div className="wd-kpi-ico"><i className={`ti ${k.icon}`} aria-hidden="true" /></div>
             </div>
           ))}
         </div>
 
-        {/* ── CENTER: status panel + recent activity ── */}
-        <div className="palm-center-grid">
-
-          {/* Left: compact status panel */}
-          <div className="palm-status-panel">
-            <div className="palm-status-header">
-              <div className="palm-status-title">CURE · Cortex</div>
-              <div className="palm-status-badge">
-                <span style={{width:5,height:5,borderRadius:"50%",background:"#1A9E6E",flexShrink:0}}></span>
-                {loading ? "Initializing" : "Operational"}
-              </div>
+        {/* ── First row: Cortex + Charts ── */}
+        <div className="wd-mid">
+          {/* Cortex panel - NOW ON THE LEFT */}
+          <div className="wd-card wd-cortex-card">
+            <div className="wd-hd">
+              <div className="wd-title">CURE · Cortex</div>
+              <span className="wd-tag ok">{loading ? "…" : "Operational"}</span>
             </div>
-
-            <div className="palm-ai-card">
-              <div className="palm-orb-wrap">
-                <div className="palm-ring2" />
-                <div className="palm-ring" />
-                <div className="palm-orb" />
-              </div>
-              <div className="palm-ai-name">CURE · CORTEX</div>
-              <div className="palm-ai-status">
-                <div className="palm-dot" />
-                {loading ? "Initializing..." : "Operational · Live"}
-              </div>
-            </div>
-
-            <div className="palm-status-metrics">
-              <div className="palm-metric">
-                <div className="palm-metric-val">{loading ? "—" : stats.synthese}</div>
-                <div className="palm-metric-lbl">Total</div>
-              </div>
-              <div className="palm-metric">
-                <div className="palm-metric-val" style={{color:"#D63F3F"}}>{loading ? "—" : stats.jobsEnErreur}</div>
-                <div className="palm-metric-lbl">Errors</div>
-              </div>
-              <div className="palm-metric">
-                <div className="palm-metric-val" style={{color:"#1A9E6E"}}>{loading ? "—" : stats.aiProcessed}</div>
-                <div className="palm-metric-lbl">Done</div>
-              </div>
-            </div>
+            <AnimatedCortex 
+              fluxData={fluxData}
+              totalErrors={totalErrors}
+              totalProcessed={totalProcessed}
+              loading={loading}
+            />
           </div>
 
-          {/* Right: recent activity */}
-          <div className="palm-flow-card">
-            <div className="palm-card-title">Recent activity</div>
-            <table className="palm-table">
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan={4} style={{textAlign:"center",color:"#8A8A9A",padding:"24px 0"}}>Loading...</td></tr>
-                ) : recentFlows.length === 0 ? (
-                  <tr><td colSpan={4} style={{textAlign:"center",color:"#8A8A9A",padding:"24px 0"}}>No recent flows</td></tr>
-                ) : recentFlows.map((f, i) => (
-                  <tr key={f.appReference || i}>
-                    <td className="palm-mono">{f.appReference?.slice(0,14) || "—"}</td>
-                    <td style={{color:"#8A8A9A",fontSize:12}}>{f.typeFlux?.flowType || "—"}</td>
-                    <td><span className={`palm-badge ${getBadgeClass(f.mergedStatus)}`}>{f.mergedStatus || "—"}</span></td>
-                    <td style={{fontSize:11,color:"#8A8A9A"}}>{formatDate(f.mergedDate) || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ── ERROR ANALYSIS ── */}
-        <ErrorAnalysisCard fluxData={rawFluxData} loading={loading} />
-
-        {/* ── DAILY BAR CHART ── */}
-        <div className="palm-chart-card">
-          <div className="palm-card-title">Daily volume trend</div>
-          {!loading && bars.length ? (
-            <>
-              <div className="palm-bars">
-                {bars.map((h, i) => (
-                  <div
-                    key={i}
-                    className="palm-bar"
-                    style={{ height:`${Math.max(4, Math.round((h / Math.max(...bars,1)) * 100))}%` }}
-                    title={`${labels[i]}: ${h} flows`}
-                  />
-                ))}
-              </div>
-              <div className="palm-bar-labels">
-                {labels.filter((_,i) => i % Math.ceil(labels.length/8) === 0).map((l) => <span key={l}>{l}</span>)}
-              </div>
-            </>
-          ) : (
-            <div style={{padding:"24px 0",textAlign:"center",color:"#8A8A9A",fontSize:13}}>No data available</div>
-          )}
-        </div>
-
-        {/* ── FILE IN vs OUT CHART ── */}
-        <div className="palm-linechart-card">
-          <div className="palm-linechart-header">
-            <div>
-              <div className="palm-card-title">File IN vs OUT</div>
-              <div className="palm-linechart-sub">Ingestion & emission over time</div>
+          {/* File IN vs OUT chart */}
+          <div className="wd-card">
+            <div className="wd-hd">
+              <div className="wd-title">File IN vs OUT</div>
+              <span className="wd-tag info">Live</span>
             </div>
-            <div className="palm-linechart-legend">
-              <span className="palm-legend-item"><span className="palm-legend-dot" style={{background:"#5B4EE8"}} />File IN</span>
-              <span className="palm-legend-item"><span className="palm-legend-dot" style={{background:"#1A9E6E"}} />File OUT</span>
+            <div className="wd-legend">
+              <span className="wd-leg-item"><span className="wd-leg-line" style={{ background: "#6366f1" }} />File IN</span>
+              <span className="wd-leg-item"><span className="wd-leg-line" style={{ borderTop: "2px dashed #10b981", background: "none", height: 0 }} />File OUT</span>
             </div>
-          </div>
-          <div className="palm-linechart-kpis">
-            <div className="palm-kpi"><div className="palm-kpi-val" style={{color:"#5B4EE8"}}>{totalIn}</div><div className="palm-kpi-lbl">Total IN</div></div>
-            <div className="palm-kpi"><div className="palm-kpi-val" style={{color:"#1A9E6E"}}>{totalOut}</div><div className="palm-kpi-lbl">Total OUT</div></div>
-            <div className="palm-kpi"><div className="palm-kpi-val">{successRate !== null ? `${successRate}%` : "—"}</div><div className="palm-kpi-lbl">Success rate</div></div>
-            <div className="palm-kpi"><div className="palm-kpi-val" style={{color: errorRate > 0 ? "#D63F3F" : undefined}}>{errorRate !== null ? `${errorRate}%` : "—"}</div><div className="palm-kpi-lbl">Error rate</div></div>
-          </div>
-          <div className="palm-linechart-canvas-wrap">
-            {!loading && labels.length
-              ? <FileInOutChart labels={labels} inCounts={inCounts} outCounts={outCounts} />
-              : <div style={{padding:"24px 0",textAlign:"center",color:"#8A8A9A",fontSize:13}}>Loading chart...</div>}
-          </div>
-        </div>
-
-        {/* ── FLOW LIFECYCLE ── */}
-        <div className="palm-linechart-card">
-          <div className="palm-linechart-header">
-            <div>
-              <div className="palm-card-title">Flow lifecycle</div>
-              <div className="palm-linechart-sub">Processing status evolution</div>
+            <div style={{ position: "relative", height: 148 }}>
+              {!loading && labels.length
+                ? <LineChartInOut labels={labels} inCounts={inCounts} outCounts={outCounts} />
+                : <div style={{ padding: "24px 0", textAlign: "center", color: "var(--t4)", fontSize: 12 }}>Loading chart…</div>
+              }
             </div>
-            <div className="palm-linechart-legend">
-              {[["#1A9E6E","Processed"],["#C47D18","Waiting"],["#D63F3F","Errors"],["#5B4EE8","In progress"]].map(([c,l]) => (
-                <span key={l} className="palm-legend-item"><span className="palm-legend-dot" style={{background:c}} />{l}</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 14 }}>
+              {[
+                { val: totalIn, lbl: "Total IN", color: "#6366f1" },
+                { val: totalOut, lbl: "Total OUT", color: "#10b981" },
+                { val: `${successRate}%`, lbl: "Success", color: "var(--t1)" },
+                { val: `${errorRate}%`, lbl: "Error rate", color: errorRate > 0 ? "#f43f5e" : "var(--t1)" },
+              ].map(k => (
+                <div key={k.lbl} style={{ textAlign: "center", background: "var(--flat)", borderRadius: "var(--rs)", border: "1px solid var(--border-in)", padding: "10px 6px" }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, fontFamily: "var(--mono)", color: k.color, lineHeight: 1.1 }}>{k.val}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: "var(--t4)", marginTop: 2 }}>{k.lbl}</div>
+                </div>
               ))}
             </div>
           </div>
-          <div className="palm-progress-summary">
-            {PROGRESS.map(({ lbl, val, color }) => {
-              const pct = Math.round((val / progTotal) * 100);
-              return (
-                <div key={lbl} className="palm-progress-item">
-                  <div className="palm-progress-meta">
-                    <span style={{color:"#8A8A9A",fontSize:12}}>{lbl}</span>
-                    <span style={{color,fontSize:12,fontWeight:600}}>{val} <span style={{color:"#8A8A9A",fontWeight:400}}>({pct}%)</span></span>
+
+          {/* Flow lifecycle chart */}
+          <div className="wd-card">
+            <div className="wd-hd">
+              <div className="wd-title">Flow lifecycle</div>
+              <span className="wd-tag ok">Healthy</span>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              {PROGRESS.map(p => (
+                <div key={p.label} className="wd-prog-row">
+                  <div className="wd-prog-lbl">{p.label}</div>
+                  <div className="wd-prog-track">
+                    <div className="wd-prog-fill" style={{ width: `${Math.round((p.val / progTotal) * 100)}%`, background: p.color }} />
                   </div>
-                  <div className="palm-progress-bar-bg">
-                    <div className="palm-progress-bar-fill" style={{width:`${pct}%`,background:color}} />
-                  </div>
+                  <div className="wd-prog-val" style={{ color: p.color }}>{p.val}</div>
                 </div>
-              );
-            })}
-          </div>
-          <div className="palm-linechart-canvas-wrap">
-            {!loading && labels.length
-              ? <FluxAvancementChart labels={labels} processedCounts={processedCounts} errorCounts={errorCounts} waitingCounts={waitingCounts} inProgressCounts={inProgressCounts} />
-              : <div style={{padding:"24px 0",textAlign:"center",color:"#8A8A9A",fontSize:13}}>Loading...</div>}
+              ))}
+            </div>
+            <div style={{ position: "relative", height: 110 }}>
+              {!loading && labels.length
+                ? <LineChartLifecycle labels={labels} processedCounts={processedCounts} errorCounts={errorCounts} waitingCounts={waitingCounts} inProgressCounts={inProgressCounts} />
+                : <div style={{ padding: "16px 0", textAlign: "center", color: "var(--t4)", fontSize: 12 }}>Loading…</div>
+              }
+            </div>
           </div>
         </div>
 
+        {/* ── Bottom row: error analysis + activity ── */}
+        <div className="wd-bottom">
+          <ErrorCard fileInData={fileInData} fileOutData={fileOutData} loading={loading} />
+
+          {/* Recent activity — shows most recent entries by ID */}
+          <div className="wd-act-card">
+            <div className="wd-act-hd">
+              <div className="wd-title">Recent activity</div>
+              <span className="wd-tag info">Latest by ID</span>
+            </div>
+            <div className="wd-table-wrapper">
+              <table className="wd-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Reference</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--t4)", padding: "24px 0" }}>Loading…</td></tr>
+                  ) : recentFlows.length === 0 ? (
+                    <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--t4)", padding: "24px 0" }}>No recent flows</td></tr>
+                  ) : (
+                    recentFlows.map((f, i) => (
+                      <tr key={`${f.ref}-${i}`} className={i === 0 ? 'wd-latest-row' : ''}>
+                        <td style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, color: "var(--brand)" }}>
+                          #{f.id}
+                        </td>
+                        <td>
+                          <span className="wd-ref">{String(f.ref).slice(0, 18)}</span>
+                          {i === 0 && <span className="wd-latest-badge">Latest</span>}
+                        </td>
+                        <td style={{ color: "var(--t3)", fontSize: 11 }}>{f.type}</td>
+                        <td><span className={`wd-chip ${chipClass(f.status)}`}>{f.status || "—"}</span></td>
+                        <td style={{ fontSize: 11, color: "var(--t4)" }}>{fmtDate(f.date)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Daily volume bar chart ── */}
+        <div className="wd-vol-card">
+          <div className="wd-hd">
+            <div className="wd-title">Daily volume trend</div>
+            <span className="wd-tag info">{labels.length} days</span>
+          </div>
+          <div style={{ position: "relative", height: 110 }}>
+            {!loading && bars.length
+              ? <BarChartVolume labels={labels} bars={bars} />
+              : <div style={{ padding: "16px 0", textAlign: "center", color: "var(--t4)", fontSize: 12 }}>No data available</div>
+            }
+          </div>
+        </div>
       </div>
 
-      <NotificationPanel notifications={notifications} />
+      <NotifDrawer notifications={notifications} />
     </>
   );
 }

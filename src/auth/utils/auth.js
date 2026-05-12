@@ -1,25 +1,28 @@
 import { jwtDecode } from "jwt-decode";
 
+// Access token stored in memory only — never readable by XSS
+let _accessToken = null;
+
 export function getToken() {
-  return localStorage.getItem("token");
+  return _accessToken;
 }
 
 export function getRefreshToken() {
-  return localStorage.getItem("refreshToken");
+  return sessionStorage.getItem("refreshToken");
 }
 
 export function setTokens(accessToken, refreshToken) {
-  localStorage.setItem("token", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
+  _accessToken = accessToken;
+  sessionStorage.setItem("refreshToken", refreshToken);
 }
 
 export function setAccessToken(accessToken) {
-  localStorage.setItem("token", accessToken);
+  _accessToken = accessToken;
 }
 
 export function clearToken() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
+  _accessToken = null;
+  sessionStorage.removeItem("refreshToken");
 }
 
 export function isTokenExpired(token) {
@@ -32,15 +35,6 @@ export function isTokenExpired(token) {
   } catch {
     return true;
   }
-}
-export function hasRole(allowedRoles = []) {
-  const user = getUserFromToken();
-
-  if (!user || !user.roles) return false;
-
-  const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-
-  return user.roles.some((role) => rolesArray.includes(role));
 }
 
 function normalizeRole(role) {
@@ -73,4 +67,14 @@ export function getUserFromToken() {
     clearToken();
     return null;
   }
+}
+
+export function hasRole(allowedRoles = []) {
+  const user = getUserFromToken();
+
+  if (!user || !user.roles) return false;
+
+  const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+  return user.roles.some((role) => rolesArray.includes(role));
 }

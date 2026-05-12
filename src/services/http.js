@@ -43,18 +43,35 @@ http.interceptors.request.use(
       try {
         if (!isRefreshing) {
           isRefreshing = true;
-          refreshPromise = refreshAccessTokenRequest();
+          // Race condition fix: attach finally directly on the promise
+          refreshPromise = refreshAccessTokenRequest().finally(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+          });
         }
 
+        // All concurrent requests await the same single promise
         token = await refreshPromise;
       } catch (error) {
-        // refresh failed — clear token but don't redirect yet
-        // let the 401 response interceptor handle the redirect
         clearToken();
         return Promise.reject(error);
-      } finally {
-        isRefreshing = false;
-        refreshPromise = null;
+      }
+    }
+
+    // No in-memory token — try to silently refresh on page load
+    if (!token) {
+      try {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          refreshPromise = refreshAccessTokenRequest().finally(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+          });
+        }
+        token = await refreshPromise;
+      } catch {
+        // No valid session at all — let the request go through without a token
+        // The 401 interceptor below will redirect to login
       }
     }
 
