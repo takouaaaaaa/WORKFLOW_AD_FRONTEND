@@ -1,4 +1,11 @@
-export default function FileOutTable({ rows, truncate, formatDate, statusClass, statusLabel }) {
+export default function FileOutTable({
+  rows,
+  truncate,
+  formatDate,
+  statusClass,
+  statusLabel,
+  loading = false,
+}) {
   return (
     <div className="filein-table-wrap">
       <table className="filein-table">
@@ -16,53 +23,62 @@ export default function FileOutTable({ rows, truncate, formatDate, statusClass, 
         </thead>
 
         <tbody>
-          {rows.length === 0 ? (
+          {loading ? (
             <tr>
-              <td colSpan={8} className="filein-table-empty">No results found.</td>
-            </tr>
-          ) : rows.map((row) => (
-            <tr key={row.idFluxOut}>
-              {/* appReferenceOut — on FileOutDTO directly */}
-              <td className="mono col-app" title={row.appReferenceOut || "—"}>
-                {truncate(row.appReferenceOut || "—", 16)}
-              </td>
-
-              {/* senderName — flat on DTO */}
-              <td className="col-sender" title={row.senderName || "—"}>
-                {truncate(row.senderName || "—", 14)}
-              </td>
-
-              {/* receiverName — flat on DTO */}
-              <td className="col-receiver" title={row.receiverName || "—"}>
-                {truncate(row.receiverName || "—", 14)}
-              </td>
-
-              {/* flowType — flat on DTO */}
-              <td className="col-flow" title={row.flowType || "—"}>
-                <span className="flow-chip">
-                  {truncate(row.flowType || "—", 18)}
+              <td colSpan={8} className="filein-table-empty">
+                <span className="filein-loading">
+                  <span className="filein-spinner" />
+                  Loading data...
                 </span>
               </td>
-
-              <td className="col-status">
-                <span className={`status-badge ${statusClass(row.status || "")}`}>
-                  {statusLabel[row.status] || row.status || "—"}
-                </span>
-              </td>
-
-              <td className="col-date" title={formatDate(row.creationDate)}>
-                {truncate(formatDate(row.creationDate), 16)}
-              </td>
-
-              <td className="col-date" title={formatDate(row.updateDate)}>
-                {truncate(formatDate(row.updateDate), 16)}
-              </td>
-
-              <td className="col-message" title={row.usedAddress || "—"}>
-                {truncate(row.usedAddress || "—", 18)}
+            </tr>
+          ) : rows.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="filein-table-empty">
+                No results found.
               </td>
             </tr>
-          ))}
+          ) : (
+            rows.map((row) => (
+              <tr key={row.idFluxOut}>
+                <td className="mono col-app" title={row.appReferenceOut || "—"}>
+                  {truncate(row.appReferenceOut || "—", 16)}
+                </td>
+
+                <td className="col-sender" title={row.senderName || "—"}>
+                  {truncate(row.senderName || "—", 14)}
+                </td>
+
+                <td className="col-receiver" title={row.receiverName || "—"}>
+                  {truncate(row.receiverName || "—", 14)}
+                </td>
+
+                <td className="col-flow" title={row.flowType || "—"}>
+                  <span className="flow-chip">
+                    {truncate(row.flowType || "—", 18)}
+                  </span>
+                </td>
+
+                <td className="col-status">
+                  <span className={`status-badge ${statusClass(row.status || "")}`}>
+                    {statusLabel[row.status] || row.status || "—"}
+                  </span>
+                </td>
+
+                <td className="col-date" title={formatDate(row.creationDate)}>
+                  {truncate(formatDate(row.creationDate), 16)}
+                </td>
+
+                <td className="col-date" title={formatDate(row.updateDate)}>
+                  {truncate(formatDate(row.updateDate), 16)}
+                </td>
+
+                <td className="col-message" title={row.usedAddress || "—"}>
+                  {truncate(row.usedAddress || "—", 18)}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

@@ -4,7 +4,6 @@ export default function FileInFilters({
   onReset,
   onSearch,
   senderOptions = [],
-  receiverOptions = [],
   flowTypeOptions = [],
 }) {
   return (
@@ -71,14 +70,6 @@ export default function FileInFilters({
             <select className="filein-input" name="sender" value={filters.sender} onChange={onChange}>
               <option value="">All</option>
               {senderOptions.map((s, i) => <option key={i} value={s}>{s}</option>)}
-            </select>
-          </div>
-
-          <div className="filein-filter-field">
-            <label className="filein-label">Receiver</label>
-            <select className="filein-input" name="receiver" value={filters.receiver} onChange={onChange}>
-              <option value="">All</option>
-              {receiverOptions.map((r, i) => <option key={i} value={r}>{r}</option>)}
             </select>
           </div>
 

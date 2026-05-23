@@ -21,7 +21,6 @@ import "../styles/FileInpage.css";
 const ITEMS_PER_PAGE = 10;
 
 export default function FileInPage() {
-
   const location = useLocation();
   const urlStatus = location.state?.status || "";
 
@@ -29,21 +28,15 @@ export default function FileInPage() {
   const [filteredRows, setFilteredRows] = useState([]);
 
   const [senders, setSenders] = useState([]);
-  const [receivers, setReceivers] = useState([]);
   const [flowTypes, setFlowTypes] = useState([]);
 
   const [senderOptions, setSenderOptions] = useState([]);
-  const [receiverOptions, setReceiverOptions] = useState([]);
   const [flowTypeOptions, setFlowTypeOptions] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const [showView, setShowView] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-
-  const [editData, setEditData] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
     appReference: "",
@@ -51,7 +44,6 @@ export default function FileInPage() {
     status: urlStatus,
     category: "",
     sender: "",
-    receiver: "",
     flowType: "",
     sendingDateFrom: "",
     sendingDateTo: "",
@@ -65,16 +57,11 @@ export default function FileInPage() {
 
   const fetchAllData = async () => {
     try {
+      setLoading(true);
 
-      const [
-        fileInRes,
-        senderRes,
-        receiverRes,
-        flowTypeRes,
-      ] = await Promise.all([
+      const [fileInRes, senderRes, flowTypeRes] = await Promise.all([
         getFileIns(),
         http.get("/senders"),
-        http.get("/receivers"),
         http.get("/typeflux"),
       ]);
 
@@ -83,270 +70,123 @@ export default function FileInPage() {
         : fileInRes.data.content || [];
 
       const senderData = senderRes.data || [];
-      const receiverData = receiverRes.data || [];
       const flowTypeData = flowTypeRes.data || [];
 
       setRows(fileIns);
-
       setSenders(senderData);
-      setReceivers(receiverData);
       setFlowTypes(flowTypeData);
 
-      setSenderOptions(
-        senderData.map((s) => s.sender).sort()
-      );
-
-      setReceiverOptions(
-        receiverData.map((r) => r.receiver).sort()
-      );
-
+      setSenderOptions(senderData.map((s) => s.sender).filter(Boolean).sort());
       setFlowTypeOptions(
-        flowTypeData.map((f) => f.FlowType).sort()
+        flowTypeData.map((f) => f.flowType).filter(Boolean).sort()
       );
 
       if (urlStatus) {
         setFilteredRows(
           fileIns.filter(
             (row) =>
-              (row?.status || "").toUpperCase() ===
-              urlStatus.toUpperCase()
+              (row?.status || "").toUpperCase() === urlStatus.toUpperCase()
           )
         );
       } else {
         setFilteredRows(fileIns);
       }
-
     } catch (error) {
       console.error(error);
       alert("Failed to load data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getSenderName = (senderId) => {
-    const sender = senders.find(
-      (s) => s.idSender === senderId
-    );
+  const getSenderName = (senderId) =>
+    senders.find((s) => s.idSender === senderId)?.sender || "";
 
-    return sender?.sender || "";
-  };
-
-  const getReceiverName = (receiverId) => {
-    const receiver = receivers.find(
-      (r) => r.idReceiver === receiverId
-    );
-
-    return receiver?.receiver || "";
-  };
-
-  const getFlowTypeName = (flowTypeId) => {
-    const flowType = flowTypes.find(
-      (f) => f.idTypeFlux === flowTypeId
-    );
-
-    return flowType?.FlowType || "";
-  };
+  const getFlowTypeName = (flowTypeId) =>
+    flowTypes.find((f) => f.idTypeFlux === flowTypeId)?.flowType || "";
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
+const handleSearch = () => {
+  
+  const result = rows.filter((row) => {
+    const appRef = (row?.appReference || "").toLowerCase();
+    const senderRef = (row?.senderReference || "").toLowerCase();
+    const status = (row?.status || "").toUpperCase();
+    const category = (row?.category || "").toUpperCase();
+    const senderName = row?.senderName || "";
+    const flowTypeName = row?.flowType || "";
+    const sendingDate = row?.sendingDate ? new Date(row.sendingDate) : null;
+    const amount = row?.totalAmount != null ? Number(row.totalAmount) : null;
 
-  const handleSearch = () => {
+    if (filters.appReference && !appRef.includes(filters.appReference.toLowerCase())) return false;
+    if (filters.senderReference && !senderRef.includes(filters.senderReference.toLowerCase())) return false;
+    if (filters.status && status !== filters.status.toUpperCase()) return false;
+    if (filters.category && category !== filters.category.toUpperCase()) return false;
+    if (filters.sender && senderName !== filters.sender) return false;
+    if (filters.flowType && flowTypeName !== filters.flowType) return false;
 
-    const result = rows.filter((row) => {
-
-      const appRef =
-        (row?.appReference || "")
-          .toLowerCase();
-
-      const senderRef =
-        (row?.flux?.senderReference || "")
-          .toLowerCase();
-
-      const status =
-        (row?.status || "")
-          .toUpperCase();
-
-      const category =
-        (row?.category || "")
-          .toUpperCase();
-
-      const senderName =
-        getSenderName(row?.flux?.sender);
-
-      const flowTypeName =
-        getFlowTypeName(row?.flux?.typeFlux);
-
-      const sendingDate =
-        row?.sendingDate
-          ? new Date(row.sendingDate)
-          : null;
-
-      const amount =
-        row?.flux?.totalAmount != null
-          ? Number(row.flux.totalAmount)
-          : null;
-
-      if (
-        filters.appReference &&
-        !appRef.includes(
-          filters.appReference.toLowerCase()
-        )
-      ) {
-        return false;
+    if (filters.sendingDateFrom || filters.sendingDateTo) {
+      if (!sendingDate) return false;
+      if (filters.sendingDateFrom && sendingDate < new Date(filters.sendingDateFrom)) return false;
+      if (filters.sendingDateTo) {
+        const endDate = new Date(filters.sendingDateTo);
+        endDate.setHours(23, 59, 59, 999);
+        if (sendingDate > endDate) return false;
       }
+    }
 
-      if (
-        filters.senderReference &&
-        !senderRef.includes(
-          filters.senderReference.toLowerCase()
-        )
-      ) {
-        return false;
-      }
+    if (filters.totalAmountFrom || filters.totalAmountTo) {
+      if (amount == null) return false;
+      if (filters.totalAmountFrom && amount < Number(filters.totalAmountFrom)) return false;
+      if (filters.totalAmountTo && amount > Number(filters.totalAmountTo)) return false;
+    }
 
-      if (
-        filters.status &&
-        status !== filters.status.toUpperCase()
-      ) {
-        return false;
-      }
+    return true;
+  });
 
-      if (
-        filters.category &&
-        category !== filters.category.toUpperCase()
-      ) {
-        return false;
-      }
-
-      if (
-        filters.sender &&
-        senderName !== filters.sender
-      ) {
-        return false;
-      }
-
-      if (
-        filters.flowType &&
-        flowTypeName !== filters.flowType
-      ) {
-        return false;
-      }
-
-      if (
-        filters.sendingDateFrom ||
-        filters.sendingDateTo
-      ) {
-
-        if (!sendingDate) return false;
-
-        if (
-          filters.sendingDateFrom &&
-          sendingDate <
-            new Date(filters.sendingDateFrom)
-        ) {
-          return false;
-        }
-
-        if (filters.sendingDateTo) {
-
-          const endDate = new Date(
-            filters.sendingDateTo
-          );
-
-          endDate.setHours(
-            23,
-            59,
-            59,
-            999
-          );
-
-          if (sendingDate > endDate) {
-            return false;
-          }
-        }
-      }
-
-      if (
-        filters.totalAmountFrom ||
-        filters.totalAmountTo
-      ) {
-
-        if (amount == null) return false;
-
-        if (
-          filters.totalAmountFrom &&
-          amount <
-            Number(filters.totalAmountFrom)
-        ) {
-          return false;
-        }
-
-        if (
-          filters.totalAmountTo &&
-          amount >
-            Number(filters.totalAmountTo)
-        ) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    setFilteredRows(result);
-
-    setCurrentPage(1);
-
-    setSelectedRow(null);
-  };
+  setFilteredRows(result);
+  setCurrentPage(1);
+  setSelectedRow(null);
+};
 
   const handleReset = () => {
-
     setFilters({
       appReference: "",
       senderReference: "",
       status: "",
       category: "",
       sender: "",
-      receiver: "",
       flowType: "",
       sendingDateFrom: "",
       sendingDateTo: "",
       totalAmountFrom: "",
       totalAmountTo: "",
     });
-
     setFilteredRows(rows);
-
     setCurrentPage(1);
-
     setSelectedRow(null);
   };
 
-  const totalPages =
-    Math.ceil(
-      filteredRows.length / ITEMS_PER_PAGE
-    ) || 1;
+  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
   const paginatedRows = useMemo(() => {
-
-    const start =
-      (currentPage - 1) * ITEMS_PER_PAGE;
-
-    return filteredRows.slice(
-      start,
-      start + ITEMS_PER_PAGE
-    );
-
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredRows.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredRows, currentPage]);
 
   return (
     <div className="filein-page-bootstrap">
+      {urlStatus && (
+        <div className="filein-status-banner">
+          Filtré par statut : <strong>{urlStatus}</strong>
+          <span className="filein-status-count">
+            {filteredRows.length} résultat(s)
+          </span>
+        </div>
+      )}
 
       <FileInFilters
         filters={filters}
@@ -354,17 +194,56 @@ export default function FileInPage() {
         onReset={handleReset}
         onSearch={handleSearch}
         senderOptions={senderOptions}
-        receiverOptions={receiverOptions}
         flowTypeOptions={flowTypeOptions}
       />
 
-      <FileInTable
-        rows={paginatedRows}
-        totalCount={filteredRows.length}
-        selectedRow={selectedRow}
-        setSelectedRow={setSelectedRow}
-      />
+      <div className="filein-card">
+        <div className="filein-card-title">
+          <span>
+            Search Result : <span className="accent">File IN</span>
+          </span>
+          <span className="filein-results-badge">
+            {loading
+              ? "Loading..."
+              : filteredRows.length === rows.length
+              ? `${rows.length.toLocaleString()} total`
+              : `${filteredRows.length.toLocaleString()} results`}
+          </span>
+        </div>
 
+        <FileInTable
+          rows={paginatedRows}
+          selectedRow={selectedRow}
+          setSelectedRow={setSelectedRow}
+          loading={loading}
+        />
+
+        <div className="filein-footer">
+          <div className="filein-pagination">
+            <button
+              type="button"
+              className="filein-btn-page"
+              disabled={currentPage === 1 || loading}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Previous
+            </button>
+
+            <span>
+              Page {currentPage} / {totalPages}
+            </span>
+
+            <button
+              type="button"
+              className="filein-btn-page"
+              disabled={currentPage === totalPages || loading}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

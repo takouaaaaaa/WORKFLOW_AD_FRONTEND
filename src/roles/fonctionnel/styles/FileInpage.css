@@ -4,8 +4,7 @@
    PAGE WRAPPER
 ════════════════════════════════════════ */
 
-.filein-page-bootstrap,
-.filein-page {
+.filein-page-bootstrap {
   padding: 24px;
   font-family: 'Space Grotesk', sans-serif;
   width: 100%;
@@ -25,12 +24,43 @@
     #0d1b2a 85%,
     #0a0e1a 100%
   );
-  color: #e0e0e0;
+  color: #f5f5f5;
   min-height: 100vh;
 }
 
 /* ════════════════════════════════════════
-   CARDS (Semi-transparent)
+   STATUS BANNER
+════════════════════════════════════════ */
+
+.filein-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 255, 204, 0.05);
+  color: #00ffcc;
+  border: 0.5px solid rgba(0, 255, 204, 0.1);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.filein-status-banner strong {
+  font-family: monospace;
+  background: rgba(0, 255, 204, 0.1);
+  color: #00ffcc;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.filein-status-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(0, 255, 204, 0.85);
+}
+
+/* ════════════════════════════════════════
+   CARDS
 ════════════════════════════════════════ */
 
 .filein-card,
@@ -61,7 +91,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .filein-card-title .accent,
@@ -82,7 +112,7 @@
 }
 
 .filein-card-body p {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
   margin: 0;
 }
@@ -109,7 +139,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.75);
   margin-bottom: 6px;
 }
 
@@ -143,7 +173,7 @@
 
 .filein-input::placeholder,
 .field input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 textarea.filein-input,
@@ -155,7 +185,7 @@ textarea.filein-input,
 
 select.filein-input,
 .field select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.7)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 11px center;
   background-color: rgba(255, 255, 255, 0.04);
@@ -195,7 +225,7 @@ select.filein-input option,
 .filein-filter-range-sep,
 .filein-range-sep {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.75);
   flex-shrink: 0;
 }
 
@@ -209,16 +239,15 @@ select.filein-input option,
 }
 
 /* ════════════════════════════════════════
-   BUTTONS (NEON COLORS)
+   BUTTONS
 ════════════════════════════════════════ */
 
-.filein-btn-reset,
-.btn.reset {
+.filein-btn-reset {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 0, 0.1);
-  color: #ffff00; /* NEON YELLOW */
+  color: #ffff00;
   border: 1px solid rgba(255, 255, 0, 0.2);
   border-radius: 9px;
   padding: 8px 16px;
@@ -229,21 +258,19 @@ select.filein-input option,
   transition: all 0.15s;
 }
 
-.filein-btn-reset:hover,
-.btn.reset:hover {
+.filein-btn-reset:hover {
   background: rgba(255, 255, 0, 0.2);
   border-color: rgba(255, 255, 0, 0.4);
   box-shadow: 0 0 20px rgba(255, 255, 0, 0.1);
 }
 
 .filein-btn-search,
-.filein-btn-primary,
-.btn.search {
+.filein-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc; /* NEON TEAL */
+  color: #00ffcc;
   border: 1px solid rgba(0, 255, 204, 0.2);
   border-radius: 9px;
   padding: 8px 16px;
@@ -255,8 +282,7 @@ select.filein-input option,
 }
 
 .filein-btn-search:hover,
-.filein-btn-primary:hover,
-.btn.search:hover {
+.filein-btn-primary:hover {
   background: rgba(0, 255, 204, 0.2);
   border-color: rgba(0, 255, 204, 0.4);
   box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
@@ -267,7 +293,7 @@ select.filein-input option,
   align-items: center;
   gap: 6px;
   background: rgba(255, 68, 68, 0.1);
-  color: #ff4444; /* NEON RED */
+  color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.2);
   border-radius: 9px;
   padding: 8px 16px;
@@ -284,11 +310,11 @@ select.filein-input option,
   box-shadow: 0 0 20px rgba(255, 68, 68, 0.1);
 }
 
-/* Small inline action buttons */
-.filein-btn-edit {
+.filein-btn-edit,
+.filein-btn-view {
   display: inline-flex; align-items: center; justify-content: center;
   background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc; /* NEON TEAL */
+  color: #00ffcc;
   border: 1px solid rgba(0, 255, 204, 0.15);
   border-radius: 7px; padding: 5px 12px;
   font-size: 12px; font-weight: 600;
@@ -296,7 +322,8 @@ select.filein-input option,
   cursor: pointer; transition: all 0.13s; white-space: nowrap;
 }
 
-.filein-btn-edit:hover {
+.filein-btn-edit:hover,
+.filein-btn-view:hover {
   background: rgba(0, 255, 204, 0.2);
   border-color: rgba(0, 255, 204, 0.3);
   box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
@@ -305,7 +332,7 @@ select.filein-input option,
 .filein-btn-force {
   display: inline-flex; align-items: center; justify-content: center;
   background: rgba(255, 68, 68, 0.1);
-  color: #ff4444; /* NEON RED */
+  color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.15);
   border-radius: 7px; padding: 5px 12px;
   font-size: 12px; font-weight: 600;
@@ -322,7 +349,7 @@ select.filein-input option,
 .filein-btn-download {
   display: inline-flex; align-items: center; justify-content: center;
   background: rgba(0, 255, 100, 0.1);
-  color: #00ff64; /* NEON GREEN */
+  color: #00ff64;
   border: 1px solid rgba(0, 255, 100, 0.15);
   border-radius: 7px; padding: 5px 12px;
   font-size: 12px; font-weight: 600;
@@ -336,59 +363,8 @@ select.filein-input option,
   box-shadow: 0 0 15px rgba(0, 255, 100, 0.1);
 }
 
-.filein-btn-view {
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc; /* NEON TEAL */
-  border: 1px solid rgba(0, 255, 204, 0.15);
-  border-radius: 7px; padding: 5px 12px;
-  font-size: 12px; font-weight: 600;
-  font-family: 'Space Grotesk', sans-serif;
-  cursor: pointer; transition: all 0.13s;
-}
-
-.filein-btn-view:hover {
-  background: rgba(0, 255, 204, 0.2);
-  border-color: rgba(0, 255, 204, 0.3);
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
-}
-
-/* action-btn aliases */
-.action-btn,
-.btn {
-  border-radius: 9px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.action-btn {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-  border: 1px solid rgba(0, 255, 204, 0.15);
-}
-
-.action-btn:hover {
-  background: rgba(0, 255, 204, 0.2);
-  border-color: rgba(0, 255, 204, 0.3);
-}
-
-.action-btn.danger {
-  background: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid rgba(255, 68, 68, 0.15);
-}
-
-.action-btn.danger:hover {
-  background: rgba(255, 68, 68, 0.2);
-  border-color: rgba(255, 68, 68, 0.3);
-}
-
 /* ════════════════════════════════════════
-   TABLE (FULLY TRANSPARENT)
+   TABLE
 ════════════════════════════════════════ */
 
 .filein-table-wrap,
@@ -402,7 +378,7 @@ select.filein-input option,
   border-collapse: collapse;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
   table-layout: fixed;
   background: transparent;
 }
@@ -414,7 +390,7 @@ select.filein-input option,
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
   background: rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(0, 255, 255, 0.06);
   white-space: nowrap;
@@ -430,7 +406,6 @@ select.filein-input option,
 }
 
 .filein-table tbody tr:last-child { border-bottom: none; }
-.filein-table tbody tr:nth-child(even) td { background: transparent; }
 .filein-table tbody tr:hover { background: rgba(0, 255, 255, 0.03); }
 .filein-table tbody tr:hover td { color: #ffffff; }
 
@@ -441,6 +416,7 @@ select.filein-input option,
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 12.5px;
+  color: #ffffff;
   background: transparent;
 }
 
@@ -460,12 +436,29 @@ select.filein-input option,
 .filein-table .col-category   { width: 110px; }
 .filein-table .col-message    { width: 140px; }
 
-.filein-table .mono,
-.filein-table td.mono,
-.mono {
+/* App Ref — teal/mono accent */
+.filein-table .col-app.mono,
+.filein-table td.col-app.mono {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   color: #00ffcc;
+  background: transparent;
+}
+
+/* Sender Ref — plain white */
+.filein-table .col-sender-ref.mono,
+.filein-table td.col-sender-ref.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #ffffff;
+  background: transparent;
+}
+
+/* Generic .mono kept for any other usages */
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #ffffff;
   background: transparent;
 }
 
@@ -473,11 +466,11 @@ select.filein-input option,
   display: inline-block;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
   padding: 2px 8px;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -490,7 +483,7 @@ select.filein-input option,
   color: #ffffff;
 }
 
-.filein-table .amount-empty { color: rgba(255, 255, 255, 0.3); }
+.filein-table .amount-empty { color: rgba(255, 255, 255, 0.55); }
 
 .filein-table .category-tag {
   font-size: 10px; font-weight: 700;
@@ -502,13 +495,13 @@ select.filein-input option,
 .filein-table .filein-table-empty {
   text-align: center;
   padding: 40px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
   background: transparent;
 }
 
 /* ════════════════════════════════════════
-   STATUS BADGES
+   STATUS BADGES — vibrant
 ════════════════════════════════════════ */
 
 .status-badge {
@@ -523,46 +516,56 @@ select.filein-input option,
 }
 
 .status-badge::before {
-  content: ''; width: 5px; height: 5px;
+  content: ''; width: 6px; height: 6px;
   border-radius: 50%; flex-shrink: 0;
 }
 
 .status-badge.processed {
-  background: rgba(0, 255, 100, 0.1);
-  color: #00ff64;
-  border: 1px solid rgba(0, 255, 100, 0.1);
+  background: rgba(0, 255, 100, 0.22);
+  color: #5cff8f;
+  border: 1px solid rgba(0, 255, 100, 0.45);
+  box-shadow: 0 0 12px rgba(0, 255, 100, 0.2);
 }
-
-.status-badge.processed::before { background: #00ff64; }
+.status-badge.processed::before {
+  background: #00ff64;
+  box-shadow: 0 0 8px #00ff64;
+}
 
 .status-badge.inprocess {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-  border: 1px solid rgba(0, 255, 204, 0.1);
+  background: rgba(0, 255, 204, 0.22);
+  color: #5cffe4;
+  border: 1px solid rgba(0, 255, 204, 0.45);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
 }
-
 .status-badge.inprocess::before {
   background: #00ffcc;
+  box-shadow: 0 0 8px #00ffcc;
   animation: fi-pulse 1.5s ease-in-out infinite;
 }
 
 .status-badge.error,
 .status-badge.rejected {
-  background: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid rgba(255, 68, 68, 0.1);
+  background: rgba(255, 68, 68, 0.22);
+  color: #ff7373;
+  border: 1px solid rgba(255, 68, 68, 0.45);
+  box-shadow: 0 0 12px rgba(255, 68, 68, 0.2);
 }
-
 .status-badge.error::before,
-.status-badge.rejected::before { background: #ff4444; }
+.status-badge.rejected::before {
+  background: #ff4444;
+  box-shadow: 0 0 8px #ff4444;
+}
 
 .status-badge.wait {
-  background: rgba(255, 170, 0, 0.1);
-  color: #ffaa00;
-  border: 1px solid rgba(255, 170, 0, 0.1);
+  background: rgba(255, 170, 0, 0.22);
+  color: #ffcc55;
+  border: 1px solid rgba(255, 170, 0, 0.45);
+  box-shadow: 0 0 12px rgba(255, 170, 0, 0.2);
 }
-
-.status-badge.wait::before { background: #ffaa00; }
+.status-badge.wait::before {
+  background: #ffaa00;
+  box-shadow: 0 0 8px #ffaa00;
+}
 
 @keyframes fi-pulse {
   0%, 100% { opacity: 1; }
@@ -570,14 +573,13 @@ select.filein-input option,
 }
 
 /* ════════════════════════════════════════
-   ACTION BAR & PAGINATION
+   FOOTER & PAGINATION (right-aligned)
 ════════════════════════════════════════ */
 
-.filein-action-bar,
 .filein-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
   padding: 12px 18px;
@@ -585,20 +587,18 @@ select.filein-input option,
   background: rgba(0, 0, 0, 0.15);
 }
 
-.filein-pagination,
-.pagination {
+.filein-pagination {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.filein-btn-page,
-.pagination button {
+.filein-btn-page {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(0, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
   padding: 6px 14px;
   border-radius: 8px;
   font-family: 'Space Grotesk', sans-serif;
@@ -607,45 +607,13 @@ select.filein-input option,
   transition: all 0.13s;
 }
 
-.filein-btn-page:hover:not(:disabled),
-.pagination button:hover:not(:disabled) {
+.filein-btn-page:hover:not(:disabled) {
   background: rgba(0, 255, 255, 0.05);
   border-color: rgba(0, 255, 255, 0.2);
   color: #00ffcc;
 }
 
-.filein-btn-page:disabled,
-.pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.filein-action-buttons,
-.action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* ════════════════════════════════════════
-   PAGE HEADER
-════════════════════════════════════════ */
-
-.filein-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.filein-page-header h4 { color: #ffffff; margin-bottom: 6px; }
-.filein-page-header p  { color: rgba(255, 255, 255, 0.6); margin: 0; font-size: 13px; }
-
-.filein-search-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.filein-search-row .filein-filter-field,
-.filein-filter-grow { flex: 1; min-width: 200px; max-width: 360px; }
-
-.filein-row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.filein-btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ════════════════════════════════════════
    MODAL OVERLAY
@@ -697,7 +665,7 @@ select.filein-input option,
   border-radius: 8px;
   border: 1px solid rgba(0, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 13px; line-height: 1;
   transition: all 0.13s; padding: 0;
@@ -715,7 +683,7 @@ select.filein-input option,
   padding: 20px;
   display: flex; flex-direction: column; gap: 14px;
   max-height: 70vh; overflow-y: auto;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
 }
 
 .fi-modal-body::-webkit-scrollbar,
@@ -731,7 +699,6 @@ select.filein-input option,
   border-radius: 999px;
 }
 
-/* Detail rows in view modal */
 .fi-detail-row,
 .modal-content p {
   display: flex; gap: 8px;
@@ -745,7 +712,7 @@ select.filein-input option,
 }
 
 .fi-detail-row span,
-.modal-content p span { color: rgba(255, 255, 255, 0.7); }
+.modal-content p span { color: #ffffff; }
 
 .fi-divider,
 .modal-content hr {
@@ -758,7 +725,7 @@ select.filein-input option,
 .modal-content label {
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.07em; text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4); margin-top: 4px;
+  color: rgba(255, 255, 255, 0.75); margin-top: 4px;
 }
 
 .modal-content input,
@@ -794,7 +761,7 @@ select.filein-input option,
 .fi-btn-cancel {
   padding: 8px 16px; border-radius: 9px;
   border: 1px solid rgba(0, 255, 255, 0.08);
-  background: transparent; color: rgba(255, 255, 255, 0.6);
+  background: transparent; color: #ffffff;
   font-size: 12px; font-weight: 600;
   font-family: 'Space Grotesk', sans-serif;
   cursor: pointer; transition: all 0.13s;
@@ -812,16 +779,14 @@ select.filein-input option,
 
 .fi-btn-save:hover { background: #00ddbb; box-shadow: 0 0 20px rgba(0, 255, 204, 0.15); }
 
-/* Pre (raw view) */
 .preview-modal pre {
   margin: 0; padding: 20px;
   max-height: 70vh; overflow: auto;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px; color: rgba(255, 255, 255, 0.7);
+  font-size: 12px; color: #ffffff;
   background: rgba(0, 0, 0, 0.2); line-height: 1.7;
 }
 
-/* Radio */
 .filein-table input[type="radio"] { accent-color: #00ffcc; cursor: pointer; }
 
 /* ════════════════════════════════════════
@@ -836,36 +801,34 @@ select.filein-input option,
 @media (max-width: 600px) {
   .filein-filter-grid,
   .filein-search-grid { grid-template-columns: 1fr; }
-  .filein-page-bootstrap, .filein-page { padding: 16px; }
-  .filein-action-bar { flex-direction: column; align-items: stretch; }
-  .filein-action-buttons { justify-content: flex-end; }
+  .filein-page-bootstrap { padding: 16px; }
+  .filein-footer { justify-content: center; }
 }
 
-/* ── Status Banner ── */
-.filein-status-banner {
-  display: flex;
+/* ════════════════════════════════════════
+   LOADING SPINNER
+════════════════════════════════════════ */
+
+.filein-loading {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(0, 255, 204, 0.05);
+  gap: 10px;
   color: #00ffcc;
-  border: 0.5px solid rgba(0, 255, 204, 0.1);
-  border-radius: 8px;
-  padding: 10px 16px;
   font-size: 13px;
-  margin-bottom: 16px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
-.filein-status-banner strong {
-  font-family: monospace;
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-  padding: 2px 8px;
-  border-radius: 4px;
+.filein-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 255, 204, 0.15);
+  border-top-color: #00ffcc;
+  border-radius: 50%;
+  animation: filein-spin 0.7s linear infinite;
+  display: inline-block;
 }
 
-.filein-status-count {
-  margin-left: auto;
-  font-size: 12px;
-  color: rgba(0, 255, 204, 0.6);
-  opacity: 0.8;
+@keyframes filein-spin {
+  to { transform: rotate(360deg); }
 }

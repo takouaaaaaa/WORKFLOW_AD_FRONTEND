@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getFileOuts } from "../services/fileOutService";
+import http from "../../../services/http";
 import FileOutSearchCard from "../components/FileOutSearchCard";
 import FileOutTable from "../components/FileOutTable";
 import FileOutPagination from "../components/FileOutPagination";
@@ -8,14 +9,13 @@ import "../styles/FileOutPage.css";
 
 const ITEMS_PER_PAGE = 10;
 
-// StatutFileOut enum values only
 const STATUS_LABEL = {
-  INITIAL:             "Initial",
-  REJECTED:            "Rejected",
+  INITIAL:               "Initial",
+  REJECTED:              "Rejected",
   ERRORREPORTEDTOSENDER: "Error To Sender",
-  SENT:                "Sent",
-  SENTANDWAITINGACK:   "Sent Waiting Ack",
-  ACKED:               "Acked",
+  SENT:                  "Sent",
+  SENTANDWAITINGACK:     "Sent Waiting Ack",
+  ACKED:                 "Acked",
 };
 
 const STATUS_OPTIONS = Object.keys(STATUS_LABEL);
@@ -24,33 +24,68 @@ export default function FileOutPage() {
   const location = useLocation();
   const urlStatus = location.state?.status || "";
 
-  const [rows, setRows]               = useState([]);
+  const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [senders, setSenders] = useState([]);
+  const [receivers, setReceivers] = useState([]);
+  const [flowTypes, setFlowTypes] = useState([]);
+
+  const [senderOptions, setSenderOptions] = useState([]);
+  const [receiverOptions, setReceiverOptions] = useState([]);
+  const [flowTypeOptions, setFlowTypeOptions] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
-    appReference:      "",
-    senderReference:   "",
-    sender:            "",
-    receiver:          "",
-    flowType:          "",
-    status:            urlStatus,
-    creationDateFrom:  "",
-    creationDateTo:    "",
+    appReference:     "",
+    senderReference:  "",
+    sender:           "",
+    receiver:         "",
+    flowType:         "",
+    status:           urlStatus,
+    creationDateFrom: "",
+    creationDateTo:   "",
   });
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
-  const fetchData = async () => {
+  const fetchAllData = async () => {
     try {
-      const res  = await getFileOuts();
-      const data = Array.isArray(res.data) ? res.data : res.data.content || [];
+      setLoading(true);
+
+      const [fileOutRes, senderRes, receiverRes, flowTypeRes] = await Promise.all([
+        getFileOuts(),
+        http.get("/senders"),
+        http.get("/receivers"),
+        http.get("/typeflux"),
+      ]);
+
+      const data = Array.isArray(fileOutRes.data)
+        ? fileOutRes.data
+        : fileOutRes.data.content || [];
+
+      const senderData = senderRes.data || [];
+      const receiverData = receiverRes.data || [];
+      const flowTypeData = flowTypeRes.data || [];
+
       setRows(data);
+      setSenders(senderData);
+      setReceivers(receiverData);
+      setFlowTypes(flowTypeData);
+
+      setSenderOptions(senderData.map((s) => s.sender).filter(Boolean).sort());
+      setReceiverOptions(receiverData.map((r) => r.receiver).filter(Boolean).sort());
+      setFlowTypeOptions(
+        flowTypeData.map((f) => f.flowType).filter(Boolean).sort()
+      );
 
       if (urlStatus) {
-        // status lives on FileOut directly, not on flux
-        const filtered = data.filter((row) =>
-          (row?.status || "").toUpperCase() === urlStatus.toUpperCase()
+        const filtered = data.filter(
+          (row) => (row?.status || "").toUpperCase() === urlStatus.toUpperCase()
         );
         setFilteredRows(filtered);
       } else {
@@ -60,8 +95,19 @@ export default function FileOutPage() {
       console.error("Error loading File OUT:", err);
       setRows([]);
       setFilteredRows([]);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const getSenderName = (senderId) =>
+    senders.find((s) => s.idSender === senderId)?.sender || "";
+
+  const getReceiverName = (receiverId) =>
+    receivers.find((r) => r.idReceiver === receiverId)?.receiver || "";
+
+  const getFlowTypeName = (flowTypeId) =>
+    flowTypes.find((f) => f.idTypeFlux === flowTypeId)?.flowType || "";
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -73,37 +119,35 @@ export default function FileOutPage() {
     const d = new Date(dateValue);
     return isNaN(d.getTime()) ? null : d;
   };
+const handleSearch = () => {
+  const result = rows.filter((row) => {
+    const appReference    = row.appReferenceOut || "";
+    const senderReference = row.senderReference || row.flux?.senderReference || "";
+    const sender          = row.senderName     || "";
+    const receiver        = row.receiverName   || "";
+    const flowType        = row.flowType       || "";
+    const status          = row.status         || "";
+    const creationDate    = normalizeDate(row.creationDate);
 
-  const handleSearch = () => {
-    const result = rows.filter((row) => {
-      const appReference    = row.appReferenceOut || "";
-      const senderReference = row.flux?.senderReference || "";
-      const sender          = row.flux?.sender?.sender || "";
-      const receiver        = row.receiver?.receiver || "";
-      const flowType        = row.flux?.typeFlux?.flowType || row.flux?.typeFlux?.FlowType || "";
-      const status          = row.status || "";   // on FileOut directly
-      const creationDate    = normalizeDate(row.creationDate);
+    const filterCreationDateFrom = filters.creationDateFrom
+      ? new Date(`${filters.creationDateFrom}T00:00:00`) : null;
+    const filterCreationDateTo = filters.creationDateTo
+      ? new Date(`${filters.creationDateTo}T23:59:59`) : null;
 
-      const filterCreationDateFrom = filters.creationDateFrom
-        ? new Date(`${filters.creationDateFrom}T00:00:00`) : null;
-      const filterCreationDateTo = filters.creationDateTo
-        ? new Date(`${filters.creationDateTo}T23:59:59`) : null;
-
-      return (
-        appReference.toLowerCase().includes(filters.appReference.toLowerCase()) &&
-        senderReference.toLowerCase().includes(filters.senderReference.toLowerCase()) &&
-        (!filters.sender   || sender   === filters.sender) &&
-        (!filters.receiver || receiver === filters.receiver) &&
-        (!filters.flowType || flowType === filters.flowType) &&
-        (!filters.status   || status   === filters.status) &&
-        (!filterCreationDateFrom || (creationDate && creationDate >= filterCreationDateFrom)) &&
-        (!filterCreationDateTo   || (creationDate && creationDate <= filterCreationDateTo))
-      );
-    });
-    setFilteredRows(result);
-    setCurrentPage(1);
-  };
-
+    return (
+      appReference.toLowerCase().includes(filters.appReference.toLowerCase()) &&
+      senderReference.toLowerCase().includes(filters.senderReference.toLowerCase()) &&
+      (!filters.sender   || sender   === filters.sender) &&
+      (!filters.receiver || receiver === filters.receiver) &&
+      (!filters.flowType || flowType === filters.flowType) &&
+      (!filters.status   || status   === filters.status) &&
+      (!filterCreationDateFrom || (creationDate && creationDate >= filterCreationDateFrom)) &&
+      (!filterCreationDateTo   || (creationDate && creationDate <= filterCreationDateTo))
+    );
+  });
+  setFilteredRows(result);
+  setCurrentPage(1);
+};
   const handleReset = () => {
     setFilters({
       appReference: "", senderReference: "", sender: "", receiver: "",
@@ -113,11 +157,8 @@ export default function FileOutPage() {
     setCurrentPage(1);
   };
 
-  const senderOptions   = useMemo(() => [...new Set(rows.map((r) => r.flux?.sender?.sender).filter(Boolean))].sort(), [rows]);
-  const receiverOptions = useMemo(() => [...new Set(rows.map((r) => r.receiver?.receiver).filter(Boolean))].sort(), [rows]);
-  const flowTypeOptions = useMemo(() => [...new Set(rows.map((r) => r.flux?.typeFlux?.flowType || r.flux?.typeFlux?.FlowType).filter(Boolean))].sort(), [rows]);
+  const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
-  const totalPages    = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredRows.slice(start, start + ITEMS_PER_PAGE);
@@ -148,7 +189,9 @@ export default function FileOutPage() {
       {urlStatus && (
         <div className="fileout-status-banner">
           Filtré par statut : <strong>{urlStatus}</strong>
-          <span className="fileout-status-count">{filteredRows.length} résultat(s)</span>
+          <span className="fileout-status-count">
+            {filteredRows.length} résultat(s)
+          </span>
         </div>
       )}
 
@@ -167,7 +210,9 @@ export default function FileOutPage() {
         <div className="fileout-card-title">
           <span>Search Result : <span className="accent">File OUT</span></span>
           <span className="filein-results-badge">
-            {filteredRows.length === rows.length
+            {loading
+              ? "Loading..."
+              : filteredRows.length === rows.length
               ? `${rows.length.toLocaleString()} total`
               : `${filteredRows.length.toLocaleString()} results`}
           </span>
@@ -179,6 +224,7 @@ export default function FileOutPage() {
           formatDate={formatDate}
           statusClass={statusClass}
           statusLabel={STATUS_LABEL}
+          loading={loading}
         />
 
         <FileOutPagination
