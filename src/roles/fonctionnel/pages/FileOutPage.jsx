@@ -144,11 +144,11 @@ export default function FileOutPage() {
   };
 
   return (
-    <div className="filein-page-bootstrap">
+    <div className="fileout-page-bootstrap">
       {urlStatus && (
-        <div className="filein-status-banner">
+        <div className="fileout-status-banner">
           Filtré par statut : <strong>{urlStatus}</strong>
-          <span className="filein-status-count">{filteredRows.length} résultat(s)</span>
+          <span className="fileout-status-count">{filteredRows.length} résultat(s)</span>
         </div>
       )}
 
@@ -163,8 +163,8 @@ export default function FileOutPage() {
         flowTypeOptions={flowTypeOptions}
       />
 
-      <div className="filein-card">
-        <div className="filein-card-title">
+      <div className="fileout-card">
+        <div className="fileout-card-title">
           <span>Search Result : <span className="accent">File OUT</span></span>
           <span className="filein-results-badge">
             {filteredRows.length === rows.length

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getTypeFluxes, addTypeFlux, updateTypeFlux, deleteTypeFlux } from "../services/typeFluxService";
 import CrudModal from "../components/Crudmodal";
-import "../../fonctionnel/styles/FileInpage.css";
+import "../styles/SearchTechnique.css";
 
 const ITEMS_PER_PAGE = 10;
 

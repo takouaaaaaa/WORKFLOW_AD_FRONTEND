@@ -4,15 +4,23 @@
   height: 60px;
   min-height: 60px;
   flex-shrink: 0;
-  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   position: sticky;
   top: 0;
   z-index: 100;
+  background: linear-gradient(
+    to right,
+    #03101c 0%,
+    #0b1d2e 35%,
+    #1f3145 100%
+  );
+  border-bottom: 1px solid rgba(98, 255, 255, 0.15);
+  box-shadow:
+    0 0 12px rgba(98, 255, 255, 0.08),
+    0 0 40px rgba(0, 212, 212, 0.05);
 }
 
 .app-topbar-left  { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -21,17 +29,17 @@
 .app-sidebar-toggle-topbar {
   width: 34px; height: 34px; min-width: 34px;
   border-radius: 9px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #F5F4F0;
-  color: #6B6B80;
+  background: rgba(0, 212, 212, 0.08);
+  border: 1px solid rgba(98, 255, 255, 0.2);
+  color: #62ffff;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .app-sidebar-toggle-topbar:hover {
-  background: #EEEDFE;
-  border-color: rgba(108, 92, 231, 0.25);
-  color: #6c5ce7;
+  background: rgba(0, 212, 212, 0.18);
+  border-color: rgba(98, 255, 255, 0.4);
+  color: #62ffff;
 }
 
 .app-brand-block { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -39,78 +47,88 @@
 .app-logo-mark {
   width: 32px; height: 32px; min-width: 32px;
   border-radius: 9px;
-  background: #EEEDFE;
-  border: 1px solid rgba(108, 92, 231, 0.2);
+  background: rgba(0, 212, 212, 0.08);
+  border: 1px solid rgba(2, 2, 2, 0.2);
   display: flex; align-items: center; justify-content: center;
-  color: #6c5ce7;
+  color: #000000;
   font-size: 16px;
 }
 
 .app-brand-text { display: flex; flex-direction: column; min-width: 0; }
-.app-logo { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: #1A1A2E; line-height: 1; }
-.app-topbar-subtitle { font-size: 11px; color: #AEAEBE; margin-top: 2px; white-space: nowrap; }
+.app-logo { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: rgba(220, 255, 255, 0.9); line-height: 1; }
+.app-topbar-subtitle { font-size: 11px; color: rgba(98, 255, 255, 0.45); margin-top: 2px; white-space: nowrap; }
 
 .app-ai-chip {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #EEEDFE;
-  border: 1px solid rgba(108, 92, 231, 0.2);
-  color: #534AB7;
+  background: rgba(0, 212, 212, 0.1);
+  border: 1px solid rgba(98, 255, 255, 0.2);
+  color: #62ffff;
   font-size: 12px; font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.app-ai-chip:hover { background: #CECBF6; border-color: rgba(108, 92, 231, 0.35); }
+.app-ai-chip:hover {
+  background: rgba(0, 212, 212, 0.22);
+  border-color: rgba(98, 255, 255, 0.4);
+}
 
 .app-icon-btn {
   width: 34px; height: 34px; min-width: 34px;
   border-radius: 9px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #F5F4F0;
-  color: #8888A0;
+  background: rgba(0, 212, 212, 0.08);
+  border: 1px solid rgba(98, 255, 255, 0.15);
+  color: rgba(98, 255, 255, 0.6);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; position: relative;
   transition: all 0.15s ease;
 }
-.app-icon-btn:hover { background: #EEEDFE; border-color: rgba(108, 92, 231, 0.2); color: #6c5ce7; }
+.app-icon-btn:hover {
+  background: rgba(0, 212, 212, 0.18);
+  border-color: rgba(98, 255, 255, 0.3);
+  color: #62ffff;
+}
 
 .app-icon-dot {
   position: absolute; top: 7px; right: 7px;
   width: 7px; height: 7px;
   border-radius: 50%;
-  background: #6c5ce7;
-  border: 2px solid #FFFFFF;
+  background: #62ffff;
+  border: 2px solid #03101c;
 }
 
 .app-badge {
   font-size: 10px; font-weight: 700;
   padding: 4px 9px;
   border-radius: 999px;
-  background: #F0EFF8;
-  color: #534AB7;
+  background: rgba(0, 212, 212, 0.1);
+  color: #62ffff;
   letter-spacing: 0.06em;
-  border: 1px solid rgba(108, 92, 231, 0.15);
+  border: 1px solid rgba(98, 255, 255, 0.2);
   text-transform: uppercase;
 }
 
 .app-profile-trigger {
   display: flex; align-items: center; gap: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #F5F4F0;
+  background: rgba(0, 212, 212, 0.08);
+  border: 1px solid rgba(98, 255, 255, 0.2);
   padding: 4px 10px 4px 4px;
   border-radius: 11px;
   cursor: pointer;
   transition: all 0.15s ease;
   margin-left: 2px;
 }
-.app-profile-trigger:hover { background: #EEEDFE; border-color: rgba(108, 92, 231, 0.2); }
+.app-profile-trigger:hover {
+  background: rgba(0, 212, 212, 0.18);
+  border-color: rgba(98, 255, 255, 0.35);
+}
 
 .app-avatar-btn {
   width: 30px; height: 30px;
   border-radius: 8px;
-  background: #6c5ce7;
-  color: #fff;
+  background: rgba(0, 150, 150, 0.6);
+  color: #62ffff;
   border: none;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700;
@@ -118,13 +136,13 @@
 }
 
 .app-profile-meta { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
-.app-profile-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1A1A2E; font-size: 12px; font-weight: 600; }
-.app-profile-role  { color: #AEAEBE; font-size: 10px; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
+.app-profile-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(220, 255, 255, 0.85); font-size: 12px; font-weight: 600; }
+.app-profile-role  { color: rgba(98, 255, 255, 0.5); font-size: 10px; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
 
 .app-logout-btn {
-  background: #EEEDFE;
-  color: #534AB7;
-  border: 1px solid rgba(108, 92, 231, 0.2);
+  background: rgba(0, 212, 212, 0.1);
+  color: #62ffff;
+  border: 1px solid rgba(98, 255, 255, 0.2);
   padding: 7px 13px;
   border-radius: 9px;
   font-weight: 600; font-size: 12px;
@@ -132,95 +150,116 @@
   transition: all 0.15s ease;
   margin-left: 4px;
 }
-.app-logout-btn:hover { background: #CECBF6; border-color: rgba(108, 92, 231, 0.35); color: #3C3489; }
+.app-logout-btn:hover {
+  background: rgba(0, 212, 212, 0.22);
+  border-color: rgba(98, 255, 255, 0.4);
+  color: #ffffff;
+}
 
 /* ── Profile dropdown ── */
 .profile-dropdown {
   position: absolute; top: calc(100% + 10px); right: 56px;
   width: 300px;
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #0b1d2e;
+  border: 1px solid rgba(98, 255, 255, 0.15);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(0, 212, 212, 0.08);
   z-index: 300; overflow: hidden;
 }
 
 .profile-dropdown-header {
   padding: 16px;
-  background: #F5F4F0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(0, 212, 212, 0.06);
+  border-bottom: 1px solid rgba(98, 255, 255, 0.1);
   display: flex; align-items: center; gap: 12px;
 }
 
 .profile-avatar-large {
   width: 44px; height: 44px;
   border-radius: 12px;
-  background: #6c5ce7;
-  color: #fff;
+  background: rgba(0, 150, 150, 0.6);
+  color: #62ffff;
   display: flex; align-items: center; justify-content: center;
   font-size: 15px; font-weight: 700; flex-shrink: 0;
 }
 
-.profile-name { font-size: 13px; font-weight: 600; color: #1A1A2E; word-break: break-word; }
-.profile-role { font-size: 11px; color: #AEAEBE; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+.profile-name { font-size: 13px; font-weight: 600; color: rgba(220, 255, 255, 0.9); word-break: break-word; }
+.profile-role { font-size: 11px; color: rgba(98, 255, 255, 0.5); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
 
 .profile-dropdown-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 
 .profile-field { display: flex; flex-direction: column; gap: 5px; }
-.profile-field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #AEAEBE; }
+.profile-field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(98, 255, 255, 0.45); }
 
 .profile-field-readonly {
-  font-size: 13px; color: #8888A0;
-  background: #F5F4F0;
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  font-size: 13px; color: rgba(98, 255, 255, 0.5);
+  background: rgba(0, 212, 212, 0.05);
+  border: 1px solid rgba(98, 255, 255, 0.1);
   border-radius: 9px; padding: 8px 11px;
 }
 
 .profile-field-input {
-  font-size: 13px; color: #1A1A2E;
-  background: #FAFAF8;
-  border: 1px solid rgba(0, 0, 0, 0.09);
+  font-size: 13px; color: rgba(220, 255, 255, 0.9);
+  background: rgba(0, 212, 212, 0.05);
+  border: 1px solid rgba(98, 255, 255, 0.15);
   border-radius: 9px; padding: 8px 11px;
   width: 100%; outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
-.profile-field-input:focus { border-color: rgba(108, 92, 231, 0.4); box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
-.profile-field-input::placeholder { color: #CFCFE0; }
+.profile-field-input:focus {
+  border-color: rgba(98, 255, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(0, 212, 212, 0.1);
+}
+.profile-field-input::placeholder { color: rgba(98, 255, 255, 0.2); }
 
-.profile-hint     { font-size: 11px; color: #AEAEBE; line-height: 1.4; }
-.profile-hint.err { color: #A32D2D; }
-.profile-hint.ok  { color: #3B6D11; }
+.profile-hint     { font-size: 11px; color: rgba(98, 255, 255, 0.4); line-height: 1.4; }
+.profile-hint.err { color: #ff6b6b; }
+.profile-hint.ok  { color: #62ffff; }
 
 .profile-dropdown-footer {
   padding: 12px 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  border-top: 1px solid rgba(98, 255, 255, 0.1);
   display: flex; justify-content: flex-end; gap: 8px;
 }
 
 .btn-cancel {
   font-size: 12px; font-weight: 600; padding: 7px 14px;
-  border: 1px solid rgba(0, 0, 0, 0.09);
-  border-radius: 9px; background: #F5F4F0; color: #6B6B80;
+  border: 1px solid rgba(98, 255, 255, 0.15);
+  border-radius: 9px;
+  background: rgba(0, 212, 212, 0.05);
+  color: rgba(98, 255, 255, 0.6);
   cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
-.btn-cancel:hover { background: #EEEDFE; color: #3C3489; border-color: rgba(108,92,231,0.2); }
+.btn-cancel:hover {
+  background: rgba(0, 212, 212, 0.12);
+  color: #62ffff;
+  border-color: rgba(98, 255, 255, 0.3);
+}
 
 .btn-save {
   font-size: 12px; font-weight: 700; padding: 7px 14px;
-  border: 1px solid rgba(108, 92, 231, 0.25);
-  border-radius: 9px; background: #EEEDFE; color: #534AB7;
+  border: 1px solid rgba(98, 255, 255, 0.3);
+  border-radius: 9px;
+  background: rgba(0, 212, 212, 0.15);
+  color: #62ffff;
   cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
-.btn-save:hover:not(:disabled) { background: #CECBF6; border-color: rgba(108, 92, 231, 0.4); color: #3C3489; }
+.btn-save:hover:not(:disabled) {
+  background: rgba(0, 212, 212, 0.28);
+  border-color: rgba(98, 255, 255, 0.5);
+  color: #ffffff;
+}
 .btn-save:disabled { opacity: 0.35; cursor: default; }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .spin { animation: spin 0.9s linear infinite; }
 
-.admin-loading { color: #AEAEBE; text-align: center; margin-top: 40px; font-size: 13px; }
-.admin-error   { background: #FCEBEB; border: 1px solid rgba(162,45,45,0.2); color: #791F1F; text-align: center; margin-top: 40px; padding: 18px 20px; border-radius: 12px; font-size: 13px; }
-.admin-empty   { background: #F5F4F0; border: 1px solid rgba(0,0,0,0.07); color: #AEAEBE; text-align: center; margin-top: 40px; padding: 18px 20px; border-radius: 12px; font-size: 13px; }
+.admin-loading { color: rgba(98, 255, 255, 0.4); text-align: center; margin-top: 40px; font-size: 13px; }
+.admin-error   { background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); color: #ff6b6b; text-align: center; margin-top: 40px; padding: 18px 20px; border-radius: 12px; font-size: 13px; }
+.admin-empty   { background: rgba(0, 212, 212, 0.05); border: 1px solid rgba(98, 255, 255, 0.1); color: rgba(98, 255, 255, 0.4); text-align: center; margin-top: 40px; padding: 18px 20px; border-radius: 12px; font-size: 13px; }
 
 @media (max-width: 1100px) {
   .app-profile-meta, .app-ai-chip { display: none; }

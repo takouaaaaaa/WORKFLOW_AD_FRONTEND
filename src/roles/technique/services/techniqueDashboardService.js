@@ -1,6 +1,7 @@
 import http from "../../../services/http";
+import { getToken } from "../../../auth/utils/auth";
 
-const API_BASE_URL = "http://localhost:8083";
+const API_BASE_URL = "http://localhost:8080";
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function normalizeArrayPayload(res) {
@@ -8,6 +9,7 @@ function normalizeArrayPayload(res) {
   if (Array.isArray(res?.data?.content)) return res.data.content;
   return [];
 }
+
 
 function normalizeStats(stats = {}) {
   return {
@@ -91,10 +93,14 @@ function buildSeriesFromLogs(logs, filterFn) {
   return counts;
 }
 
-export function createLogStream(path, onMessage) {
-  const token = localStorage.getItem("token");
+function buildUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
 
-  const streamUrl = `${API_BASE_URL}${path}${
+export function createLogStream(path, onMessage) {
+  const token = getToken();
+
+  const streamUrl = `${buildUrl(path)}${
     token ? `?token=${encodeURIComponent(token)}` : ""
   }`;
 
@@ -128,7 +134,7 @@ export function createLogStream(path, onMessage) {
 
 export async function getGeneratorLogs(params = {}) {
   try {
-    const res = await http.get("/api/generator/logs", {
+    const res = await http.get(buildUrl("/api/generator/logs"), {
       params: {
         limit: params.limit ?? 100,
         level: params.level ?? "ALL",
@@ -146,7 +152,7 @@ export async function getGeneratorLogs(params = {}) {
 
 export async function getGeneratorStats() {
   try {
-    const res = await http.get("/api/generator/logs/stats");
+    const res = await http.get(buildUrl("/api/generator/logs/stats"));
     return normalizeStats(res.data);
   } catch (error) {
     console.error("Failed to load generator stats", error);
@@ -156,7 +162,7 @@ export async function getGeneratorStats() {
 
 export async function getAutoencoderLogs(params = {}) {
   try {
-    const res = await http.get("/api/autoencoder/logs", {
+    const res = await http.get(buildUrl("/api/autoencoder/logs"), {
       params: {
         limit: params.limit ?? 100,
         level: params.level ?? "ALL",
@@ -175,7 +181,7 @@ export async function getAutoencoderLogs(params = {}) {
 
 export async function getAutoencoderStats() {
   try {
-    const res = await http.get("/api/autoencoder/logs/stats");
+    const res = await http.get(buildUrl("/api/autoencoder/logs/stats"));
     return normalizeStats(res.data);
   } catch (error) {
     console.error("Failed to load autoencoder stats", error);

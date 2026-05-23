@@ -1,14 +1,23 @@
 .app-sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #f7f6f2 0%, #eeece6 100%);
-  border-right: 1px solid rgba(20, 25, 40, 0.08);
   padding: 14px 10px;
   overflow-y: auto;
   overflow-x: hidden;
   transition: width 0.22s ease, padding 0.22s ease;
   display: flex;
   flex-direction: column;
+
+  background: linear-gradient(
+    to bottom,
+    #03101c 0%,
+    #0b1d2e 18%,
+    #1f3145 42%,
+    #42566d 68%,
+    #6f8096 100%
+  );
+
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .app-sidebar.collapsed {
@@ -25,9 +34,13 @@
 }
 
 .app-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(20, 25, 40, 0.12);
+  background: rgba(98, 255, 255, 0.18);
   border-radius: 999px;
 }
+
+/* ───────────────────────────── */
+/* TOP */
+/* ───────────────────────────── */
 
 .app-sidebar-top {
   padding: 4px 10px 18px;
@@ -36,18 +49,22 @@
 .app-sidebar-title {
   font-size: 14px;
   font-weight: 800;
-  color: #1f2540;
+  color: #f4f7ff;
 }
 
 .app-sidebar-subtitle {
   font-size: 11px;
-  color: #8f95a8;
+  color: rgba(98, 255, 255, 0.65);
   margin-top: 4px;
 }
 
+/* ───────────────────────────── */
+/* SECTION */
+/* ───────────────────────────── */
+
 .app-sidebar-section {
   font-size: 10px;
-  color: #a5a8b6;
+  color: rgba(244, 247, 255, 0.65);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 800;
@@ -58,6 +75,10 @@
 .app-sidebar.collapsed .app-sidebar-section {
   display: none;
 }
+
+/* ───────────────────────────── */
+/* NAVIGATION */
+/* ───────────────────────────── */
 
 .app-sidebar-nav {
   display: flex;
@@ -70,84 +91,171 @@
   display: flex;
   align-items: center;
   gap: 12px;
+
   width: 100%;
-  color: #60677d;
-  padding: 10px 12px;
-  border-radius: 15px;
-  text-decoration: none;
-  transition: all 0.18s ease;
   min-height: 48px;
+
+  padding: 10px 12px;
+
+  border-radius: 16px;
   border: 1px solid transparent;
+
+  text-decoration: none;
   cursor: pointer;
+
+  transition: all 0.18s ease;
+
+  color: rgba(244, 247, 255, 0.45);
+
+  background: transparent;
+  box-shadow: none;
 }
 
-.app-nav-item:hover {
-  color: #252b45;
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(108, 92, 231, 0.12);
+/* ───────────────────────────── */
+/* NON ACTIVE */
+/* ───────────────────────────── */
+
+.app-nav-item:not(.active) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
+
+.app-nav-item:not(.active):hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: rgba(244, 247, 255, 0.8);
+  box-shadow: none !important;
+}
+
+/* ───────────────────────────── */
+/* ACTIVE */
+/* ───────────────────────────── */
 
 .app-nav-item.active {
-  color: #4c3fdc;
-  background: #ffffff;
-  border-color: rgba(108, 92, 231, 0.22);
-  box-shadow: 0 10px 24px rgba(37, 43, 69, 0.08);
+  color: #62ffff;
+
+  background: rgba(98, 255, 255, 0.08);
+
+  border-color: rgba(98, 255, 255, 0.18);
+
+  box-shadow:
+    inset 0 0 20px rgba(98, 255, 255, 0.03),
+    0 0 16px rgba(98, 255, 255, 0.08);
 }
+
+/* ───────────────────────────── */
+/* ACTIVE LEFT BAR */
+/* ───────────────────────────── */
 
 .app-nav-active-bar {
   position: absolute;
+
   left: -2px;
   top: 11px;
   bottom: 11px;
+
   width: 4px;
+
   border-radius: 20px;
+
   background: transparent;
+
   transition: background 0.18s ease;
 }
 
 .app-nav-item.active .app-nav-active-bar {
-  background: #6c5ce7;
+  background: #62ffff;
+
+  box-shadow: 0 0 10px rgba(98, 255, 255, 0.8);
 }
+
+/* ───────────────────────────── */
+/* ICON */
+/* ───────────────────────────── */
 
 .app-nav-icon-wrap {
   width: 34px;
   height: 34px;
   min-width: 34px;
+
   border-radius: 11px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(31, 37, 64, 0.05);
-  border: 1px solid rgba(31, 37, 64, 0.07);
-  transition: all 0.18s ease;
+
   flex-shrink: 0;
+
+  transition: all 0.18s ease;
+
+  background: transparent !important;
+  border: 1px solid transparent !important;
+
+  box-shadow: none !important;
 }
 
-.app-nav-item:hover .app-nav-icon-wrap {
-  background: rgba(108, 92, 231, 0.08);
-  border-color: rgba(108, 92, 231, 0.16);
+/* NON ACTIVE ICON */
+
+.app-nav-item:not(.active) .app-nav-icon-wrap {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  color: rgba(244, 247, 255, 0.45);
 }
+
+/* HOVER NON ACTIVE */
+
+.app-nav-item:not(.active):hover .app-nav-icon-wrap {
+  color: rgba(244, 247, 255, 0.8);
+
+  background: transparent !important;
+  border-color: transparent !important;
+
+  box-shadow: none !important;
+}
+
+/* ACTIVE ICON */
 
 .app-nav-item.active .app-nav-icon-wrap {
-  background: #f0edff;
-  border-color: rgba(108, 92, 231, 0.2);
-  color: #6c5ce7;
+  background: rgba(98, 255, 255, 0.08) !important;
+
+  border-color: rgba(98, 255, 255, 0.16) !important;
+
+  color: #62ffff !important;
+
+  box-shadow:
+    0 0 10px rgba(98, 255, 255, 0.18),
+    inset 0 0 12px rgba(98, 255, 255, 0.04) !important;
 }
 
 .app-nav-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+
   color: inherit;
 }
 
+/* ───────────────────────────── */
+/* LABEL */
+/* ───────────────────────────── */
+
 .app-nav-label {
   white-space: nowrap;
+
+  overflow: hidden;
+
   font-size: 13px;
   font-weight: 700;
+
   color: inherit;
-  overflow: hidden;
 }
+
+/* ───────────────────────────── */
+/* COLLAPSED */
+/* ───────────────────────────── */
 
 .app-sidebar.collapsed .app-nav-item {
   justify-content: center;
@@ -163,11 +271,21 @@
   width: 3px;
 }
 
+/* ───────────────────────────── */
+/* DIVIDER */
+/* ───────────────────────────── */
+
 .app-sidebar-divider {
   height: 1px;
-  background: rgba(31, 37, 64, 0.08);
+
   margin: 12px 8px;
+
+  background: rgba(255, 255, 255, 0.08);
 }
+
+/* ───────────────────────────── */
+/* RESPONSIVE */
+/* ───────────────────────────── */
 
 @media (max-width: 900px) {
   .app-sidebar {

@@ -1,10 +1,41 @@
+/*
+ * TechniqueDashboard.css
+ *
+ * Section index
+ * ─────────────
+ * 1.  Google Fonts & Bootstrap Icons imports
+ * 2.  CSS custom properties (design tokens)
+ * 3.  Overline / hero title / subtitle typography
+ * 4.  Live pulse dot
+ * 5.  Stat (KPI) cards
+ * 6.  Section headers
+ * 7.  Terminal / log feed
+ * 8.  Soft entity-count cards
+ * 9.  Quick-access navigation cards + outline button
+ * 10. Chart wrapper
+ * 11. Spinner / loading state
+ * 12. Alerts modal
+ * 13. Keyframe animations
+ * 14. Main page background
+ * 15. Responsive overrides
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 1. EXTERNAL RESOURCE IMPORTS
+ * ───────────────────────────────────────────────────────────────────────────── */
+
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css");
 @import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 2. CSS CUSTOM PROPERTIES (design tokens)
+ * ───────────────────────────────────────────────────────────────────────────── */
 :root {
   --monitor-bg: #f4f2ee;
   --monitor-surface: #ffffff;
   --monitor-surface-soft: #fbfaf8;
+
   --monitor-border: rgba(99, 92, 168, 0.1);
   --monitor-border-strong: rgba(99, 92, 168, 0.2);
 
@@ -28,97 +59,129 @@
   --monitor-radius: 12px;
   --monitor-radius-lg: 16px;
   --monitor-radius-xl: 20px;
+
+  --accent-teal: #00ffcc;
+  --accent-teal-dim: rgba(0, 255, 204, 0.15);
 }
 
-/* BASE */
 
-.monitor-page {
-  min-height: 100vh;
-  background: var(--monitor-bg);
-  padding: 20px;
-  color: var(--monitor-text);
-  font-family: "Inter", sans-serif;
-}
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 3. OVERLINE / HERO TYPOGRAPHY
+ * ───────────────────────────────────────────────────────────────────────────── */
 
-.monitor-page h1,
-.monitor-page h2,
-.monitor-page h3,
-.monitor-page h4,
-.monitor-page h5,
-.monitor-page h6 {
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-/* PANELS */
-
-.monitor-panel {
-  background: var(--monitor-surface);
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius-xl);
-  padding: 24px;
-  transition: all 0.2s ease;
-}
-
-.monitor-panel:hover {
-  box-shadow: var(--monitor-shadow-md);
-}
-
-/* HERO */
-
-.monitor-hero {
-  margin-bottom: 28px;
-}
-
-.hero-panel {
-  background: linear-gradient(135deg, #ffffff 0%, #fefdfc 100%);
+.monitor-header-wrapper {
   position: relative;
-  overflow: hidden;
+  width: 100%;
 }
 
 .monitor-overline {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--monitor-purple);
-  background: var(--monitor-purple-soft);
-  padding: 4px 12px;
-  border-radius: 20px;
-}
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
 
-.monitor-title {
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--monitor-text), var(--monitor-purple));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #00ffcc;
+  text-shadow: 0 0 20px rgba(0, 255, 204, 0.6),
+               0 0 40px rgba(0, 255, 204, 0.3);
+
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+  overflow: hidden;
 }
 
-.monitor-subtitle {
-  color: var(--monitor-text-soft);
-  line-height: 1.5;
-  font-size: 0.95rem;
-}
-
-.monitor-floating-status {
+.monitor-live-btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: var(--monitor-surface);
-  border: 1px solid var(--monitor-border);
-  border-radius: 40px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--monitor-text);
-  box-shadow: var(--monitor-shadow-sm);
+  justify-content: center;
+  gap: 6px;
+
+  background: #ff3333;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  padding: 4px 14px;
+  border-radius: 50px;
+  border: none;
+  margin: 0;
+
+  box-shadow: 0 0 20px rgba(255, 51, 51, 0.6),
+              0 0 40px rgba(255, 51, 51, 0.3);
+
+  animation: pulse-live 1.5s ease-in-out infinite;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
+@keyframes pulse-live {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.8; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* "What's about to break." */
+.monitor-hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 16px;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* "Before it does." */
+.monitor-hero-subtitle {
+  font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.28);
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* "Live Logs Center" big title */
+.monitor-logs-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 16px;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-align: left;
+}
+
+.monitor-logs-subtitle {
+  font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.28);
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-align: left;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 4. LIVE PULSE DOT
+ * ───────────────────────────────────────────────────────────────────────────── */
 .monitor-live-dot {
   width: 8px;
   height: 8px;
@@ -127,16 +190,21 @@
   animation: pulseDot 1.8s infinite;
 }
 
-/* STAT CARDS */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 5. STAT / KPI CARDS (VIBRANT DARK GLASS STYLE)
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-stat-card {
-  background: var(--monitor-surface);
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius-lg);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   padding: 20px;
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .monitor-stat-card:disabled {
@@ -145,8 +213,9 @@
 }
 
 .monitor-stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--monitor-shadow-lg);
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5);
 }
 
 .monitor-stat-clickable {
@@ -157,143 +226,196 @@
   transform: translateY(-5px);
 }
 
+.monitor-stat-clickable:active {
+  transform: scale(0.95);
+}
+
+/* ── DEFAULT (Teal) ── */
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning) {
+  border-color: rgba(0, 255, 204, 0.2);
+  background: rgba(0, 20, 20, 0.3);
+}
+
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning):hover {
+  border-color: rgba(0, 255, 204, 0.5);
+  box-shadow: 0 8px 40px rgba(0, 255, 204, 0.15);
+}
+
+/* ── ERROR Card (Red) ── */
 .monitor-stat-error {
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(255, 50, 50, 0.3);
+  background: rgba(40, 0, 0, 0.4);
 }
 
+.monitor-stat-error:hover {
+  border-color: rgba(255, 50, 50, 0.6);
+  box-shadow: 0 8px 40px rgba(255, 50, 50, 0.15);
+}
+
+.monitor-stat-error:active {
+  box-shadow: 0 0 80px rgba(255, 50, 50, 0.4), 0 0 150px rgba(255, 50, 50, 0.15);
+  border-color: #ff4444;
+}
+
+/* ── WARNING Card (Orange) ── */
 .monitor-stat-warning {
-  border-color: rgba(245, 158, 11, 0.25);
+  border-color: rgba(255, 170, 0, 0.3);
+  background: rgba(40, 20, 0, 0.4);
 }
 
+.monitor-stat-warning:hover {
+  border-color: rgba(255, 170, 0, 0.6);
+  box-shadow: 0 8px 40px rgba(255, 170, 0, 0.15);
+}
+
+.monitor-stat-warning:active {
+  box-shadow: 0 0 80px rgba(255, 170, 0, 0.4), 0 0 150px rgba(255, 170, 0, 0.15);
+  border-color: #ffaa00;
+}
+
+/* ── ICONS ── */
 .monitor-stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--monitor-radius);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--monitor-purple-soft), var(--monitor-blue-soft));
-  color: var(--monitor-purple);
-  font-size: 20px;
-  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #00ffcc;
+  font-size: 18px;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
 }
 
 .monitor-stat-error .monitor-stat-icon {
-  background: rgba(239, 68, 68, 0.08);
-  color: var(--monitor-danger);
+  color: #ff4444;
+  background: rgba(255, 68, 68, 0.12);
+  border-color: rgba(255, 68, 68, 0.15);
 }
 
 .monitor-stat-warning .monitor-stat-icon {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--monitor-warning);
+  color: #ffaa00;
+  background: rgba(255, 170, 0, 0.12);
+  border-color: rgba(255, 170, 0, 0.15);
 }
 
+/* ── TYPOGRAPHY ── */
 .monitor-stat-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--monitor-text-soft);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2px;
 }
 
 .monitor-stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  margin-top: 8px;
-  color: var(--monitor-text);
-  line-height: 1.2;
+  font-size: 36px;
+  font-weight: 800;
+  margin-top: 2px;
+  color: #ffffff;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
 }
 
 .monitor-stat-sub {
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 6px;
-  color: var(--monitor-text-soft);
-}
-
-.monitor-click-hint {
-  margin-top: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--monitor-purple);
-}
-
-/* HEALTH */
-
-.monitor-health-card {
-  background: linear-gradient(135deg, var(--monitor-surface), var(--monitor-surface-soft));
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius-xl);
-  padding: 24px;
-  height: 100%;
-}
-
-.monitor-health-chart {
-  position: relative;
-  height: 240px;
-}
-
-.monitor-health-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  pointer-events: none;
-}
-
-.monitor-health-value {
-  font-size: 36px;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--monitor-purple), var(--monitor-blue));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.monitor-health-label {
-  font-size: 12px;
-  color: var(--monitor-text-soft);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
 }
 
-.monitor-health-meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.monitor-mini-kpi {
-  background: var(--monitor-surface-soft);
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius);
-  padding: 14px;
-  text-align: center;
-}
-
-.monitor-mini-kpi .label {
-  display: block;
+/* ── CLICK HINT ── */
+.monitor-click-hint {
+  margin-top: 12px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--monitor-text-soft);
-  margin-bottom: 6px;
+  color: #00ffcc;
+  opacity: 1;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
 }
 
-.monitor-mini-kpi strong {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--monitor-text);
+.monitor-click-hint:hover {
+  background: rgba(0, 255, 204, 0.1);
+  border-color: #00ffcc;
 }
 
-/* SECTION HEADER */
+.monitor-stat-error .monitor-click-hint {
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.3);
+}
 
+.monitor-stat-error .monitor-click-hint:hover {
+  background: rgba(255, 68, 68, 0.1);
+  border-color: #ff4444;
+}
+
+.monitor-stat-warning .monitor-click-hint {
+  color: #ffaa00;
+  border-color: rgba(255, 170, 0, 0.3);
+}
+
+.monitor-stat-warning .monitor-click-hint:hover {
+  background: rgba(255, 170, 0, 0.1);
+  border-color: #ffaa00;
+}
+
+/* ── GLOW RINGS ── */
+.monitor-stat-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 18px;
+  background: transparent;
+  z-index: -1;
+  transition: all 0.4s ease;
+}
+
+.monitor-stat-error::before {
+  background: radial-gradient(circle at center, rgba(255, 68, 68, 0.2), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-error:hover::before {
+  opacity: 1;
+}
+
+.monitor-stat-warning::before {
+  background: radial-gradient(circle at center, rgba(255, 170, 0, 0.2), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-warning:hover::before {
+  opacity: 1;
+}
+
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning)::before {
+  background: radial-gradient(circle at center, rgba(0, 255, 204, 0.15), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning):hover::before {
+  opacity: 1;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 6. SECTION HEADERS
+ * ───────────────────────────────────────────────────────────────────────────── */
 .monitor-section-header {
   margin-bottom: 20px;
   display: flex;
-  align-items: center;
+  align-items: left;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
@@ -324,123 +446,150 @@
   margin: 0;
 }
 
-/* TERMINAL */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 7. TERMINAL / LIVE LOG FEED
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-terminal {
-  background: #0f1117;
+  background: #454A4F;
   border-radius: var(--monitor-radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(0, 255, 255, 0.08);
 }
 
 .monitor-terminal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  background: rgba(15, 17, 23, 0.95);
-  border-bottom: 1px solid rgba(124, 58, 237, 0.15);
+  padding: 20px 30px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.06);
 }
 
 .monitor-terminal-title {
-  color: #e2e8f0;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
   font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .monitor-terminal-subtitle {
-  color: #94a3b8;
-  font-size: 11px;
+  color: #00ffcc;
+  font-size: 12px;
   font-family: "JetBrains Mono", monospace;
-  background: rgba(124, 58, 237, 0.1);
-  padding: 4px 10px;
+  background: rgba(0, 255, 204, 0.08);
+  padding: 4px 14px;
   border-radius: 20px;
+  border: 1px solid rgba(0, 255, 204, 0.1);
 }
 
 .monitor-terminal-body {
   max-height: 420px;
   overflow-y: auto;
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .monitor-log-line {
-  padding: 12px 14px;
+  padding: 16px 18px;
   background: rgba(255, 255, 255, 0.02);
-  border-radius: var(--monitor-radius);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-left: 3px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.monitor-log-line.success {
-  border-left-color: var(--monitor-success);
+.monitor-log-line:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.monitor-log-line.warning {
-  border-left-color: var(--monitor-warning);
-}
-
-.monitor-log-line.danger {
-  border-left-color: var(--monitor-danger);
-}
+.monitor-log-line.success  { border-left-color: #00ffcc; }
+.monitor-log-line.warning  { border-left-color: #ffaa00; }
+.monitor-log-line.danger   { border-left-color: #ff4444; }
 
 .monitor-log-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .monitor-source-pill {
-  padding: 4px 11px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
 .monitor-source-pill.generator {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  background: rgba(0, 100, 255, 0.15);
+  color: #ff3c3c;
 }
 
 .monitor-source-pill.autoencoder {
-  background: rgba(124, 58, 237, 0.15);
-  color: #a78bfa;
+  background: rgba(0, 255, 204, 0.12);
+  color: #00f7c6;
 }
 
 .monitor-phase-pill {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   padding: 3px 10px;
   border-radius: 20px;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .monitor-log-time {
   font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  color: #64748b;
+  font-size: 9px;
+  color: #ffffff;
+  margin-left: auto;
+  letter-spacing: 0.02em;
 }
 
 .monitor-log-message {
-  color: #e2e8f0;
-  font-size: 12px;
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .monitor-empty-log {
   text-align: center;
   padding: 40px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.3);
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
 }
 
-/* SOFT CARDS */
+.monitor-terminal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.monitor-terminal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.monitor-terminal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 204, 0.2);
+  border-radius: 10px;
+}
+
+.monitor-terminal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 204, 0.3);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 8. SOFT ENTITY COUNT CARDS
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-soft-card {
   background: linear-gradient(135deg, var(--monitor-surface), var(--monitor-surface-soft));
@@ -469,53 +618,99 @@
   color: transparent;
 }
 
-/* TASK */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 9. QUICK-ACCESS NAVIGATION CARDS + OUTLINE BUTTON
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-task-card {
-  background: var(--monitor-surface);
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius-lg);
-  padding: 18px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.monitor-task-card:hover {
+  border-color: rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .monitor-task-card h6 {
+  color: #ffffff;
   font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-  color: var(--monitor-text);
+  font-size: 1.1rem;
 }
 
 .monitor-task-card p {
-  color: var(--monitor-text-soft);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
   line-height: 1.5;
-  margin-bottom: 12px;
+}
+
+.monitor-task-card .badge {
+  background: rgba(0, 255, 204, 0.15) !important;
+  color: var(--accent-teal) !important;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
 }
 
 .monitor-outline-btn {
   background: transparent;
-  border: 1px solid var(--monitor-border-strong);
-  color: var(--monitor-purple);
-  border-radius: var(--monitor-radius);
-  padding: 6px 16px;
-  font-size: 12px;
+  border: 1px solid #ff3333;
+  color: #ff3333;
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-size: 13px;
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .monitor-outline-btn:hover {
-  background: var(--monitor-purple);
-  border-color: var(--monitor-purple);
-  color: white;
+  background: #ff3333;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 51, 51, 0.3);
 }
 
-/* CHARTS */
+/* "Manage Data Flow" heading */
+.first_title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 16px;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 10. CHART WRAPPER
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-chart-wrap {
+  position: relative;
+  width: 100%;
   height: 320px;
-  margin-top: 8px;
 }
 
-/* LOADING */
+.monitor-chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 11. SPINNER / LOADING STATE
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-spinner {
   width: 40px;
@@ -530,9 +725,36 @@
   color: var(--monitor-text-soft);
   font-size: 14px;
 }
-/* =========================
-   REAL CENTERED MODAL
-========================= */
+
+.monitor-panel {
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(0, 255, 204, 0.12);
+  border-radius: 24px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(0, 255, 204, 0.04);
+
+  transition: all 0.3s ease;
+}
+
+.monitor-panel:hover {
+  border-color: rgba(0, 255, 204, 0.22);
+
+  box-shadow:
+    0 14px 50px rgba(0, 0, 0, 0.45),
+    0 0 70px rgba(0, 255, 204, 0.08);
+
+  transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 12. ALERTS MODAL
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-modal-backdrop {
   position: fixed;
@@ -546,76 +768,51 @@
   position: fixed;
   inset: 0;
   z-index: 5001;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 24px;
 }
 
 .monitor-modal-card {
   width: 100%;
   max-width: 760px;
-
   background: #ffffff;
-
   border-radius: 28px;
-
   overflow: hidden;
-
   box-shadow:
     0 35px 90px rgba(15, 23, 42, 0.28),
     0 12px 32px rgba(15, 23, 42, 0.12);
-
   animation: monitorModalPop 0.24s ease;
 }
 
-/* HEADER */
-
 .monitor-modal-header {
   padding: 24px 28px;
-
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(124, 58, 237, 0.05),
-      rgba(59, 130, 246, 0.04)
-    );
-
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(59, 130, 246, 0.04));
   border-bottom: 1px solid rgba(99, 92, 168, 0.08);
 }
 
 .monitor-modal-title {
   margin: 0;
-
   font-size: 1.45rem;
   font-weight: 800;
-
   color: var(--monitor-text);
 }
 
 .monitor-modal-subtitle {
   margin-top: 6px;
   margin-bottom: 0;
-
   color: var(--monitor-text-soft);
-
   font-size: 13px;
 }
 
-/* TOP BADGE */
-
 .monitor-modal-main-badge {
   padding: 6px 12px;
-
   border-radius: 12px;
-
   font-size: 12px;
   font-weight: 800;
 }
@@ -630,23 +827,16 @@
   color: white;
 }
 
-/* CLOSE */
-
 .monitor-modal-close {
   width: 42px;
   height: 42px;
-
   border: none;
   border-radius: 14px;
-
   background: rgba(15, 23, 42, 0.06);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   color: #475569;
-
   transition: all 0.2s ease;
 }
 
@@ -655,13 +845,9 @@
   transform: rotate(90deg);
 }
 
-/* BODY */
-
 .monitor-modal-body {
   padding: 24px;
-
   background: #f8f7f4;
-
   max-height: 60vh;
   overflow-y: auto;
 }
@@ -675,34 +861,21 @@
   border-radius: 999px;
 }
 
-/* FOOTER */
-
 .monitor-modal-footer {
   padding: 18px 24px;
-
   background: white;
-
   border-top: 1px solid rgba(99, 92, 168, 0.08);
-
   display: flex;
   justify-content: flex-end;
 }
 
-/* EMPTY */
-
 .monitor-modal-empty {
   background: white;
-
   border: 1px solid var(--monitor-border);
-
   border-radius: 18px;
-
   padding: 18px;
-
   color: var(--monitor-text-soft);
 }
-
-/* LIST */
 
 .monitor-alert-list {
   display: flex;
@@ -710,62 +883,39 @@
   gap: 16px;
 }
 
-/* ITEM */
-
 .monitor-alert-item {
   background: white;
-
   border-radius: 20px;
-
   padding: 18px;
-
   border: 1px solid rgba(99, 92, 168, 0.08);
-
   position: relative;
-
   overflow: hidden;
 }
 
 .monitor-alert-item::before {
   content: "";
-
   position: absolute;
-
   left: 0;
   top: 14px;
   bottom: 14px;
-
   width: 5px;
-
   border-radius: 999px;
 }
 
-.monitor-alert-item.warning::before {
-  background: var(--monitor-warning);
-}
-
-.monitor-alert-item.danger::before {
-  background: var(--monitor-danger);
-}
-
-/* TOP */
+.monitor-alert-item.warning::before { background: var(--monitor-warning); }
+.monitor-alert-item.danger::before  { background: var(--monitor-danger);  }
 
 .monitor-alert-top {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-
   margin-bottom: 12px;
 }
 
-/* BADGES */
-
 .monitor-alert-badge {
   padding: 5px 12px;
-
   border-radius: 999px;
-
   font-size: 11px;
   font-weight: 800;
 }
@@ -780,101 +930,75 @@
   color: #d92d20;
 }
 
-/* SOURCE */
-
-.monitor-source-pill {
-  padding: 5px 12px;
-
-  border-radius: 999px;
-
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.monitor-source-pill.generator {
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563eb;
-}
-
-.monitor-source-pill.autoencoder {
-  background: rgba(124, 58, 237, 0.12);
-  color: #7c3aed;
-}
-
-/* PHASE */
-
 .monitor-phase-light {
   background: rgba(124, 58, 237, 0.08);
-
   color: var(--monitor-purple);
-
   padding: 5px 12px;
-
   border-radius: 999px;
-
   font-size: 11px;
   font-weight: 700;
 }
-
-/* TIME */
 
 .monitor-alert-time {
   margin-left: auto;
-
   font-size: 11px;
-
   color: #8b8ba3;
-
   font-family: "JetBrains Mono", monospace;
 }
 
-/* MESSAGE */
-
 .monitor-alert-message {
   color: var(--monitor-text);
-
   line-height: 1.7;
-
   font-size: 14px;
 }
 
-/* ANIMATION */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 13. KEYFRAME ANIMATIONS
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 @keyframes monitorModalPop {
   from {
     opacity: 0;
     transform: translateY(20px) scale(0.96);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-/* ANIMATIONS */
-
 @keyframes pulseDot {
-  0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
-  }
-
-  70% {
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);  }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);   }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* RESPONSIVE */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 14. MAIN PAGE BACKGROUND
+ * ───────────────────────────────────────────────────────────────────────────── */
+.monitor-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #03101c 0%,
+    #0b1d2e 5%,
+    #1f3145 10%,
+    #42566d 30%,
+    #6f8096 100%
+  );
+  padding: 24px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * 15. RESPONSIVE OVERRIDES
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 991px) {
   .monitor-page {
@@ -887,10 +1011,6 @@
 
   .monitor-chart-wrap {
     height: 260px;
-  }
-
-  .monitor-health-chart {
-    height: 200px;
   }
 }
 
@@ -908,10 +1028,6 @@
     align-items: flex-start;
   }
 
-  .monitor-health-meta {
-    grid-template-columns: 1fr;
-  }
-
   .monitor-stat-value {
     font-size: 28px;
   }
@@ -921,11 +1037,7 @@
     align-items: flex-start;
   }
 
-  .monitor-bs-modal {
-    padding: 14px !important;
-  }
-
-  .monitor-bs-modal .modal-dialog {
-    width: calc(100vw - 28px) !important;
+  .monitor-chart-wrap {
+    height: 220px;
   }
 }

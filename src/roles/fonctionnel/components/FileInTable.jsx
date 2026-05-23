@@ -13,10 +13,55 @@ const STATUS_LABEL = {
   SUSPENDED:        "Suspended",
   CANCELED:         "Canceled",
 };
+const truncate = (value, max = 30) => {
+  if (value === null || value === undefined) {
+    return "—";
+  }
 
+  const text = String(value);
+
+  return text.length > max
+    ? text.slice(0, max) + "..."
+    : text;
+};
+const formatDate = (date) => {
+  if (!date) return "—";
+
+  return new Date(date).toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+const statusClass = (status) => {
+  switch (status) {
+    case "PROCESSED":
+      return "success";
+
+    case "INPROCESS":
+      return "processing";
+
+    case "REJECTED":
+    case "INTECHNICALERROR":
+    case "INBUSINESSERROR":
+      return "danger";
+
+    case "WAITPROCESS":
+      return "warning";
+
+    default:
+      return "default";
+  }
+};
 export default function FileInTable({
-  rows, totalCount = 0, selectedRow, setSelectedRow, truncate, formatDate, statusClass,
+  rows,
+  totalCount = 0,
+  selectedRow,
+  setSelectedRow,
 }) {
+
   const headerText = rows.length === totalCount
     ? `${totalCount.toLocaleString()} total`
     : `${rows.length.toLocaleString()} results`;

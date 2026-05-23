@@ -8,10 +8,8 @@ import {
   Chart,
   BarController,
   LineController,
-  DoughnutController,
   BarElement,
   LineElement,
-  ArcElement,
   PointElement,
   CategoryScale,
   LinearScale,
@@ -28,10 +26,8 @@ import {
 Chart.register(
   BarController,
   LineController,
-  DoughnutController,
   BarElement,
   LineElement,
-  ArcElement,
   PointElement,
   CategoryScale,
   LinearScale,
@@ -133,11 +129,7 @@ function LogsTerminal({ logs }) {
                   {log.source}
                 </span>
 
-                <span
-                  className={`badge text-bg-${levelClass(
-                    log.level
-                  )} monitor-level-badge`}
-                >
+                <span className={`badge text-bg-${levelClass(log.level)}`}>
                   {log.level}
                 </span>
 
@@ -169,8 +161,6 @@ function AlertsModal({ show, type, logs, onClose }) {
 
       <div className="monitor-modal-shell">
         <div className="monitor-modal-card">
-
-          {/* HEADER */}
           <div className="monitor-modal-header">
             <div>
               <div className="d-flex align-items-center gap-2">
@@ -182,9 +172,7 @@ function AlertsModal({ show, type, logs, onClose }) {
                   {type}
                 </span>
 
-                <h5 className="monitor-modal-title">
-                  {title}
-                </h5>
+                <h5 className="monitor-modal-title">{title}</h5>
               </div>
 
               <p className="monitor-modal-subtitle">
@@ -201,29 +189,22 @@ function AlertsModal({ show, type, logs, onClose }) {
             </button>
           </div>
 
-          {/* BODY */}
           <div className="monitor-modal-body">
-
             {logs.length === 0 ? (
               <div className="monitor-modal-empty">
                 No {type.toLowerCase()} logs found.
               </div>
             ) : (
               <div className="monitor-alert-list">
-
                 {logs.map((log) => (
                   <div
                     key={log.id}
                     className={`monitor-alert-item ${levelClass(log.level)}`}
                   >
-
                     <div className="monitor-alert-top">
-
                       <span
                         className={`monitor-alert-badge ${
-                          log.level === "ERROR"
-                            ? "error"
-                            : "warn"
+                          log.level === "ERROR" ? "error" : "warn"
                         }`}
                       >
                         {log.level}
@@ -237,43 +218,32 @@ function AlertsModal({ show, type, logs, onClose }) {
                         {log.source}
                       </span>
 
-                      <span className="monitor-phase-light">
-                        {log.phase}
-                      </span>
+                      <span className="monitor-phase-light">{log.phase}</span>
 
                       <span className="monitor-alert-time">
                         {formatDateTime(log.timestamp)}
                       </span>
                     </div>
 
-                    <div className="monitor-alert-message">
-                      {log.message}
-                    </div>
-
+                    <div className="monitor-alert-message">{log.message}</div>
                   </div>
                 ))}
-
               </div>
             )}
-
           </div>
 
-          {/* FOOTER */}
           <div className="monitor-modal-footer">
-            <button
-              className="btn btn-secondary px-4"
-              onClick={onClose}
-            >
+            <button className="btn btn-secondary px-4" onClick={onClose}>
               Close
             </button>
           </div>
-
         </div>
       </div>
     </>,
     document.body
   );
 }
+
 function SenderChart({ labels, values }) {
   const ref = useRef(null);
   const chartRef = useRef(null);
@@ -287,29 +257,71 @@ function SenderChart({ labels, values }) {
           {
             label: "Normal",
             data: values.ok,
-            backgroundColor: "rgba(93,168,255,0.72)",
-            borderRadius: 10,
+            backgroundColor: "rgba(0, 255, 204, 0.35)",
+            borderColor: "rgba(0, 255, 204, 0.8)",
+            borderWidth: 2,
+            borderRadius: 8,
             borderSkipped: false,
+            barPercentage: 0.7,
           },
           {
             label: "Flagged",
             data: values.flagged,
-            backgroundColor: "rgba(124,77,255,0.68)",
-            borderRadius: 10,
+            backgroundColor: "rgba(255, 68, 68, 0.55)",
+            borderColor: "rgba(255, 68, 68, 0.9)",
+            borderWidth: 2,
+            borderRadius: 8,
             borderSkipped: false,
+            barPercentage: 0.7,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 900 },
+        animation: { duration: 800 },
         plugins: {
-          legend: { labels: { boxWidth: 10, usePointStyle: true } },
+          legend: {
+            labels: {
+              color: "rgba(255,255,255,0.85)",
+              boxWidth: 14,
+              usePointStyle: true,
+              pointStyle: "circle",
+              padding: 16,
+              font: { size: 13, weight: "600" },
+            },
+          },
+          tooltip: {
+            backgroundColor: "rgba(0,0,0,0.8)",
+            titleFont: { size: 14, weight: "700" },
+            bodyFont: { size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+          }
         },
         scales: {
-          x: { stacked: true, grid: { display: false } },
-          y: { stacked: true, beginAtZero: true, border: { display: false } },
+          x: {
+            stacked: true,
+            grid: { display: false },
+            ticks: { 
+              color: "rgba(255,255,255,0.6)",
+              font: { size: 12, weight: "500" },
+            },
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            border: { display: false },
+            grid: { 
+              color: "rgba(255,255,255,0.06)",
+              drawBorder: false,
+            },
+            ticks: { 
+              color: "rgba(255,255,255,0.6)",
+              font: { size: 12 },
+              stepSize: 2,
+            },
+          },
         },
       },
     });
@@ -319,7 +331,6 @@ function SenderChart({ labels, values }) {
 
   useEffect(() => {
     if (!chartRef.current) return;
-
     chartRef.current.data.labels = labels;
     chartRef.current.data.datasets[0].data = values.ok;
     chartRef.current.data.datasets[1].data = values.flagged;
@@ -346,22 +357,28 @@ function AutoencoderChart({ labels, values }) {
           {
             label: "Autoencoder Events",
             data: values.received,
-            borderColor: "#5DA8FF",
-            backgroundColor: "rgba(93,168,255,0.10)",
+            borderColor: "#00ffcc",
+            backgroundColor: "rgba(0, 255, 204, 0.08)",
             fill: true,
             tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: "#5DA8FF",
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: "#00ffcc",
+            pointBorderColor: "#03101c",
+            pointBorderWidth: 2,
           },
           {
             label: "Alerts",
             data: values.alerts,
-            borderColor: "#7C4DFF",
-            backgroundColor: "rgba(124,77,255,0.08)",
+            borderColor: "#ff4444",
+            backgroundColor: "rgba(255, 68, 68, 0.06)",
             fill: true,
             tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: "#7C4DFF",
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: "#ff4444",
+            pointBorderColor: "#03101c",
+            pointBorderWidth: 2,
             borderDash: [6, 4],
           },
         ],
@@ -369,13 +386,47 @@ function AutoencoderChart({ labels, values }) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 900 },
+        animation: { duration: 800 },
         plugins: {
-          legend: { labels: { boxWidth: 10, usePointStyle: true } },
+          legend: {
+            labels: {
+              color: "rgba(255,255,255,0.85)",
+              boxWidth: 14,
+              usePointStyle: true,
+              pointStyle: "circle",
+              padding: 16,
+              font: { size: 13, weight: "600" },
+            },
+          },
+          tooltip: {
+            backgroundColor: "rgba(0,0,0,0.8)",
+            titleFont: { size: 14, weight: "700" },
+            bodyFont: { size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+          }
         },
         scales: {
-          x: { grid: { display: false } },
-          y: { beginAtZero: true, border: { display: false } },
+          x: {
+            grid: { display: false },
+            ticks: { 
+              color: "rgba(255,255,255,0.6)",
+              font: { size: 12, weight: "500" },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            border: { display: false },
+            grid: { 
+              color: "rgba(255,255,255,0.06)",
+              drawBorder: false,
+            },
+            ticks: { 
+              color: "rgba(255,255,255,0.6)",
+              font: { size: 12 },
+              stepSize: 2,
+            },
+          },
         },
       },
     });
@@ -385,7 +436,6 @@ function AutoencoderChart({ labels, values }) {
 
   useEffect(() => {
     if (!chartRef.current) return;
-
     chartRef.current.data.labels = labels;
     chartRef.current.data.datasets[0].data = values.received;
     chartRef.current.data.datasets[1].data = values.alerts;
@@ -395,66 +445,6 @@ function AutoencoderChart({ labels, values }) {
   return (
     <div className="monitor-chart-wrap">
       <canvas ref={ref} />
-    </div>
-  );
-}
-
-function HealthDonut({ healthyRate, totalErrors, totalWarnings }) {
-  const ref = useRef(null);
-  const healthy = Number(String(healthyRate).replace("%", "")) || 0;
-  const unhealthy = Math.max(0, 100 - healthy);
-
-  useEffect(() => {
-    const chart = new Chart(ref.current, {
-      type: "doughnut",
-      data: {
-        labels: ["Healthy", "Needs attention"],
-        datasets: [
-          {
-            data: [healthy, unhealthy],
-            backgroundColor: [
-              "rgba(93,168,255,0.82)",
-              "rgba(124,77,255,0.35)",
-            ],
-            borderWidth: 0,
-            hoverOffset: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: "76%",
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true },
-        },
-      },
-    });
-
-    return () => chart.destroy();
-  }, [healthy, unhealthy]);
-
-  return (
-    <div className="monitor-health-card">
-      <div className="monitor-health-chart">
-        <canvas ref={ref} />
-        <div className="monitor-health-center">
-          <div className="monitor-health-value">{healthyRate}</div>
-          <div className="monitor-health-label">Healthy rate</div>
-        </div>
-      </div>
-
-      <div className="monitor-health-meta">
-        <div className="monitor-mini-kpi">
-          <span className="label">Errors</span>
-          <strong>{totalErrors}</strong>
-        </div>
-        <div className="monitor-mini-kpi">
-          <span className="label">Warnings</span>
-          <strong>{totalWarnings}</strong>
-        </div>
-      </div>
     </div>
   );
 }
@@ -473,8 +463,6 @@ export default function TechniqueDashboard() {
       generatorCount: 0,
       autoencoderCount: 0,
     },
-    generatorStats: {},
-    autoencoderStats: {},
     logs: [],
     senderChart: {
       ok: [0, 0, 0, 0, 0, 0, 0],
@@ -487,6 +475,7 @@ export default function TechniqueDashboard() {
   });
 
   const [loading, setLoading] = useState(true);
+
   const [alertModal, setAlertModal] = useState({
     show: false,
     type: "ERROR",
@@ -551,13 +540,13 @@ export default function TechniqueDashboard() {
           source: "GENERATOR",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
-          message: payload?.message || payload?.details || JSON.stringify(payload),
+          message:
+            payload?.message || payload?.details || JSON.stringify(payload),
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
         setDashboard((prev) => {
           const idx = getTodayIndex();
-
           const updatedOk = [...prev.senderChart.ok];
           const updatedFlagged = [...prev.senderChart.flagged];
 
@@ -572,6 +561,11 @@ export default function TechniqueDashboard() {
             entry.level === "ERROR"
               ? prev.stats.totalErrors + 1
               : prev.stats.totalErrors;
+
+          const totalWarnings =
+            entry.level === "WARN" || entry.level === "WARNING"
+              ? prev.stats.totalWarnings + 1
+              : prev.stats.totalWarnings;
 
           const healthyRate =
             totalLogs > 0
@@ -593,10 +587,7 @@ export default function TechniqueDashboard() {
               totalLogs,
               generatorCount: prev.stats.generatorCount + 1,
               totalErrors,
-              totalWarnings:
-                entry.level === "WARN" || entry.level === "WARNING"
-                  ? prev.stats.totalWarnings + 1
-                  : prev.stats.totalWarnings,
+              totalWarnings,
               healthyRate,
             },
           };
@@ -612,13 +603,13 @@ export default function TechniqueDashboard() {
           source: "AUTOENCODER",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
-          message: payload?.message || payload?.details || JSON.stringify(payload),
+          message:
+            payload?.message || payload?.details || JSON.stringify(payload),
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
         setDashboard((prev) => {
           const idx = getTodayIndex();
-
           const updatedReceived = [...prev.autoencoderChart.received];
           const updatedAlerts = [...prev.autoencoderChart.alerts];
 
@@ -633,6 +624,11 @@ export default function TechniqueDashboard() {
             entry.level === "ERROR"
               ? prev.stats.totalErrors + 1
               : prev.stats.totalErrors;
+
+          const totalWarnings =
+            entry.level === "WARN" || entry.level === "WARNING"
+              ? prev.stats.totalWarnings + 1
+              : prev.stats.totalWarnings;
 
           const healthyRate =
             totalLogs > 0
@@ -654,10 +650,7 @@ export default function TechniqueDashboard() {
               totalLogs,
               autoencoderCount: prev.stats.autoencoderCount + 1,
               totalErrors,
-              totalWarnings:
-                entry.level === "WARN" || entry.level === "WARNING"
-                  ? prev.stats.totalWarnings + 1
-                  : prev.stats.totalWarnings,
+              totalWarnings,
               healthyRate,
             },
           };
@@ -718,203 +711,144 @@ export default function TechniqueDashboard() {
   }
 
   return (
-    <div className="monitor-page container-fluid py-4">
-      <AlertsModal
-        show={alertModal.show}
-        type={alertModal.type}
-        logs={selectedAlertLogs}
-        onClose={() => setAlertModal({ show: false, type: "ERROR" })}
-      />
+    <div className="technique-dashboard-wrapper">
+      <div className="monitor-page container-fluid py-4">
+        <AlertsModal
+          show={alertModal.show}
+          type={alertModal.type}
+          logs={selectedAlertLogs}
+          onClose={() => setAlertModal({ show: false, type: "ERROR" })}
+        />
 
-      <div className="monitor-hero mb-4">
-        <div className="row g-4 align-items-stretch">
-          <div className="col-12 col-xl-8">
-            <div className="monitor-panel hero-panel h-100">
-              <div className="d-flex flex-wrap justify-content-between gap-3 align-items-start">
-                <div>
-                  <span className="monitor-overline">
-                    CURE · technical supervision
-                  </span>
+        <div className="monitor-hero mb-4">
+          <div className="monitor-panel hero-panel">
+            <div className="monitor-header-wrapper mb-3">
+              <div className="monitor-overline">
+                <span>CURE · TECHNICAL SUPERVISION</span>
 
-                  <h2 className="monitor-title mt-2 mb-2">
-                    Real-time Monitoring Dashboard
-                  </h2>
-
-                  <p className="monitor-subtitle mb-3">
-                    Live supervision of generator logs, autoencoder logs,
-                    technical references, and system alert activity.
-                  </p>
-
-                  <div className="monitor-floating-status">
-                    <span className="monitor-live-dot" />
-                    {heroPhrases[phraseIndex]}
-                  </div>
-                </div>
-              </div>
-
-              <div className="row g-3 mt-1">
-                {topStats.map((item) => (
-                  <div className="col-12 col-sm-6 col-lg-3" key={item.label}>
-                    <button
-                      type="button"
-                      disabled={!item.clickable}
-                      onClick={() =>
-                        item.clickable &&
-                        setAlertModal({ show: true, type: item.type })
-                      }
-                      className={`monitor-stat-card h-100 w-100 text-start ${
-                        item.clickable ? "monitor-stat-clickable" : ""
-                      } ${
-                        item.type === "ERROR"
-                          ? "monitor-stat-error"
-                          : item.type === "WARNING"
-                          ? "monitor-stat-warning"
-                          : ""
-                      }`}
-                    >
-                      <div className="monitor-stat-icon">
-                        <i className={`bi ${item.icon}`} />
-                      </div>
-
-                      <div className="monitor-stat-label">{item.label}</div>
-                      <div className="monitor-stat-value">{item.value}</div>
-                      <div className="monitor-stat-sub">{item.sub}</div>
-
-                      {item.clickable && (
-                        <div className="monitor-click-hint">
-                          Click to view details
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-xl-4">
-            <HealthDonut
-              healthyRate={dashboard.stats.healthyRate}
-              totalErrors={dashboard.stats.totalErrors}
-              totalWarnings={dashboard.stats.totalWarnings}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="row g-4 mb-4">
-        <div className="col-12 col-xl-8">
-          <div className="monitor-panel h-100">
-            <div className="monitor-section-header">
-              <div>
-                <h5 className="mb-1">Live Logs Center</h5>
-                <p className="mb-0">
-                  Real-time stream from generator and autoencoder services
-                </p>
+                <button className="monitor-live-btn">
+                  <span className="monitor-live-dot" />
+                  {heroPhrases[phraseIndex]}
+                </button>
               </div>
             </div>
 
-            <LogsTerminal logs={dashboard.logs} />
-          </div>
-        </div>
+            <h2 className="monitor-hero-title">What's about to break.</h2>
+            <p className="monitor-hero-subtitle">Before it does.</p>
 
-        <div className="col-12 col-xl-4">
-          <div className="monitor-panel h-100">
-            <div className="monitor-section-header">
-              <div>
-                <h5 className="mb-1">Technical Scope</h5>
-                <p className="mb-0">Supervised technical reference entities</p>
-              </div>
-            </div>
-
-            <div className="row g-3">
-              <div className="col-12">
-                <div className="monitor-soft-card">
-                  <span className="monitor-soft-label">Senders</span>
-                  <h3>{dashboard.totalSenders}</h3>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="monitor-soft-card">
-                  <span className="monitor-soft-label">Receivers</span>
-                  <h3>{dashboard.totalReceivers}</h3>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="monitor-soft-card">
-                  <span className="monitor-soft-label">Type Flux</span>
-                  <h3>{dashboard.totalTypeFlux}</h3>
-                </div>
-              </div>
-            </div>
-
-            <hr className="my-4" />
-
-            <div className="monitor-section-header mb-3">
-              <div>
-                <h6 className="mb-1">Quick Access</h6>
-                <p className="mb-0">Open technical data management screens</p>
-              </div>
-            </div>
-
-            <div className="d-flex flex-column gap-3">
-              {QUICK_LINKS.map((task) => (
-                <div className="monitor-task-card" key={task.title}>
-                  <div className="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                      <h6 className="mb-1">{task.title}</h6>
-                      <p className="mb-2">{task.desc}</p>
+            <div className="row g-4 mt-4">
+              {topStats.map((item) => (
+                <div className="col-6 col-xl-3" key={item.label}>
+                  <button
+                    type="button"
+                    disabled={!item.clickable}
+                    onClick={() =>
+                      item.clickable &&
+                      setAlertModal({ show: true, type: item.type })
+                    }
+                    className={`monitor-stat-card h-100 w-100 text-start ${
+                      item.clickable ? "monitor-stat-clickable" : ""
+                    } ${
+                      item.type === "ERROR"
+                        ? "monitor-stat-error"
+                        : item.type === "WARNING"
+                        ? "monitor-stat-warning"
+                        : ""
+                    }`}
+                  >
+                    <div className="monitor-stat-icon">
+                      <i className={`bi ${item.icon}`} />
                     </div>
 
-                    <span className={`badge text-bg-${task.badgeCls}`}>
-                      {task.badge}
-                    </span>
-                  </div>
+                    <div className="monitor-stat-label">{item.label}</div>
+                    <div className="monitor-stat-value">{item.value}</div>
+                    <div className="monitor-stat-sub">{item.sub}</div>
 
-                  <Link to={task.link} className="btn monitor-outline-btn btn-sm">
-                    {task.btn}
-                  </Link>
+                    {item.clickable && (
+                      <div className="monitor-click-hint">
+                        Click to view details
+                      </div>
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="row g-4">
-        <div className="col-12 col-xl-6">
-          <div className="monitor-panel h-100">
-            <div className="monitor-section-header">
-              <div>
-                <h5 className="mb-1">Generator Activity</h5>
-                <p className="mb-0">
-                  Normal vs flagged generator events over the week
-                </p>
+        <div className="row g-4 mb-4">
+          <h6 className="first_title">Manage Data Flow</h6>
+
+          {QUICK_LINKS.map((task) => (
+            <div className="col-12 col-md-4" key={task.title}>
+              <div className="monitor-task-card h-100">
+                <div className="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <h6 className="mb-1">{task.title}</h6>
+                    <p className="mb-2">{task.desc}</p>
+                  </div>
+
+                  <span className={`badge text-bg-${task.badgeCls}`}>
+                    {task.badge}
+                  </span>
+                </div>
+
+                <Link to={task.link} className="btn monitor-outline-btn btn-sm">
+                  {task.btn}
+                </Link>
               </div>
             </div>
+          ))}
+        </div>
 
-            <SenderChart
-              labels={dashboard.labels}
-              values={dashboard.senderChart}
-            />
+        <div className="row g-4 mb-4">
+          <div className="col-12">
+            <div className="monitor-panel">
+              <div className="mb-4 text-center">
+                <h2 className="monitor-logs-title">Live Logs</h2>
+                <p className="monitor-logs-subtitle">
+                  Real-time stream from generator and autoencoder services
+                </p>
+              </div>
+
+              <LogsTerminal logs={dashboard.logs} />
+            </div>
           </div>
         </div>
 
-        <div className="col-12 col-xl-6">
-          <div className="monitor-panel h-100">
-            <div className="monitor-section-header">
-              <div>
-                <h5 className="mb-1">Autoencoder Activity</h5>
-                <p className="mb-0">All events vs alert events over the week</p>
+        <div className="row g-4">
+          <div className="col-12 col-xl-6">
+            <div className="monitor-panel h-100">
+              <div className="monitor-section-header">
+                <div>
+                  <h5 className="mb-1">Generator Activity</h5>
+                  <p className="mb-0">Normal vs flagged events over the week</p>
+                </div>
               </div>
-            </div>
 
-            <AutoencoderChart
-              labels={dashboard.labels}
-              values={dashboard.autoencoderChart}
-            />
+              <SenderChart
+                labels={dashboard.labels}
+                values={dashboard.senderChart}
+              />
+            </div>
+          </div>
+
+          <div className="col-12 col-xl-6">
+            <div className="monitor-panel h-100">
+              <div className="monitor-section-header">
+                <div>
+                  <h5 className="mb-1">Autoencoder Activity</h5>
+                  <h6 className="mb-0">
+                    All events vs alert events over the week
+                  </h6>
+                </div>
+              </div>
+
+              <AutoencoderChart
+                labels={dashboard.labels}
+                values={dashboard.autoencoderChart}
+              />
+            </div>
           </div>
         </div>
       </div>

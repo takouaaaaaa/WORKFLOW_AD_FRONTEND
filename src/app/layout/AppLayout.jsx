@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Topbar from "./Topbar";
 import Sidebar from "./sidebar";
-
+import WelcomePage from "../../shared/ui/WelcomePage";
 import {
   clearToken,
   getRefreshToken,
@@ -21,6 +21,8 @@ export default function AppLayout() {
 
   const [user] = useState(() => getUserFromToken());
   const role = user?.roles?.[0];
+
+  const [welcomeDone, setWelcomeDone] = useState(false);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     role === "USER_TECHNIQUE"
@@ -54,10 +56,14 @@ export default function AppLayout() {
     return await updateMyProfile(data);
   };
 
-  if (!user) {
-    return null;
+  if (!user) return null;
+
+  // ── Welcome screen: full-screen, no chrome ──────────────────────────────
+  if (!welcomeDone) {
+    return <WelcomePage onDone={() => setWelcomeDone(true)} />;
   }
 
+  // ── Main app shell ───────────────────────────────────────────────────────
   return (
     <div className="app-shell">
       <Topbar

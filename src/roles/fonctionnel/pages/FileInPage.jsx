@@ -73,8 +73,8 @@ export default function FileInPage() {
         flowTypeRes,
       ] = await Promise.all([
         getFileIns(),
-        http.get("/sender"),
-        http.get("/receiver"),
+        http.get("/senders"),
+        http.get("/receivers"),
         http.get("/typeflux"),
       ]);
 

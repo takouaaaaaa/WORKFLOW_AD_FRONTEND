@@ -6,7 +6,7 @@ import {
   deleteReceiver,
 } from "../services/receiverService";
 import CrudModal from "../components/Crudmodal";
-import "../../fonctionnel/styles/FileInpage.css"; 
+import "../styles/SearchTechnique.css"; 
 
 const ITEMS_PER_PAGE = 10;
 

@@ -56,8 +56,8 @@ function getStatus(item) {
   ).toUpperCase();
 }
 
-const isOk = s => OK_STATUSES.includes(String(s || "").toUpperCase());
-const isError = s => [...FILEIN_ERRORS, ...FILEOUT_ERRORS].map(x => x.key).includes(String(s || "").toUpperCase());
+const isOk      = s => OK_STATUSES.includes(String(s || "").toUpperCase());
+const isError   = s => [...FILEIN_ERRORS, ...FILEOUT_ERRORS].map(x => x.key).includes(String(s || "").toUpperCase());
 const isWaiting = s => [...FILEIN_WAITS, ...FILEOUT_WAITS].map(x => x.key).includes(String(s || "").toUpperCase());
 
 function classify(s) {
@@ -69,9 +69,9 @@ function classify(s) {
 
 function chipClass(s) {
   const c = classify(s);
-  if (c === "processed")  return "ok";
-  if (c === "error")      return "err";
-  if (c === "waiting")    return "warn";
+  if (c === "processed") return "ok";
+  if (c === "error")     return "err";
+  if (c === "waiting")   return "warn";
   return "unk";
 }
 
@@ -110,35 +110,18 @@ function getId(item) {
 }
 
 /* ─── data builders ─────────────────────────────── */
-
-/**
- * Returns the most recent entries sorted by ID (highest ID first - newest)
- * Always shows the latest items based on insertion order
- */
 function buildRecentActivity(fileInData, fileOutData) {
   const all = [
-    ...fileInData.map(i => ({ 
-      ref: getRef(i, "IN"),  
-      type: "File IN",  
-      status: getStatus(i),  
-      date: resolveDate(i),
-      id: getId(i),
-      rawId: parseInt(getId(i)) || 0
+    ...fileInData.map(i => ({
+      ref: getRef(i, "IN"),  type: "File IN",  status: getStatus(i),
+      date: resolveDate(i),  id: getId(i),     rawId: parseInt(getId(i)) || 0,
     })),
-    ...fileOutData.map(i => ({ 
-      ref: getRef(i, "OUT"), 
-      type: "File OUT", 
-      status: getStatus(i),  
-      date: resolveDate(i),
-      id: getId(i),
-      rawId: parseInt(getId(i)) || 0
+    ...fileOutData.map(i => ({
+      ref: getRef(i, "OUT"), type: "File OUT", status: getStatus(i),
+      date: resolveDate(i),  id: getId(i),     rawId: parseInt(getId(i)) || 0,
     })),
   ];
-  
-  // Sort by ID (highest first - newest entries typically have higher IDs)
-  return all
-    .sort((a, b) => b.rawId - a.rawId)
-    .slice(0, 10); // Show up to 10 most recent entries by ID
+  return all.sort((a, b) => b.rawId - a.rawId).slice(0, 10);
 }
 
 function buildChartData(fileInData, fileOutData) {
@@ -160,13 +143,13 @@ function buildChartData(fileInData, fileOutData) {
   const labels = Object.keys(grouped).sort((a, b) => parseFR(a) - parseFR(b));
   return {
     labels,
-    bars: labels.map(l => grouped[l].in + grouped[l].out),
-    inCounts: labels.map(l => grouped[l].in),
-    outCounts: labels.map(l => grouped[l].out),
+    bars:            labels.map(l => grouped[l].in + grouped[l].out),
+    inCounts:        labels.map(l => grouped[l].in),
+    outCounts:       labels.map(l => grouped[l].out),
     processedCounts: labels.map(l => grouped[l].processed),
-    errorCounts: labels.map(l => grouped[l].error),
-    waitingCounts: labels.map(l => grouped[l].waiting),
-    inProgressCounts: labels.map(l => grouped[l].inProgress),
+    errorCounts:     labels.map(l => grouped[l].error),
+    waitingCounts:   labels.map(l => grouped[l].waiting),
+    inProgressCounts:labels.map(l => grouped[l].inProgress),
   };
 }
 
@@ -201,7 +184,7 @@ function LineChartInOut({ labels, inCounts, outCounts }) {
       data: {
         labels,
         datasets: [
-          { label: "File IN", data: inCounts, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,.06)", borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: "#6366f1" },
+          { label: "File IN",  data: inCounts,  borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,.06)", borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: "#6366f1" },
           { label: "File OUT", data: outCounts, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,.04)", borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: "#10b981", borderDash: [5, 3] },
         ],
       },
@@ -230,10 +213,10 @@ function LineChartLifecycle({ labels, processedCounts, errorCounts, waitingCount
       data: {
         labels,
         datasets: [
-          { label: "Processed", data: processedCounts, borderColor: "#10b981", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [] },
-          { label: "Errors", data: errorCounts, borderColor: "#f43f5e", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [3, 2] },
-          { label: "In progress", data: inProgressCounts, borderColor: "#6366f1", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [5, 3] },
-          { label: "Waiting", data: waitingCounts, borderColor: "#f59e0b", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [4, 2] },
+          { label: "Processed",   data: processedCounts,   borderColor: "#10b981", borderWidth: 1.5, tension: .4, pointRadius: 2 },
+          { label: "Errors",      data: errorCounts,       borderColor: "#f43f5e", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [3, 2] },
+          { label: "In progress", data: inProgressCounts,  borderColor: "#6366f1", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [5, 3] },
+          { label: "Waiting",     data: waitingCounts,     borderColor: "#f59e0b", borderWidth: 1.5, tension: .4, pointRadius: 2, borderDash: [4, 2] },
         ],
       },
       options: {
@@ -262,10 +245,9 @@ function BarChartVolume({ labels, bars }) {
         labels,
         datasets: [{
           label: "Volume", data: bars,
-          backgroundColor: bars.map((v, i) => {
+          backgroundColor: bars.map(v => {
             const max = Math.max(...bars, 1);
-            const opacity = 0.3 + 0.6 * (v / max);
-            return `rgba(99,102,241,${opacity.toFixed(2)})`;
+            return `rgba(99,102,241,${(0.3 + 0.6 * (v / max)).toFixed(2)})`;
           }),
           borderColor: "#6366f1", borderWidth: 1, borderRadius: 6,
         }],
@@ -323,18 +305,20 @@ function NotifDrawer({ notifications }) {
 /* ─── error analysis ────────────────────────────── */
 function ErrorCard({ fileInData, fileOutData, loading }) {
   const navigate = useNavigate();
-  const cntIn = key => fileInData.filter(x => getStatus(x) === key).length;
+  const cntIn  = key => fileInData.filter(x => getStatus(x) === key).length;
   const cntOut = key => fileOutData.filter(x => getStatus(x) === key).length;
 
-  const totalErrIn = FILEIN_ERRORS.reduce((s, x) => s + cntIn(x.key), 0);
+  const totalErrIn  = FILEIN_ERRORS.reduce((s, x) => s + cntIn(x.key), 0);
   const totalErrOut = FILEOUT_ERRORS.reduce((s, x) => s + cntOut(x.key), 0);
-  const totalWaitIn = FILEIN_WAITS.reduce((s, x) => s + cntIn(x.key), 0);
+  const totalWaitIn  = FILEIN_WAITS.reduce((s, x) => s + cntIn(x.key), 0);
   const totalWaitOut = FILEOUT_WAITS.reduce((s, x) => s + cntOut(x.key), 0);
-  const totalErr = totalErrIn + totalErrOut;
-  const totalWait = totalWaitIn + totalWaitOut;
-  const totalHealthy = fileInData.filter(x => isOk(getStatus(x))).length + fileOutData.filter(x => isOk(getStatus(x))).length;
+  const totalErr     = totalErrIn + totalErrOut;
+  const totalWait    = totalWaitIn + totalWaitOut;
+  const totalHealthy =
+    fileInData.filter(x => isOk(getStatus(x))).length +
+    fileOutData.filter(x => isOk(getStatus(x))).length;
 
-  const maxErr = Math.max(...FILEIN_ERRORS.map(s => cntIn(s.key)), ...FILEOUT_ERRORS.map(s => cntOut(s.key)), 1);
+  const maxErr  = Math.max(...FILEIN_ERRORS.map(s => cntIn(s.key)), ...FILEOUT_ERRORS.map(s => cntOut(s.key)), 1);
   const maxWait = Math.max(...FILEIN_WAITS.map(s => cntIn(s.key)), ...FILEOUT_WAITS.map(s => cntOut(s.key)), 1);
 
   const row = (key, label, count, total, max, kind, route) => {
@@ -360,9 +344,9 @@ function ErrorCard({ fileInData, fileOutData, loading }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 16 }}>
         {[
-          { label: "Critical errors", val: totalErr, color: "#f43f5e" },
-          { label: "Pending review", val: totalWait, color: "#f59e0b" },
-          { label: "Healthy flows", val: totalHealthy, color: "#10b981" },
+          { label: "Critical errors", val: totalErr,     color: "#f43f5e" },
+          { label: "Pending review",  val: totalWait,    color: "#f59e0b" },
+          { label: "Healthy flows",   val: totalHealthy, color: "#10b981" },
         ].map(m => (
           <div key={m.label} style={{ textAlign: "center", padding: "14px 8px", background: "var(--flat)", borderRadius: "var(--rs)", border: "1px solid var(--border-in)" }}>
             <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--mono)", color: m.color, marginBottom: 3 }}>{loading ? "—" : m.val}</div>
@@ -390,31 +374,46 @@ function ErrorCard({ fileInData, fileOutData, loading }) {
   );
 }
 
-/* ─── animated Cortex component ──────────────────── */
-function AnimatedCortex({ fluxData, totalErrors, totalProcessed, loading }) {
-  const [isGlowing, setIsGlowing] = useState(true);
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsGlowing(prev => !prev);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
+/* ─── Cyan particle-grid orb (replaces AnimatedCortex) ── */
+function CortexOrb({ fluxData, totalErrors, totalProcessed, loading }) {
   return (
     <div className="wd-cortex-animated">
+      {/* Orb */}
       <div className="wd-orb-wrap">
-        <div className="wd-ring2" />
-        <div className="wd-ring" />
-        <div className={`wd-orb ${isGlowing ? 'glowing' : ''}`}>
-          <div className="wd-orb-pulse" />
+        <div className="wd-orb-glow-2" />
+        <div className="wd-orb-glow" />
+        <div className="wd-orb-ring-outer" />
+        <div className="wd-orb-ring-dashed" />
+        <div className="wd-plasma-wave" />
+        <div className="wd-plasma-wave-2" />
+        <div className="wd-data-stream">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="wd-data-particle" />
+          ))}
+        </div>
+        {/* Core sphere */}
+        <div className="wd-orb-sphere">
+          <div className="wd-orb-scan" />
+        </div>
+        {/* Eclipse halo */}
+        <div className="wd-orb-eclipse" />
+        <div className="wd-orb-corona" />
+        {/* Metrics inside orb */}
+        <div className="wd-orb-inner">
+          <div className="wd-orb-inner-val">
+            {loading ? "—" : fluxData.length}
+          </div>
+          <div className="wd-orb-inner-lbl">FLUX</div>
         </div>
       </div>
+
       <div className="wd-cortex-name">CURE · CORTEX</div>
+
       <div className="wd-cortex-status">
         <span className="wd-status-dot" />
         {loading ? "Initializing..." : "Operational · Live"}
       </div>
+
       <div className="wd-cortex-metrics">
         <div className="wd-cm">
           <div className="wd-cm-val">{loading ? "—" : fluxData.length}</div>
@@ -429,8 +428,9 @@ function AnimatedCortex({ fluxData, totalErrors, totalProcessed, loading }) {
           <div className="wd-cm-lbl">Done</div>
         </div>
       </div>
+
       <div className="wd-cortex-energy">
-        <div className="wd-energy-bar" style={{ width: loading ? '0%' : '100%' }} />
+        <div className="wd-energy-bar" style={{ width: loading ? "0%" : "100%" }} />
       </div>
     </div>
   );
@@ -455,8 +455,8 @@ export default function FonctionnelDashboard() {
       const [fluxRes, inRes, outRes] = await Promise.all([
         getAllFlux(), getAllFileIn(), getAllFileOut(),
       ]);
-      const flux = normalize(fluxRes);
-      const fileIn = normalize(inRes);
+      const flux   = normalize(fluxRes);
+      const fileIn  = normalize(inRes);
       const fileOut = normalize(outRes);
       setFluxData(flux);
       setFileInData(fileIn);
@@ -484,7 +484,7 @@ export default function FonctionnelDashboard() {
 
   const { labels, bars, inCounts, outCounts, processedCounts, errorCounts, waitingCounts, inProgressCounts } = chartData;
 
-  const totalIn = fileInData.length;
+  const totalIn  = fileInData.length;
   const totalOut = fileOutData.length;
   const totalProcessed =
     fileInData.filter(x => isOk(getStatus(x))).length +
@@ -499,14 +499,14 @@ export default function FonctionnelDashboard() {
     fileInData.length + fileOutData.length - totalProcessed - totalErrors - totalWaiting
   );
   const successRate = totalOut ? Math.round((fileOutData.filter(x => isOk(getStatus(x))).length / totalOut) * 100) : 0;
-  const errorRate = totalOut ? Math.round((fileOutData.filter(x => isError(getStatus(x))).length / totalOut) * 100) : 0;
-  const progTotal = totalProcessed + totalWaiting + totalErrors + totalInProgress || 1;
+  const errorRate   = totalOut ? Math.round((fileOutData.filter(x => isError(getStatus(x))).length / totalOut) * 100) : 0;
+  const progTotal   = totalProcessed + totalWaiting + totalErrors + totalInProgress || 1;
 
   const PROGRESS = [
-    { label: "Processed", val: totalProcessed, color: "#10b981" },
-    { label: "Errors", val: totalErrors, color: "#f43f5e" },
-    { label: "In progress", val: totalInProgress, color: "#6366f1" },
-    { label: "Waiting", val: totalWaiting, color: "#f59e0b" },
+    { label: "Processed",   val: totalProcessed,  color: "#10b981" },
+    { label: "Errors",      val: totalErrors,      color: "#f43f5e" },
+    { label: "In progress", val: totalInProgress,  color: "#6366f1" },
+    { label: "Waiting",     val: totalWaiting,     color: "#f59e0b" },
   ];
 
   return (
@@ -534,10 +534,10 @@ export default function FonctionnelDashboard() {
         {/* ── KPI cards ── */}
         <div className="wd-kpis">
           {[
-            { label: "Total flux", val: loading ? "—" : fluxData.length, cls: "", sub: "All flows monitored", icon: "ti-topology-star-3" },
-            { label: "Total errors", val: loading ? "—" : totalErrors, cls: totalErrors > 0 ? "danger" : "ok", sub: "FileIn + FileOut errors", icon: "ti-alert-triangle" },
-            { label: "File IN", val: loading ? "—" : totalIn, cls: "warn", sub: "Records received", icon: "ti-file-import" },
-            { label: "Processed", val: loading ? "—" : totalProcessed, cls: "ok", sub: "Completed successfully", icon: "ti-circle-check" },
+            { label: "Total flux",    val: loading ? "—" : fluxData.length, cls: "",                              sub: "All flows monitored",    icon: "ti-topology-star-3" },
+            { label: "Total errors",  val: loading ? "—" : totalErrors,     cls: totalErrors > 0 ? "danger" : "ok", sub: "FileIn + FileOut errors", icon: "ti-alert-triangle"  },
+            { label: "File IN",       val: loading ? "—" : totalIn,         cls: "warn",                          sub: "Records received",       icon: "ti-file-import"     },
+            { label: "Processed",     val: loading ? "—" : totalProcessed,  cls: "ok",                            sub: "Completed successfully", icon: "ti-circle-check"    },
           ].map(k => (
             <div key={k.label} className="wd-kpi">
               <div className="wd-kpi-lbl">{k.label}</div>
@@ -548,15 +548,15 @@ export default function FonctionnelDashboard() {
           ))}
         </div>
 
-        {/* ── First row: Cortex + Charts ── */}
+        {/* ── Mid row: Cortex + Charts ── */}
         <div className="wd-mid">
-          {/* Cortex panel - NOW ON THE LEFT */}
+          {/* Cortex panel */}
           <div className="wd-card wd-cortex-card">
             <div className="wd-hd">
               <div className="wd-title">CURE · Cortex</div>
               <span className="wd-tag ok">{loading ? "…" : "Operational"}</span>
             </div>
-            <AnimatedCortex 
+            <CortexOrb
               fluxData={fluxData}
               totalErrors={totalErrors}
               totalProcessed={totalProcessed}
@@ -564,7 +564,7 @@ export default function FonctionnelDashboard() {
             />
           </div>
 
-          {/* File IN vs OUT chart */}
+          {/* File IN vs OUT */}
           <div className="wd-card">
             <div className="wd-hd">
               <div className="wd-title">File IN vs OUT</div>
@@ -582,10 +582,10 @@ export default function FonctionnelDashboard() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 14 }}>
               {[
-                { val: totalIn, lbl: "Total IN", color: "#6366f1" },
-                { val: totalOut, lbl: "Total OUT", color: "#10b981" },
-                { val: `${successRate}%`, lbl: "Success", color: "var(--t1)" },
-                { val: `${errorRate}%`, lbl: "Error rate", color: errorRate > 0 ? "#f43f5e" : "var(--t1)" },
+                { val: totalIn,          lbl: "Total IN",  color: "#6366f1"                               },
+                { val: totalOut,         lbl: "Total OUT", color: "#10b981"                               },
+                { val: `${successRate}%`,lbl: "Success",   color: "var(--t1)"                             },
+                { val: `${errorRate}%`,  lbl: "Error rate",color: errorRate > 0 ? "#f43f5e" : "var(--t1)"},
               ].map(k => (
                 <div key={k.lbl} style={{ textAlign: "center", background: "var(--flat)", borderRadius: "var(--rs)", border: "1px solid var(--border-in)", padding: "10px 6px" }}>
                   <div style={{ fontSize: 20, fontWeight: 800, fontFamily: "var(--mono)", color: k.color, lineHeight: 1.1 }}>{k.val}</div>
@@ -595,7 +595,7 @@ export default function FonctionnelDashboard() {
             </div>
           </div>
 
-          {/* Flow lifecycle chart */}
+          {/* Flow lifecycle */}
           <div className="wd-card">
             <div className="wd-hd">
               <div className="wd-title">Flow lifecycle</div>
@@ -621,11 +621,10 @@ export default function FonctionnelDashboard() {
           </div>
         </div>
 
-        {/* ── Bottom row: error analysis + activity ── */}
+        {/* ── Bottom row ── */}
         <div className="wd-bottom">
           <ErrorCard fileInData={fileInData} fileOutData={fileOutData} loading={loading} />
 
-          {/* Recent activity — shows most recent entries by ID */}
           <div className="wd-act-card">
             <div className="wd-act-hd">
               <div className="wd-title">Recent activity</div>
@@ -635,11 +634,7 @@ export default function FonctionnelDashboard() {
               <table className="wd-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Reference</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th>ID</th><th>Reference</th><th>Type</th><th>Status</th><th>Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -647,29 +642,25 @@ export default function FonctionnelDashboard() {
                     <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--t4)", padding: "24px 0" }}>Loading…</td></tr>
                   ) : recentFlows.length === 0 ? (
                     <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--t4)", padding: "24px 0" }}>No recent flows</td></tr>
-                  ) : (
-                    recentFlows.map((f, i) => (
-                      <tr key={`${f.ref}-${i}`} className={i === 0 ? 'wd-latest-row' : ''}>
-                        <td style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, color: "var(--brand)" }}>
-                          #{f.id}
-                        </td>
-                        <td>
-                          <span className="wd-ref">{String(f.ref).slice(0, 18)}</span>
-                          {i === 0 && <span className="wd-latest-badge">Latest</span>}
-                        </td>
-                        <td style={{ color: "var(--t3)", fontSize: 11 }}>{f.type}</td>
-                        <td><span className={`wd-chip ${chipClass(f.status)}`}>{f.status || "—"}</span></td>
-                        <td style={{ fontSize: 11, color: "var(--t4)" }}>{fmtDate(f.date)}</td>
-                      </tr>
-                    ))
-                  )}
+                  ) : recentFlows.map((f, i) => (
+                    <tr key={`${f.ref}-${i}`} className={i === 0 ? "wd-latest-row" : ""}>
+                      <td style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, color: "var(--brand)" }}>#{f.id}</td>
+                      <td>
+                        <span className="wd-ref">{String(f.ref).slice(0, 18)}</span>
+                        {i === 0 && <span className="wd-latest-badge">Latest</span>}
+                      </td>
+                      <td style={{ color: "var(--t3)", fontSize: 11 }}>{f.type}</td>
+                      <td><span className={`wd-chip ${chipClass(f.status)}`}>{f.status || "—"}</span></td>
+                      <td style={{ fontSize: 11, color: "var(--t4)" }}>{fmtDate(f.date)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
 
-        {/* ── Daily volume bar chart ── */}
+        {/* ── Daily volume ── */}
         <div className="wd-vol-card">
           <div className="wd-hd">
             <div className="wd-title">Daily volume trend</div>
