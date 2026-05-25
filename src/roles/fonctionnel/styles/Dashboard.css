@@ -1129,3 +1129,192 @@ body {
 @keyframes wd-energy{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @keyframes wd-p1{0%{opacity:0;transform:translate(0,0) scale(.5)}20%{opacity:1}80%{opacity:.8}100%{opacity:0;transform:translate(12px,-20px) scale(1.4)}}
 @keyframes wd-p2{0%{opacity:0;transform:translate(0,0) scale(.5)}20%{opacity:1}80%{opacity:.8}100%{opacity:0;transform:translate(-16px,-26px) scale(1.4)}}
+.wd-table-wrapper-full {
+  max-height: 520px;
+  border-top: 1px solid var(--border-in);
+}
+
+.wd-activity-table {
+  min-width: 760px;
+}
+
+.wd-activity-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(2, 10, 18, 0.96);
+}
+
+.wd-activity-table tbody tr:hover {
+  background: rgba(0, 229, 255, 0.06);
+}
+
+.wd-id-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.wd-type-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--t2);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.wd-date-cell {
+  font-family: var(--mono);
+  color: var(--t2) !important;
+  white-space: nowrap;
+}
+
+.wd-empty-cell {
+  text-align: center;
+  color: var(--t4);
+  padding: 28px 0 !important;
+}
+.wd-table-wrapper-full {
+  max-height: 520px;
+  border-top: 1px solid var(--border-in);
+}
+
+.wd-activity-table {
+  min-width: 900px;
+}
+
+.wd-activity-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(2, 10, 18, 0.96);
+}
+
+.wd-desc-cell {
+  max-width: 280px;
+  color: var(--t2) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wd-empty-cell {
+  text-align: center;
+  color: var(--t4);
+  padding: 28px 0 !important;
+}
+/* Add these styles to your existing Dashboard.css */
+
+/* Enhanced volume card styles */
+.wd-vol-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wd-vol-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Mini trend bar animations */
+@keyframes barRise {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: auto;
+    opacity: 1;
+  }
+}
+
+.wd-vol-card .mini-bar {
+  animation: barRise 0.4s ease-out backwards;
+}
+
+/* Stats counters animation */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wd-vol-card .stats-number {
+  animation: countUp 0.3s ease-out backwards;
+}
+
+/* Hover effect for trend indicators */
+.trend-up:hover, .trend-down:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Peak badge pulse */
+@keyframes peakPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  }
+}
+
+.peak-badge {
+  animation: peakPulse 2s ease-in-out infinite;
+}
+.wd-hourly-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.wd-hourly-big{
+  font-size:42px;
+  font-weight:800;
+  font-family:var(--mono);
+  color:var(--brand);
+  line-height:1;
+}
+
+.wd-hourly-sub{
+  font-size:11px;
+  color:var(--t3);
+  margin-top:6px;
+}
+
+.wd-hourly-stats{
+  display:flex;
+  gap:28px;
+}
+
+.wd-hourly-stats div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+}
+
+.wd-hourly-stats span{
+  font-size:10px;
+  text-transform:uppercase;
+  color:var(--t4);
+  margin-bottom:4px;
+}
+
+.wd-hourly-stats strong{
+  font-size:18px;
+  color:var(--t1);
+  font-family:var(--mono);
+}
+
+.wd-hourly-chart-wrap{
+  position:relative;
+  height:260px;
+}

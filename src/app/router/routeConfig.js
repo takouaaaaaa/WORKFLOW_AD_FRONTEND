@@ -14,12 +14,7 @@ export const MENU_BY_ROLE = {
   [ROLES.ADMIN]: [
     { label: "Dashboard", path: "/admin" },
     { label: "Users", path: "/admin/users" },
-    { label: "Senders", path: "/admin/senders" },
-    { label: "Receivers", path: "/admin/receivers" },
-    { label: "Type Flux", path: "/admin/typeflux" },
-    { label: "Flux", path: "/admin/flux" },
-    { label: "File IN", path: "/admin/file-in" },
-    { label: "File OUT", path: "/admin/file-out" },
+    
   ],
 
   [ROLES.USER_TECHNIQUE]: [

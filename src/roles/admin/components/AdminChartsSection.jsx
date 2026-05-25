@@ -302,14 +302,14 @@ export default function AdminChartsSection({ stats = {} }) {
           colors={["#7c6ff7", "#06b6d4", "#10b981"]}
           legend={[
             { label: "Admin",        color: "#7c6ff7", value: userStats.admin },
-            { label: "Fonctionnel",  color: "#06b6d4", value: userStats.fonctionnel },
+           { label: "Functional", color: "#06b6d4", value: userStats.fonctionnel },
             { label: "Technique",    color: "#10b981", value: userStats.technique },
           ]}
         />
 
         <DonutCard
           id="acd-c2"
-          title="Flux by sender"
+         title="Flows by sender"
           sub={`Total: ${totalSnd} flows`}
           total={totalSnd}
           totalLabel="flows"
@@ -324,7 +324,7 @@ export default function AdminChartsSection({ stats = {} }) {
 
         <DonutCard
           id="acd-c3"
-          title="Flux by receiver"
+          title="Flows by receiver"
           sub={`Total: ${totalRec} flows`}
           total={totalRec}
           totalLabel="flows"
@@ -339,7 +339,7 @@ export default function AdminChartsSection({ stats = {} }) {
 
         <DonutCard
           id="acd-c4"
-          title="Flux by type"
+          title="Flows by type"
           sub={`Total: ${totalTf} flows`}
           total={totalTf}
           totalLabel="flows"
@@ -390,7 +390,7 @@ export default function AdminChartsSection({ stats = {} }) {
 
         <LineCard
           id="acd-c7"
-          title="Type flux trend"
+          title="Flow type trend"
           sub="Flows by type per day"
           xLabels={trendLabels}
           legend={[

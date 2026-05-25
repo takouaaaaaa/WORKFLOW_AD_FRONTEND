@@ -55,8 +55,8 @@ export default function AddUserModal({ show, onClose, form, setForm, onSave }) {
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
               
-              <option value="USER_TECHNIQUE">Technique</option>
-              <option value="USER_FONCTIONNEL">Fonctionnel</option>
+              <option value="USER_TECHNIQUE">Technical</option>
+              <option value="USER_FONCTIONNEL">Functional</option>
             </select>
           </div>
 

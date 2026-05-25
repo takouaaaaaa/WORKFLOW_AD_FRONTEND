@@ -188,9 +188,9 @@ const handleSearch = () => {
     <div className="fileout-page-bootstrap">
       {urlStatus && (
         <div className="fileout-status-banner">
-          Filtré par statut : <strong>{urlStatus}</strong>
+          Filtered by status: <strong>{urlStatus}</strong>
           <span className="fileout-status-count">
-            {filteredRows.length} résultat(s)
+            {filteredRows.length} result(s)
           </span>
         </div>
       )}

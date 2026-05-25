@@ -62,7 +62,7 @@ function UserSidebar({ activePage, onNavigate }) {
         </div>
       ))}
       <div className="palm-sidebar-section" style={{ marginTop: 12 }}>Links</div>
-      <div className="palm-nav-item">🏦 Banque de France</div>
+      <div className="palm-nav-item">🏦 Bank of France</div>
       <div className="palm-nav-item">📖 WIKI CURE</div>
     </div>
   );

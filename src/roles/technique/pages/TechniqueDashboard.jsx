@@ -6,9 +6,7 @@ import "../styles/TechniqueDashboard.css";
 
 import {
   Chart,
-  BarController,
   LineController,
-  BarElement,
   LineElement,
   PointElement,
   CategoryScale,
@@ -24,9 +22,7 @@ import {
 } from "../services/techniqueDashboardService";
 
 Chart.register(
-  BarController,
   LineController,
-  BarElement,
   LineElement,
   PointElement,
   CategoryScale,
@@ -39,7 +35,7 @@ Chart.register(
 const QUICK_LINKS = [
   {
     title: "Senders Registry",
-    desc: "Monitor sender references and clean technical mapping data.",
+    desc: "Monitor sender references and mapping data.",
     badge: "Monitoring",
     badgeCls: "success",
     link: "/technique/senders",
@@ -47,26 +43,21 @@ const QUICK_LINKS = [
   },
   {
     title: "Receivers Registry",
-    desc: "Control receiver mapping, routing details, and destination health.",
+    desc: "Control routing and receiver mapping.",
     badge: "Routing",
     badgeCls: "primary",
     link: "/technique/receivers",
     btn: "Open Receivers",
   },
   {
-    title: "Type Flux Control",
-    desc: "Supervise technical flow categories used by generator and downstream services.",
+    title: "Flow Type Control",
+    desc: "Manage technical flow structures.",
     badge: "Structure",
     badgeCls: "warning",
     link: "/technique/typeflux",
-    btn: "Open Type Flux",
+    btn: "Open Flow Types",
   },
 ];
-
-function getTodayIndex() {
-  const today = new Date().getDay();
-  return today === 0 ? 6 : today - 1;
-}
 
 function formatDateTime(value) {
   if (!value) return "No timestamp";
@@ -95,88 +86,39 @@ function isError(log) {
   return String(log?.level || "").toUpperCase() === "ERROR";
 }
 
-function LogsTerminal({ logs }) {
-  const bodyRef = useRef(null);
-
-  useEffect(() => {
-    if (!bodyRef.current) return;
-    bodyRef.current.scrollTop = 0;
-  }, [logs]);
-
-  return (
-    <div className="monitor-terminal">
-      <div className="monitor-terminal-header">
-        <div className="d-flex align-items-center gap-2">
-          <span className="monitor-live-dot" />
-          <span className="monitor-terminal-title">Live Monitoring Feed</span>
-        </div>
-        <span className="monitor-terminal-subtitle">
-          generator + autoencoder
-        </span>
-      </div>
-
-      <div className="monitor-terminal-body" ref={bodyRef}>
-        {logs.length === 0 ? (
-          <div className="monitor-empty-log">No logs available.</div>
-        ) : (
-          logs.map((log) => (
-            <div
-              key={log.id}
-              className={`monitor-log-line ${levelClass(log.level)}`}
-            >
-              <div className="monitor-log-meta">
-                <span className={`monitor-source-pill ${sourceClass(log.source)}`}>
-                  {log.source}
-                </span>
-
-                <span className={`badge text-bg-${levelClass(log.level)}`}>
-                  {log.level}
-                </span>
-
-                <span className="monitor-phase-pill">{log.phase}</span>
-
-                <span className="monitor-log-time">
-                  {formatDateTime(log.timestamp)}
-                </span>
-              </div>
-
-              <div className="monitor-log-message">{log.message}</div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
 function AlertsModal({ show, type, logs, onClose }) {
   if (!show) return null;
 
-  const title = type === "ERROR" ? "Error Logs" : "Warning Logs";
   const isErrorType = type === "ERROR";
+  const title = isErrorType ? "Error Logs" : "Warning Logs";
+
+  const cleanLogs = logs.filter((log) => {
+    const level = String(log?.level || "").toUpperCase();
+    return isErrorType ? level === "ERROR" : ["WARN", "WARNING"].includes(level);
+  });
 
   return createPortal(
     <>
       <div className="monitor-modal-backdrop" onClick={onClose} />
 
       <div className="monitor-modal-shell">
-        <div className="monitor-modal-card">
+        <div className="monitor-modal-card monitor-modal-dark">
           <div className="monitor-modal-header">
             <div>
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex align-items-center gap-3">
                 <span
                   className={`monitor-modal-main-badge ${
                     isErrorType ? "error" : "warning"
                   }`}
                 >
-                  {type}
+                  {isErrorType ? "ERROR" : "WARNING"}
                 </span>
 
                 <h5 className="monitor-modal-title">{title}</h5>
               </div>
 
               <p className="monitor-modal-subtitle">
-                {logs.length} event(s) found in live monitoring logs
+                {cleanLogs.length} event(s) found
               </p>
             </div>
 
@@ -185,47 +127,64 @@ function AlertsModal({ show, type, logs, onClose }) {
               className="monitor-modal-close"
               onClick={onClose}
             >
-              <i className="bi bi-x-lg" />
+              ✕
             </button>
           </div>
 
           <div className="monitor-modal-body">
-            {logs.length === 0 ? (
-              <div className="monitor-modal-empty">
-                No {type.toLowerCase()} logs found.
+            {cleanLogs.length === 0 ? (
+              <div className="monitor-modal-empty-dark">
+                <div className="monitor-empty-icon">
+                  {isErrorType ? "✖" : "⚠"}
+                </div>
+
+                <h4>No {isErrorType ? "Errors" : "Warnings"} Found</h4>
+
+                <p>
+                  The monitoring system did not detect any{" "}
+                  {isErrorType ? "critical errors" : "warning events"}.
+                </p>
               </div>
             ) : (
               <div className="monitor-alert-list">
-                {logs.map((log) => (
+                {cleanLogs.map((log) => (
                   <div
                     key={log.id}
-                    className={`monitor-alert-item ${levelClass(log.level)}`}
+                    className={`monitor-alert-item-dark ${
+                      isErrorType ? "error" : "warning"
+                    }`}
                   >
                     <div className="monitor-alert-top">
-                      <span
-                        className={`monitor-alert-badge ${
-                          log.level === "ERROR" ? "error" : "warn"
-                        }`}
-                      >
-                        {log.level}
-                      </span>
+                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <span
+                          className={`monitor-alert-badge ${
+                            isErrorType ? "error" : "warn"
+                          }`}
+                        >
+                          {String(log.level || type).toUpperCase()}
+                        </span>
 
-                      <span
-                        className={`monitor-source-pill ${sourceClass(
-                          log.source
-                        )}`}
-                      >
-                        {log.source}
-                      </span>
+                        <span
+                          className={`monitor-source-pill ${sourceClass(
+                            log.source
+                          )}`}
+                        >
+                          {log.source || "SYSTEM"}
+                        </span>
 
-                      <span className="monitor-phase-light">{log.phase}</span>
+                        <span className="monitor-phase-light">
+                          {log.phase || "GENERAL"}
+                        </span>
+                      </div>
 
                       <span className="monitor-alert-time">
                         {formatDateTime(log.timestamp)}
                       </span>
                     </div>
 
-                    <div className="monitor-alert-message">{log.message}</div>
+                    <div className="monitor-alert-message">
+                      {log.message || "No message available"}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -233,7 +192,7 @@ function AlertsModal({ show, type, logs, onClose }) {
           </div>
 
           <div className="monitor-modal-footer">
-            <button className="btn btn-secondary px-4" onClick={onClose}>
+            <button className="btn monitor-modal-dark-btn" onClick={onClose}>
               Close
             </button>
           </div>
@@ -244,214 +203,256 @@ function AlertsModal({ show, type, logs, onClose }) {
   );
 }
 
-function SenderChart({ labels, values }) {
+function MiniCurve({ type, logs }) {
   const ref = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    chartRef.current = new Chart(ref.current, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [
-          {
-            label: "Normal",
-            data: values.ok,
-            backgroundColor: "rgba(0, 255, 204, 0.35)",
-            borderColor: "rgba(0, 255, 204, 0.8)",
-            borderWidth: 2,
-            borderRadius: 8,
-            borderSkipped: false,
-            barPercentage: 0.7,
-          },
-          {
-            label: "Flagged",
-            data: values.flagged,
-            backgroundColor: "rgba(255, 68, 68, 0.55)",
-            borderColor: "rgba(255, 68, 68, 0.9)",
-            borderWidth: 2,
-            borderRadius: 8,
-            borderSkipped: false,
-            barPercentage: 0.7,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 800 },
-        plugins: {
-          legend: {
-            labels: {
-              color: "rgba(255,255,255,0.85)",
-              boxWidth: 14,
-              usePointStyle: true,
-              pointStyle: "circle",
-              padding: 16,
-              font: { size: 13, weight: "600" },
-            },
-          },
-          tooltip: {
-            backgroundColor: "rgba(0,0,0,0.8)",
-            titleFont: { size: 14, weight: "700" },
-            bodyFont: { size: 13 },
-            padding: 12,
-            cornerRadius: 8,
+    if (!ref.current) return;
+
+    chartRef.current?.destroy();
+
+    const last = logs.slice(0, 12).reverse();
+
+    const labels = last.length
+      ? last.map((_, i) => `T${i + 1}`)
+      : ["T1", "T2", "T3", "T4", "T5", "T6"];
+
+    const values = last.length
+      ? last.map((log, i) => {
+          const level = String(log.level || "").toUpperCase();
+
+          if (type === "autoencoder") {
+            if (level === "ERROR") return 0.92;
+            if (level === "WARN" || level === "WARNING") return 0.65;
+            return 0.22 + i * 0.02;
           }
-        },
-        scales: {
-          x: {
-            stacked: true,
-            grid: { display: false },
-            ticks: { 
-              color: "rgba(255,255,255,0.6)",
-              font: { size: 12, weight: "500" },
-            },
-          },
-          y: {
-            stacked: true,
-            beginAtZero: true,
-            border: { display: false },
-            grid: { 
-              color: "rgba(255,255,255,0.06)",
-              drawBorder: false,
-            },
-            ticks: { 
-              color: "rgba(255,255,255,0.6)",
-              font: { size: 12 },
-              stepSize: 2,
-            },
-          },
-        },
-      },
-    });
 
-    return () => chartRef.current?.destroy();
-  }, []);
+          if (level === "ERROR") return 85;
+          if (level === "WARN" || level === "WARNING") return 55;
+          return 25 + i * 3;
+        })
+      : type === "autoencoder"
+      ? [0.18, 0.22, 0.25, 0.31, 0.38, 0.28]
+      : [20, 35, 28, 42, 58, 47];
 
-  useEffect(() => {
-    if (!chartRef.current) return;
-    chartRef.current.data.labels = labels;
-    chartRef.current.data.datasets[0].data = values.ok;
-    chartRef.current.data.datasets[1].data = values.flagged;
-    chartRef.current.update();
-  }, [labels, values]);
+    const threshold =
+      type === "autoencoder" ? values.map(() => 0.5) : values.map(() => 60);
 
-  return (
-    <div className="monitor-chart-wrap">
-      <canvas ref={ref} />
-    </div>
-  );
-}
-
-function AutoencoderChart({ labels, values }) {
-  const ref = useRef(null);
-  const chartRef = useRef(null);
-
-  useEffect(() => {
     chartRef.current = new Chart(ref.current, {
       type: "line",
       data: {
         labels,
         datasets: [
           {
-            label: "Autoencoder Events",
-            data: values.received,
+            label:
+              type === "autoencoder" ? "Reconstruction error" : "CBR score",
+            data: values,
             borderColor: "#00ffcc",
             backgroundColor: "rgba(0, 255, 204, 0.08)",
             fill: true,
             tension: 0.4,
-            pointRadius: 5,
-            pointHoverRadius: 7,
+            borderWidth: 2,
+            pointRadius: 3,
             pointBackgroundColor: "#00ffcc",
-            pointBorderColor: "#03101c",
-            pointBorderWidth: 2,
           },
           {
-            label: "Alerts",
-            data: values.alerts,
+            label: "Threshold",
+            data: threshold,
             borderColor: "#ff4444",
-            backgroundColor: "rgba(255, 68, 68, 0.06)",
-            fill: true,
-            tension: 0.4,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBackgroundColor: "#ff4444",
-            pointBorderColor: "#03101c",
-            pointBorderWidth: 2,
             borderDash: [6, 4],
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 800 },
         plugins: {
           legend: {
             labels: {
-              color: "rgba(255,255,255,0.85)",
-              boxWidth: 14,
+              color: "rgba(255,255,255,0.75)",
+              boxWidth: 10,
               usePointStyle: true,
-              pointStyle: "circle",
-              padding: 16,
-              font: { size: 13, weight: "600" },
+              font: { size: 11 },
             },
           },
-          tooltip: {
-            backgroundColor: "rgba(0,0,0,0.8)",
-            titleFont: { size: 14, weight: "700" },
-            bodyFont: { size: 13 },
-            padding: 12,
-            cornerRadius: 8,
-          }
         },
         scales: {
           x: {
             grid: { display: false },
-            ticks: { 
-              color: "rgba(255,255,255,0.6)",
-              font: { size: 12, weight: "500" },
-            },
+            ticks: { color: "rgba(255,255,255,0.45)", font: { size: 10 } },
           },
           y: {
             beginAtZero: true,
-            border: { display: false },
-            grid: { 
-              color: "rgba(255,255,255,0.06)",
-              drawBorder: false,
-            },
-            ticks: { 
-              color: "rgba(255,255,255,0.6)",
-              font: { size: 12 },
-              stepSize: 2,
-            },
+            grid: { color: "rgba(255,255,255,0.05)" },
+            ticks: { color: "rgba(255,255,255,0.45)", font: { size: 10 } },
           },
         },
       },
     });
 
     return () => chartRef.current?.destroy();
-  }, []);
-
-  useEffect(() => {
-    if (!chartRef.current) return;
-    chartRef.current.data.labels = labels;
-    chartRef.current.data.datasets[0].data = values.received;
-    chartRef.current.data.datasets[1].data = values.alerts;
-    chartRef.current.update();
-  }, [labels, values]);
+  }, [logs, type]);
 
   return (
-    <div className="monitor-chart-wrap">
+    <div className="monitor-mini-curve">
       <canvas ref={ref} />
+    </div>
+  );
+}
+
+function MathBox({ type }) {
+  if (type === "AUTOENCODER") {
+    return (
+      <div className="monitor-math-box">
+        <div className="monitor-math-title">Autoencoder Logic</div>
+
+        <div className="monitor-formula">
+          Compare original data with reconstructed data
+        </div>
+
+        <p>
+          The AI reads the File IN data, rebuilds it, then checks if the rebuilt
+          version is very different from the original. If the difference is too
+          high, the system marks the flow as suspicious or anomalous.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="monitor-math-box">
+      <div className="monitor-math-title">CBR Logic</div>
+
+      <div className="monitor-formula">
+        Compare current case with previous cases
+      </div>
+
+      <p>
+        CBR looks at old similar cases already handled by the system. If it
+        finds a very similar situation, it suggests a decision based on what
+        happened before.
+      </p>
+    </div>
+  );
+}
+
+function LogsSection({ title, subtitle, logs, source }) {
+  const errors = logs.filter((l) => l.level === "ERROR").length;
+  const warnings = logs.filter((l) =>
+    ["WARN", "WARNING"].includes(l.level)
+  ).length;
+  const healthy = logs.filter(
+    (l) => !["ERROR", "WARN", "WARNING"].includes(l.level)
+  ).length;
+
+  return (
+    <div className="monitor-panel h-100 monitor-clean-card">
+      <div className="monitor-clean-head">
+        <div>
+          <h5>{title}</h5>
+          <p>{subtitle}</p>
+        </div>
+
+        <span
+          className={`monitor-clean-badge ${
+            source === "AUTOENCODER" ? "autoencoder" : "generator"
+          }`}
+        >
+          {source === "AUTOENCODER" ? "IA" : "CBR"}
+        </span>
+      </div>
+
+      <div className="monitor-clean-grid">
+        <div>
+          <span>Total Events</span>
+          <strong>{logs.length}</strong>
+        </div>
+
+        <div>
+          <span>Errors</span>
+          <strong className="danger">{errors}</strong>
+        </div>
+
+        <div>
+          <span>Warnings</span>
+          <strong className="warning">{warnings}</strong>
+        </div>
+
+        <div>
+          <span>Healthy</span>
+          <strong className="success">{healthy}</strong>
+        </div>
+      </div>
+
+      <MiniCurve
+        type={source === "AUTOENCODER" ? "autoencoder" : "generator"}
+        logs={logs}
+      />
+
+      <MathBox type={source} />
+
+      <div className="monitor-mini-terminal mt-4">
+        <div className="monitor-terminal-header">
+          <div className="d-flex align-items-center gap-2">
+            <span className="monitor-live-dot" />
+
+            <span className="monitor-terminal-title">
+              {source === "AUTOENCODER" ? "Autoencoder Logs" : "CBR Logs"}
+            </span>
+          </div>
+
+          <span className="monitor-terminal-subtitle">
+            {source.toLowerCase()}
+          </span>
+        </div>
+
+        <div className="monitor-terminal-body">
+          {logs.length === 0 ? (
+            <div className="monitor-empty-log">No logs available.</div>
+          ) : (
+            logs.slice(0, 20).map((log) => (
+              <div
+                key={log.id}
+                className={`monitor-log-line ${levelClass(log.level)}`}
+              >
+                <div className="monitor-log-meta">
+                  <span
+                    className={`monitor-source-pill ${sourceClass(log.source)}`}
+                  >
+                    {log.source}
+                  </span>
+
+                  <span className={`badge text-bg-${levelClass(log.level)}`}>
+                    {log.level}
+                  </span>
+
+                  <span className="monitor-phase-pill">
+                    {log.phase || "GENERAL"}
+                  </span>
+
+                  <span className="monitor-log-time">
+                    {formatDateTime(log.timestamp)}
+                  </span>
+                </div>
+
+                <div className="monitor-log-message">
+                  {log.message || "No message available"}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function TechniqueDashboard() {
   const [dashboard, setDashboard] = useState({
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     totalSenders: 0,
     totalReceivers: 0,
     totalTypeFlux: 0,
@@ -464,18 +465,9 @@ export default function TechniqueDashboard() {
       autoencoderCount: 0,
     },
     logs: [],
-    senderChart: {
-      ok: [0, 0, 0, 0, 0, 0, 0],
-      flagged: [0, 0, 0, 0, 0, 0, 0],
-    },
-    autoencoderChart: {
-      received: [0, 0, 0, 0, 0, 0, 0],
-      alerts: [0, 0, 0, 0, 0, 0, 0],
-    },
   });
 
   const [loading, setLoading] = useState(true);
-
   const [alertModal, setAlertModal] = useState({
     show: false,
     type: "ERROR",
@@ -491,6 +483,16 @@ export default function TechniqueDashboard() {
     [dashboard.logs]
   );
 
+  const generatorLogs = useMemo(
+    () => dashboard.logs.filter((l) => l.source === "GENERATOR"),
+    [dashboard.logs]
+  );
+
+  const autoencoderLogs = useMemo(
+    () => dashboard.logs.filter((l) => l.source === "AUTOENCODER"),
+    [dashboard.logs]
+  );
+
   const selectedAlertLogs =
     alertModal.type === "ERROR" ? errorLogs : warningLogs;
 
@@ -498,10 +500,10 @@ export default function TechniqueDashboard() {
     () => [
       `Monitoring ${dashboard.stats.generatorCount} generator events`,
       `Watching ${dashboard.stats.autoencoderCount} autoencoder events`,
-      `${dashboard.totalSenders} senders currently referenced`,
+      `${dashboard.totalSenders} senders referenced`,
       `${dashboard.totalReceivers} receivers mapped`,
-      `${dashboard.totalTypeFlux} type flux entries supervised`,
-      `${dashboard.stats.totalErrors} errors require technical attention`,
+      `${dashboard.totalTypeFlux} flow types supervised`,
+      `${dashboard.stats.totalErrors} errors require attention`,
     ],
     [dashboard]
   );
@@ -529,6 +531,12 @@ export default function TechniqueDashboard() {
 
   useEffect(() => {
     loadDashboard();
+
+    const refresh = setInterval(() => {
+      loadDashboard();
+    }, 60000);
+
+    return () => clearInterval(refresh);
   }, []);
 
   useEffect(() => {
@@ -536,7 +544,7 @@ export default function TechniqueDashboard() {
       "/api/generator/logs/stream",
       (payload) => {
         const entry = {
-          id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          id: `g-${Date.now()}`,
           source: "GENERATOR",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
@@ -545,53 +553,10 @@ export default function TechniqueDashboard() {
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
-        setDashboard((prev) => {
-          const idx = getTodayIndex();
-          const updatedOk = [...prev.senderChart.ok];
-          const updatedFlagged = [...prev.senderChart.flagged];
-
-          if (["WARN", "WARNING", "ERROR"].includes(entry.level)) {
-            updatedFlagged[idx] += 1;
-          } else {
-            updatedOk[idx] += 1;
-          }
-
-          const totalLogs = prev.stats.totalLogs + 1;
-          const totalErrors =
-            entry.level === "ERROR"
-              ? prev.stats.totalErrors + 1
-              : prev.stats.totalErrors;
-
-          const totalWarnings =
-            entry.level === "WARN" || entry.level === "WARNING"
-              ? prev.stats.totalWarnings + 1
-              : prev.stats.totalWarnings;
-
-          const healthyRate =
-            totalLogs > 0
-              ? `${Math.max(
-                  0,
-                  Math.round(((totalLogs - totalErrors) / totalLogs) * 100)
-                )}%`
-              : "100%";
-
-          return {
-            ...prev,
-            senderChart: {
-              ok: updatedOk,
-              flagged: updatedFlagged,
-            },
-            logs: [entry, ...prev.logs].slice(0, 160),
-            stats: {
-              ...prev.stats,
-              totalLogs,
-              generatorCount: prev.stats.generatorCount + 1,
-              totalErrors,
-              totalWarnings,
-              healthyRate,
-            },
-          };
-        });
+        setDashboard((prev) => ({
+          ...prev,
+          logs: [entry, ...prev.logs].slice(0, 200),
+        }));
       }
     );
 
@@ -599,7 +564,7 @@ export default function TechniqueDashboard() {
       "/api/autoencoder/logs/stream",
       (payload) => {
         const entry = {
-          id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          id: `a-${Date.now()}`,
           source: "AUTOENCODER",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
@@ -608,53 +573,10 @@ export default function TechniqueDashboard() {
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
-        setDashboard((prev) => {
-          const idx = getTodayIndex();
-          const updatedReceived = [...prev.autoencoderChart.received];
-          const updatedAlerts = [...prev.autoencoderChart.alerts];
-
-          updatedReceived[idx] += 1;
-
-          if (["WARN", "WARNING", "ERROR"].includes(entry.level)) {
-            updatedAlerts[idx] += 1;
-          }
-
-          const totalLogs = prev.stats.totalLogs + 1;
-          const totalErrors =
-            entry.level === "ERROR"
-              ? prev.stats.totalErrors + 1
-              : prev.stats.totalErrors;
-
-          const totalWarnings =
-            entry.level === "WARN" || entry.level === "WARNING"
-              ? prev.stats.totalWarnings + 1
-              : prev.stats.totalWarnings;
-
-          const healthyRate =
-            totalLogs > 0
-              ? `${Math.max(
-                  0,
-                  Math.round(((totalLogs - totalErrors) / totalLogs) * 100)
-                )}%`
-              : "100%";
-
-          return {
-            ...prev,
-            autoencoderChart: {
-              received: updatedReceived,
-              alerts: updatedAlerts,
-            },
-            logs: [entry, ...prev.logs].slice(0, 160),
-            stats: {
-              ...prev.stats,
-              totalLogs,
-              autoencoderCount: prev.stats.autoencoderCount + 1,
-              totalErrors,
-              totalWarnings,
-              healthyRate,
-            },
-          };
-        });
+        setDashboard((prev) => ({
+          ...prev,
+          logs: [entry, ...prev.logs].slice(0, 200),
+        }));
       }
     );
 
@@ -672,26 +594,26 @@ export default function TechniqueDashboard() {
       icon: "bi-activity",
       clickable: false,
     },
-    {
-      label: "Errors",
-      value: dashboard.stats.totalErrors,
-      sub: "Critical technical events",
-      icon: "bi-exclamation-triangle",
-      clickable: true,
-      type: "ERROR",
-    },
-    {
-      label: "Warnings",
-      value: dashboard.stats.totalWarnings,
-      sub: "Need technician review",
-      icon: "bi-bell",
-      clickable: true,
-      type: "WARNING",
-    },
+   {
+  label: "Errors",
+  value: errorLogs.length,
+  sub: "Critical events",
+  icon: "bi-exclamation-triangle",
+  clickable: true,
+  type: "ERROR",
+},
+{
+  label: "Warnings",
+  value: warningLogs.length,
+  sub: "Need review",
+  icon: "bi-bell",
+  clickable: true,
+  type: "WARNING",
+},
     {
       label: "Healthy Rate",
       value: dashboard.stats.healthyRate,
-      sub: "Current monitoring health",
+      sub: "Monitoring health",
       icon: "bi-heart-pulse",
       clickable: false,
     },
@@ -702,8 +624,9 @@ export default function TechniqueDashboard() {
       <div className="monitor-page d-flex align-items-center justify-content-center">
         <div className="text-center">
           <div className="spinner-border monitor-spinner mb-3" role="status" />
+
           <div className="monitor-loading-text">
-            Loading technical monitoring dashboard...
+            Loading technical dashboard...
           </div>
         </div>
       </div>
@@ -717,7 +640,12 @@ export default function TechniqueDashboard() {
           show={alertModal.show}
           type={alertModal.type}
           logs={selectedAlertLogs}
-          onClose={() => setAlertModal({ show: false, type: "ERROR" })}
+          onClose={() =>
+            setAlertModal({
+              show: false,
+              type: "ERROR",
+            })
+          }
         />
 
         <div className="monitor-hero mb-4">
@@ -734,6 +662,7 @@ export default function TechniqueDashboard() {
             </div>
 
             <h2 className="monitor-hero-title">What's about to break.</h2>
+
             <p className="monitor-hero-subtitle">Before it does.</p>
 
             <div className="row g-4 mt-4">
@@ -744,7 +673,10 @@ export default function TechniqueDashboard() {
                     disabled={!item.clickable}
                     onClick={() =>
                       item.clickable &&
-                      setAlertModal({ show: true, type: item.type })
+                      setAlertModal({
+                        show: true,
+                        type: item.type,
+                      })
                     }
                     className={`monitor-stat-card h-100 w-100 text-start ${
                       item.clickable ? "monitor-stat-clickable" : ""
@@ -761,7 +693,9 @@ export default function TechniqueDashboard() {
                     </div>
 
                     <div className="monitor-stat-label">{item.label}</div>
+
                     <div className="monitor-stat-value">{item.value}</div>
+
                     <div className="monitor-stat-sub">{item.sub}</div>
 
                     {item.clickable && (
@@ -785,6 +719,7 @@ export default function TechniqueDashboard() {
                 <div className="d-flex justify-content-between align-items-start gap-2">
                   <div>
                     <h6 className="mb-1">{task.title}</h6>
+
                     <p className="mb-2">{task.desc}</p>
                   </div>
 
@@ -801,54 +736,23 @@ export default function TechniqueDashboard() {
           ))}
         </div>
 
-        <div className="row g-4 mb-4">
-          <div className="col-12">
-            <div className="monitor-panel">
-              <div className="mb-4 text-center">
-                <h2 className="monitor-logs-title">Live Logs</h2>
-                <p className="monitor-logs-subtitle">
-                  Real-time stream from generator and autoencoder services
-                </p>
-              </div>
-
-              <LogsTerminal logs={dashboard.logs} />
-            </div>
-          </div>
-        </div>
-
         <div className="row g-4">
           <div className="col-12 col-xl-6">
-            <div className="monitor-panel h-100">
-              <div className="monitor-section-header">
-                <div>
-                  <h5 className="mb-1">Generator Activity</h5>
-                  <p className="mb-0">Normal vs flagged events over the week</p>
-                </div>
-              </div>
-
-              <SenderChart
-                labels={dashboard.labels}
-                values={dashboard.senderChart}
-              />
-            </div>
+            <LogsSection
+              title="CBR / Generator Intelligence"
+              subtitle="Similarity-based decision engine and CBR logs"
+              logs={generatorLogs}
+              source="GENERATOR"
+            />
           </div>
 
           <div className="col-12 col-xl-6">
-            <div className="monitor-panel h-100">
-              <div className="monitor-section-header">
-                <div>
-                  <h5 className="mb-1">Autoencoder Activity</h5>
-                  <h6 className="mb-0">
-                    All events vs alert events over the week
-                  </h6>
-                </div>
-              </div>
-
-              <AutoencoderChart
-                labels={dashboard.labels}
-                values={dashboard.autoencoderChart}
-              />
-            </div>
+            <LogsSection
+              title="Autoencoder AI Intelligence"
+             subtitle="Reconstruction error, anomaly threshold and AI logs"
+              logs={autoencoderLogs}
+              source="AUTOENCODER"
+            />
           </div>
         </div>
       </div>

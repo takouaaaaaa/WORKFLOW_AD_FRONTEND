@@ -157,7 +157,7 @@ export default function Topbar({
 
       
 
-        {role && <span className="app-badge">{formatRole(role)}</span>}
+       
 
         <button
           className="app-profile-trigger"

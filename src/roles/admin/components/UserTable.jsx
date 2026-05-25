@@ -11,8 +11,8 @@ export default function UserTable({ rows, onEdit, onDelete }) {
   const roleLabel = (role) => {
     switch (role) {
       case "ADMIN":           return "Admin";
-      case "USER_TECHNIQUE":  return "Technique";
-      case "USER_FONCTIONNEL":return "Fonctionnel";
+     case "USER_TECHNIQUE":  return "Technical";
+    case "USER_FONCTIONNEL":return "Functional";
       default:                return role;
     }
   };

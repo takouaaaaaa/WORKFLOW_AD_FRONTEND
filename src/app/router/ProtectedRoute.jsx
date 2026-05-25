@@ -1,21 +1,81 @@
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { getUserFromToken, hasRole, getToken } from "../../auth/utils/auth";
+import {
+  getUserFromToken,
+  hasRole,
+  getToken,
+  getRefreshToken,
+  setAccessToken,
+  clearToken,
+} from "../../auth/utils/auth";
+import { refreshAccessToken } from "../../auth/services/authService";
 
 export default function ProtectedRoute({ allowedRoles }) {
-  const token = getToken();
+  const [checking, setChecking] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+  const [denied, setDenied] = useState(false);
 
-  if (!token) {
-    return <Navigate to="/" replace />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        let token = getToken();
+
+        if (!token) {
+          const refreshToken = getRefreshToken();
+
+          if (!refreshToken) {
+            setAuthorized(false);
+            return;
+          }
+
+          const res = await refreshAccessToken(refreshToken);
+          token = res.data.accessToken;
+
+          if (!token) {
+            clearToken();
+            setAuthorized(false);
+            return;
+          }
+
+          setAccessToken(token);
+        }
+
+        const user = getUserFromToken();
+
+        if (!user) {
+          clearToken();
+          setAuthorized(false);
+          return;
+        }
+
+        if (!hasRole(allowedRoles)) {
+          setDenied(true);
+          return;
+        }
+
+        setAuthorized(true);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        clearToken();
+        setAuthorized(false);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [allowedRoles]);
+
+  if (checking) {
+    return <div style={{ padding: 24 }}>Loading...</div>;
   }
 
-  const user = getUserFromToken();
-
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (!hasRole(allowedRoles)) {
+  if (denied) {
     return <Navigate to="/unauthorized" replace />;
+  }
+
+  if (!authorized) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

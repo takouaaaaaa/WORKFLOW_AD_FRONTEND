@@ -1,27 +1,5 @@
-/*
- * TechniqueDashboard.css
- *
- * Section index
- * ─────────────
- * 1.  Google Fonts & Bootstrap Icons imports
- * 2.  CSS custom properties (design tokens)
- * 3.  Overline / hero title / subtitle typography
- * 4.  Live pulse dot
- * 5.  Stat (KPI) cards
- * 6.  Section headers
- * 7.  Terminal / log feed
- * 8.  Soft entity-count cards
- * 9.  Quick-access navigation cards + outline button
- * 10. Chart wrapper
- * 11. Spinner / loading state
- * 12. Alerts modal
- * 13. Keyframe animations
- * 14. Main page background
- * 15. Responsive overrides
- */
-
 /* ─────────────────────────────────────────────────────────────────────────────
- * 1. EXTERNAL RESOURCE IMPORTS
+ * IMPORTS
  * ───────────────────────────────────────────────────────────────────────────── */
 
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css");
@@ -29,44 +7,76 @@
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 2. CSS CUSTOM PROPERTIES (design tokens)
+ * DESIGN TOKENS
  * ───────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --monitor-bg: #f4f2ee;
-  --monitor-surface: #ffffff;
-  --monitor-surface-soft: #fbfaf8;
-
-  --monitor-border: rgba(99, 92, 168, 0.1);
-  --monitor-border-strong: rgba(99, 92, 168, 0.2);
-
   --monitor-text: #1a1a2e;
   --monitor-text-soft: #6b6b7e;
-
   --monitor-purple: #7c3aed;
-  --monitor-blue: #3b82f6;
   --monitor-purple-soft: rgba(124, 58, 237, 0.08);
-  --monitor-blue-soft: rgba(59, 130, 246, 0.08);
-
   --monitor-success: #10b981;
   --monitor-warning: #f59e0b;
   --monitor-danger: #ef4444;
-
-  --monitor-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --monitor-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-  --monitor-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  --monitor-shadow-xl: 0 30px 80px rgba(15, 23, 42, 0.2);
-
   --monitor-radius: 12px;
   --monitor-radius-lg: 16px;
-  --monitor-radius-xl: 20px;
-
   --accent-teal: #00ffcc;
-  --accent-teal-dim: rgba(0, 255, 204, 0.15);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 3. OVERLINE / HERO TYPOGRAPHY
+ * PAGE & WRAPPER
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.monitor-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #03101c 0%,
+    #0b1d2e 5%,
+    #1f3145 10%,
+    #42566d 30%,
+    #6f8096 100%
+  );
+  padding: 24px;
+}
+
+.technique-dashboard-wrapper {
+  /* wrapper shell — no extra styles needed */
+}
+
+.monitor-hero {
+  /* section spacing handled by Bootstrap mb-4 */
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * PANEL (glass card base)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.monitor-panel {
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 255, 204, 0.12);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(0, 255, 204, 0.04);
+  transition: all 0.3s ease;
+}
+
+.monitor-panel:hover {
+  border-color: rgba(0, 255, 204, 0.22);
+  box-shadow:
+    0 14px 50px rgba(0, 0, 0, 0.45),
+    0 0 70px rgba(0, 255, 204, 0.08);
+  transform: translateY(-2px);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * OVERLINE / HERO TYPOGRAPHY
  * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-header-wrapper {
@@ -80,16 +90,12 @@
   justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
-
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
   color: #00ffcc;
-  text-shadow: 0 0 20px rgba(0, 255, 204, 0.6),
-               0 0 40px rgba(0, 255, 204, 0.3);
-
+  text-shadow: 0 0 20px rgba(0, 255, 204, 0.6), 0 0 40px rgba(0, 255, 204, 0.3);
   padding: 12px 24px;
   border-radius: 50px;
   border: 1px solid rgba(0, 255, 204, 0.3);
@@ -102,34 +108,22 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-
   background: #ff3333;
   color: #ffffff;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-
   padding: 4px 14px;
   border-radius: 50px;
   border: none;
   margin: 0;
-
-  box-shadow: 0 0 20px rgba(255, 51, 51, 0.6),
-              0 0 40px rgba(255, 51, 51, 0.3);
-
+  box-shadow: 0 0 20px rgba(255, 51, 51, 0.6), 0 0 40px rgba(255, 51, 51, 0.3);
   animation: pulse-live 1.5s ease-in-out infinite;
   cursor: pointer;
   white-space: nowrap;
 }
 
-@keyframes pulse-live {
-  0%   { opacity: 1; transform: scale(1); }
-  50%  { opacity: 0.8; transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* "What's about to break." */
 .monitor-hero-title {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
@@ -138,10 +132,8 @@
   margin-bottom: 0;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* "Before it does." */
 .monitor-hero-subtitle {
   font-size: clamp(1.5rem, 3.5vw, 2.8rem);
   font-weight: 700;
@@ -150,11 +142,9 @@
   margin-bottom: 0;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* "Live Logs Center" big title */
-.monitor-logs-title {
+.first_title {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
   color: #ffffff;
@@ -162,26 +152,13 @@
   margin-bottom: 0;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  text-align: left;
-}
-
-.monitor-logs-subtitle {
-  font-size: clamp(1.5rem, 3.5vw, 2.8rem);
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.28);
-  margin-top: 4px;
-  margin-bottom: 0;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  text-align: left;
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 4. LIVE PULSE DOT
+ * LIVE PULSE DOT
  * ───────────────────────────────────────────────────────────────────────────── */
+
 .monitor-live-dot {
   width: 8px;
   height: 8px;
@@ -192,7 +169,7 @@
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 5. STAT / KPI CARDS (VIBRANT DARK GLASS STYLE)
+ * STAT / KPI CARDS
  * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-stat-card {
@@ -218,19 +195,7 @@
   box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5);
 }
 
-.monitor-stat-clickable {
-  cursor: pointer;
-}
-
-.monitor-stat-clickable:hover {
-  transform: translateY(-5px);
-}
-
-.monitor-stat-clickable:active {
-  transform: scale(0.95);
-}
-
-/* ── DEFAULT (Teal) ── */
+/* Default (teal) */
 .monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning) {
   border-color: rgba(0, 255, 204, 0.2);
   background: rgba(0, 20, 20, 0.3);
@@ -241,7 +206,7 @@
   box-shadow: 0 8px 40px rgba(0, 255, 204, 0.15);
 }
 
-/* ── ERROR Card (Red) ── */
+/* Error (red) */
 .monitor-stat-error {
   border-color: rgba(255, 50, 50, 0.3);
   background: rgba(40, 0, 0, 0.4);
@@ -257,7 +222,7 @@
   border-color: #ff4444;
 }
 
-/* ── WARNING Card (Orange) ── */
+/* Warning (orange) */
 .monitor-stat-warning {
   border-color: rgba(255, 170, 0, 0.3);
   background: rgba(40, 20, 0, 0.4);
@@ -273,7 +238,54 @@
   border-color: #ffaa00;
 }
 
-/* ── ICONS ── */
+/* Clickable */
+.monitor-stat-clickable {
+  cursor: pointer;
+}
+
+.monitor-stat-clickable:hover {
+  transform: translateY(-5px);
+}
+
+.monitor-stat-clickable:active {
+  transform: scale(0.95);
+}
+
+/* Glow rings */
+.monitor-stat-card::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 18px;
+  background: transparent;
+  z-index: -1;
+  transition: all 0.4s ease;
+}
+
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning)::before {
+  background: radial-gradient(circle at center, rgba(0, 255, 204, 0.15), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning):hover::before {
+  opacity: 1;
+}
+
+.monitor-stat-error::before {
+  background: radial-gradient(circle at center, rgba(255, 68, 68, 0.2), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-error:hover::before { opacity: 1; }
+
+.monitor-stat-warning::before {
+  background: radial-gradient(circle at center, rgba(255, 170, 0, 0.2), transparent 70%);
+  opacity: 0;
+}
+
+.monitor-stat-warning:hover::before { opacity: 1; }
+
+/* Icons */
 .monitor-stat-icon {
   width: 44px;
   height: 44px;
@@ -301,7 +313,7 @@
   border-color: rgba(255, 170, 0, 0.15);
 }
 
-/* ── TYPOGRAPHY ── */
+/* Typography */
 .monitor-stat-label {
   font-size: 12px;
   font-weight: 700;
@@ -327,7 +339,7 @@
   font-weight: 500;
 }
 
-/* ── CLICK HINT ── */
+/* Click hint */
 .monitor-click-hint {
   margin-top: 12px;
   padding: 6px 14px;
@@ -337,7 +349,6 @@
   font-size: 11px;
   font-weight: 600;
   color: #00ffcc;
-  opacity: 1;
   letter-spacing: 0.05em;
   transition: all 0.3s ease;
 }
@@ -367,95 +378,205 @@
   border-color: #ffaa00;
 }
 
-/* ── GLOW RINGS ── */
-.monitor-stat-card::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 18px;
-  background: transparent;
-  z-index: -1;
-  transition: all 0.4s ease;
-}
-
-.monitor-stat-error::before {
-  background: radial-gradient(circle at center, rgba(255, 68, 68, 0.2), transparent 70%);
-  opacity: 0;
-}
-
-.monitor-stat-error:hover::before {
-  opacity: 1;
-}
-
-.monitor-stat-warning::before {
-  background: radial-gradient(circle at center, rgba(255, 170, 0, 0.2), transparent 70%);
-  opacity: 0;
-}
-
-.monitor-stat-warning:hover::before {
-  opacity: 1;
-}
-
-.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning)::before {
-  background: radial-gradient(circle at center, rgba(0, 255, 204, 0.15), transparent 70%);
-  opacity: 0;
-}
-
-.monitor-stat-card:not(.monitor-stat-error):not(.monitor-stat-warning):hover::before {
-  opacity: 1;
-}
-
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 6. SECTION HEADERS
+ * QUICK-ACCESS TASK CARDS + OUTLINE BUTTON
  * ───────────────────────────────────────────────────────────────────────────── */
-.monitor-section-header {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: left;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+
+.monitor-task-card {
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
-.monitor-section-header h5,
-.monitor-section-header h6 {
+.monitor-task-card:hover {
+  border-color: rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.monitor-task-card h6 {
+  color: #ffffff;
   font-weight: 600;
   font-size: 1.1rem;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.monitor-section-header h5::before,
-.monitor-section-header h6::before {
-  content: "";
-  width: 4px;
-  height: 18px;
-  background: linear-gradient(180deg, var(--monitor-purple), var(--monitor-blue));
-  border-radius: 4px;
+.monitor-task-card p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-.monitor-section-header p {
-  color: var(--monitor-text-soft);
+.monitor-task-card .badge {
+  background: rgba(0, 255, 204, 0.15) !important;
+  color: var(--accent-teal) !important;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.monitor-outline-btn {
+  background: transparent;
+  border: 1px solid #ff3333;
+  color: #ff3333;
+  border-radius: 50px;
+  padding: 8px 20px;
   font-size: 13px;
-  margin: 0;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.monitor-outline-btn:hover {
+  background: #ff3333;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 51, 51, 0.3);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 7. TERMINAL / LIVE LOG FEED
+ * LOGS SECTION — CLEAN CARD
  * ───────────────────────────────────────────────────────────────────────────── */
 
-.monitor-terminal {
-  background: #454A4F;
-  border-radius: var(--monitor-radius-lg);
+.monitor-clean-card {
+  min-height: 260px;
+}
+
+.monitor-clean-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.monitor-clean-head h5 {
+  color: #fff;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.monitor-clean-head p {
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.monitor-clean-badge {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.monitor-clean-badge.generator {
+  background: rgba(0, 229, 255, 0.12);
+  color: #00e5ff;
+}
+
+.monitor-clean-badge.autoencoder {
+  background: rgba(0, 255, 204, 0.12);
+  color: #00ffcc;
+}
+
+.monitor-clean-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.monitor-clean-grid div {
+  padding: 18px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.monitor-clean-grid span {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 8px;
+}
+
+.monitor-clean-grid strong {
+  font-size: 28px;
+  font-family: "JetBrains Mono", monospace;
+  color: #fff;
+}
+
+.monitor-clean-grid strong.success { color: #00ffcc; }
+.monitor-clean-grid strong.warning { color: #ffaa00; }
+.monitor-clean-grid strong.danger  { color: #ff6688; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * MINI CURVE CHART
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.monitor-mini-curve {
+  height: 180px;
+  margin-top: 26px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.20);
+  border: 1px solid rgba(0, 255, 204, 0.08);
+}
+
+.monitor-mini-curve canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * MATH BOX
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.monitor-math-box {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(0, 255, 204, 0.055);
+  border: 1px solid rgba(0, 255, 204, 0.10);
+}
+
+.monitor-math-title {
+  color: #00ffcc;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.monitor-formula {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.monitor-math-box p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * MINI TERMINAL / LOG FEED
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.monitor-mini-terminal {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(0, 255, 204, 0.08);
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(0, 255, 255, 0.08);
 }
 
 .monitor-terminal-header {
@@ -493,6 +614,11 @@
   gap: 12px;
 }
 
+.monitor-terminal-body::-webkit-scrollbar { width: 6px; }
+.monitor-terminal-body::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+.monitor-terminal-body::-webkit-scrollbar-thumb { background: rgba(0, 255, 204, 0.2); border-radius: 10px; }
+.monitor-terminal-body::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 204, 0.3); }
+
 .monitor-log-line {
   padding: 16px 18px;
   background: rgba(255, 255, 255, 0.02);
@@ -502,13 +628,10 @@
   transition: all 0.3s ease;
 }
 
-.monitor-log-line:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.monitor-log-line.success  { border-left-color: #00ffcc; }
-.monitor-log-line.warning  { border-left-color: #ffaa00; }
-.monitor-log-line.danger   { border-left-color: #ff4444; }
+.monitor-log-line:hover { background: rgba(255, 255, 255, 0.04); }
+.monitor-log-line.success { border-left-color: #00ffcc; }
+.monitor-log-line.warning { border-left-color: #ffaa00; }
+.monitor-log-line.danger  { border-left-color: #ff4444; }
 
 .monitor-log-meta {
   display: flex;
@@ -569,147 +692,9 @@
   font-size: 13px;
 }
 
-.monitor-terminal-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.monitor-terminal-body::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.monitor-terminal-body::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 204, 0.2);
-  border-radius: 10px;
-}
-
-.monitor-terminal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 204, 0.3);
-}
-
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 8. SOFT ENTITY COUNT CARDS
- * ───────────────────────────────────────────────────────────────────────────── */
-
-.monitor-soft-card {
-  background: linear-gradient(135deg, var(--monitor-surface), var(--monitor-surface-soft));
-  border: 1px solid var(--monitor-border);
-  border-radius: var(--monitor-radius-lg);
-  padding: 20px;
-}
-
-.monitor-soft-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--monitor-text-soft);
-  margin-bottom: 8px;
-  display: block;
-}
-
-.monitor-soft-card h3 {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, var(--monitor-text), var(--monitor-purple));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
- * 9. QUICK-ACCESS NAVIGATION CARDS + OUTLINE BUTTON
- * ───────────────────────────────────────────────────────────────────────────── */
-
-.monitor-task-card {
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(0, 255, 255, 0.15);
-  border-radius: 16px;
-  padding: 24px;
-  height: 100%;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-
-.monitor-task-card:hover {
-  border-color: rgba(0, 255, 255, 0.4);
-  box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.monitor-task-card h6 {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.monitor-task-card p {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.monitor-task-card .badge {
-  background: rgba(0, 255, 204, 0.15) !important;
-  color: var(--accent-teal) !important;
-  border: 1px solid rgba(0, 255, 204, 0.2);
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 8px;
-}
-
-.monitor-outline-btn {
-  background: transparent;
-  border: 1px solid #ff3333;
-  color: #ff3333;
-  border-radius: 50px;
-  padding: 8px 20px;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.monitor-outline-btn:hover {
-  background: #ff3333;
-  color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 51, 51, 0.3);
-}
-
-/* "Manage Data Flow" heading */
-.first_title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 800;
-  color: #ffffff;
-  margin-top: 16px;
-  margin-bottom: 0;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
- * 10. CHART WRAPPER
- * ───────────────────────────────────────────────────────────────────────────── */
-
-.monitor-chart-wrap {
-  position: relative;
-  width: 100%;
-  height: 320px;
-}
-
-.monitor-chart-wrap canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
- * 11. SPINNER / LOADING STATE
+ * SPINNER / LOADING STATE
  * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-spinner {
@@ -726,34 +711,9 @@
   font-size: 14px;
 }
 
-.monitor-panel {
-  background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(0, 255, 204, 0.12);
-  border-radius: 24px;
-
-  padding: 24px;
-
-  box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.35),
-    0 0 40px rgba(0, 255, 204, 0.04);
-
-  transition: all 0.3s ease;
-}
-
-.monitor-panel:hover {
-  border-color: rgba(0, 255, 204, 0.22);
-
-  box-shadow:
-    0 14px 50px rgba(0, 0, 0, 0.45),
-    0 0 70px rgba(0, 255, 204, 0.08);
-
-  transform: translateY(-2px);
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 12. ALERTS MODAL
+ * ALERTS MODAL (DARK THEME)
  * ───────────────────────────────────────────────────────────────────────────── */
 
 .monitor-modal-backdrop {
@@ -777,201 +737,247 @@
 .monitor-modal-card {
   width: 100%;
   max-width: 760px;
-  background: #ffffff;
   border-radius: 28px;
   overflow: hidden;
-  box-shadow:
-    0 35px 90px rgba(15, 23, 42, 0.28),
-    0 12px 32px rgba(15, 23, 42, 0.12);
   animation: monitorModalPop 0.24s ease;
 }
 
+.monitor-modal-dark {
+  background: #071321;
+  border: 1px solid rgba(0, 255, 204, 0.12);
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.75),
+    0 0 40px rgba(0, 255, 204, 0.08);
+}
+
 .monitor-modal-header {
-  padding: 24px 28px;
+  padding: 28px 34px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(59, 130, 246, 0.04));
-  border-bottom: 1px solid rgba(99, 92, 168, 0.08);
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.07), rgba(255, 255, 255, 0.01));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .monitor-modal-title {
   margin: 0;
-  font-size: 1.45rem;
+  color: #ffffff;
+  font-size: 28px;
   font-weight: 800;
-  color: var(--monitor-text);
 }
 
 .monitor-modal-subtitle {
-  margin-top: 6px;
+  margin-top: 8px;
   margin-bottom: 0;
-  color: var(--monitor-text-soft);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 14px;
 }
 
 .monitor-modal-main-badge {
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 800;
-}
-
-.monitor-modal-main-badge.warning {
-  background: #ffc107;
-  color: #111827;
+  letter-spacing: 0.04em;
 }
 
 .monitor-modal-main-badge.error {
-  background: #ef4444;
-  color: white;
+  background: rgba(255, 68, 68, 0.15);
+  color: #ff5555;
+  border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.monitor-modal-main-badge.warning {
+  background: rgba(255, 170, 0, 0.12);
+  color: #ffb300;
+  border: 1px solid rgba(255, 170, 0, 0.2);
 }
 
 .monitor-modal-close {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   border: none;
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
-  transition: all 0.2s ease;
+  transition: 0.25s;
 }
 
 .monitor-modal-close:hover {
-  background: rgba(15, 23, 42, 0.12);
-  transform: rotate(90deg);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
 .monitor-modal-body {
-  padding: 24px;
-  background: #f8f7f4;
-  max-height: 60vh;
+  background: #071321;
+  max-height: 62vh;
   overflow-y: auto;
+  padding: 24px;
 }
 
-.monitor-modal-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.monitor-modal-body::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.24);
-  border-radius: 999px;
-}
+.monitor-modal-body::-webkit-scrollbar { width: 8px; }
+.monitor-modal-body::-webkit-scrollbar-thumb { background: rgba(0, 255, 204, 0.22); border-radius: 999px; }
+.monitor-modal-body::-webkit-scrollbar-track { background: transparent; }
 
 .monitor-modal-footer {
-  padding: 18px 24px;
-  background: white;
-  border-top: 1px solid rgba(99, 92, 168, 0.08);
+  padding: 22px 30px;
+  background: #06111d;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   justify-content: flex-end;
 }
 
-.monitor-modal-empty {
-  background: white;
-  border: 1px solid var(--monitor-border);
-  border-radius: 18px;
-  padding: 18px;
-  color: var(--monitor-text-soft);
+.monitor-modal-dark-btn {
+  background: rgba(0, 255, 204, 0.10);
+  border: 1px solid rgba(0, 255, 204, 0.18);
+  color: #00ffcc;
+  padding: 10px 24px;
+  border-radius: 14px;
+  font-weight: 700;
+  transition: 0.25s;
 }
 
+.monitor-modal-dark-btn:hover {
+  background: rgba(0, 255, 204, 0.18);
+  color: #ffffff;
+}
+
+/* Empty state */
+.monitor-modal-empty-dark {
+  min-height: 280px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.monitor-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 30px;
+  margin-bottom: 18px;
+}
+
+.monitor-modal-empty-dark h4 {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.monitor-modal-empty-dark p {
+  max-width: 460px;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* Alert list */
 .monitor-alert-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
-.monitor-alert-item {
-  background: white;
-  border-radius: 20px;
-  padding: 18px;
-  border: 1px solid rgba(99, 92, 168, 0.08);
-  position: relative;
-  overflow: hidden;
+.monitor-alert-item-dark {
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: 0.25s ease;
 }
 
-.monitor-alert-item::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 5px;
-  border-radius: 999px;
+.monitor-alert-item-dark:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 255, 204, 0.15);
 }
 
-.monitor-alert-item.warning::before { background: var(--monitor-warning); }
-.monitor-alert-item.danger::before  { background: var(--monitor-danger);  }
+.monitor-alert-item-dark.error  { border-left: 4px solid #ff4444; }
+.monitor-alert-item-dark.warning { border-left: 4px solid #ffaa00; }
 
 .monitor-alert-top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .monitor-alert-badge {
-  padding: 5px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-}
-
-.monitor-alert-badge.warn {
-  background: rgba(245, 158, 11, 0.16);
-  color: #b66f00;
+  letter-spacing: 0.05em;
 }
 
 .monitor-alert-badge.error {
-  background: rgba(239, 68, 68, 0.16);
-  color: #d92d20;
+  background: rgba(255, 68, 68, 0.14);
+  color: #ff5555;
+}
+
+.monitor-alert-badge.warn {
+  background: rgba(255, 170, 0, 0.14);
+  color: #ffb300;
 }
 
 .monitor-phase-light {
-  background: rgba(124, 58, 237, 0.08);
-  color: var(--monitor-purple);
-  padding: 5px 12px;
+  padding: 7px 14px;
   border-radius: 999px;
-  font-size: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
   font-weight: 700;
 }
 
 .monitor-alert-time {
-  margin-left: auto;
-  font-size: 11px;
-  color: #8b8ba3;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 12px;
+  white-space: nowrap;
   font-family: "JetBrains Mono", monospace;
 }
 
 .monitor-alert-message {
-  color: var(--monitor-text);
+  color: rgba(255, 255, 255, 0.82);
   line-height: 1.7;
   font-size: 14px;
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 13. KEYFRAME ANIMATIONS
+ * KEYFRAME ANIMATIONS
  * ───────────────────────────────────────────────────────────────────────────── */
 
-@keyframes monitorModalPop {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes pulse-live {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.8; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes pulseDot {
   0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-  70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);  }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);   }
+  70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes monitorModalPop {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes spin {
@@ -980,64 +986,17 @@
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * 14. MAIN PAGE BACKGROUND
- * ───────────────────────────────────────────────────────────────────────────── */
-.monitor-page {
-  min-height: 100vh;
-  background: linear-gradient(
-    to bottom,
-    #03101c 0%,
-    #0b1d2e 5%,
-    #1f3145 10%,
-    #42566d 30%,
-    #6f8096 100%
-  );
-  padding: 24px;
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
- * 15. RESPONSIVE OVERRIDES
+ * RESPONSIVE OVERRIDES
  * ───────────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 991px) {
-  .monitor-page {
-    padding: 16px;
-  }
-
-  .monitor-panel {
-    padding: 18px;
-  }
-
-  .monitor-chart-wrap {
-    height: 260px;
-  }
+  .monitor-page  { padding: 16px; }
+  .monitor-panel { padding: 18px; }
 }
 
 @media (max-width: 575px) {
-  .monitor-page {
-    padding: 12px;
-  }
-
-  .monitor-panel {
-    padding: 16px;
-  }
-
-  .monitor-terminal-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .monitor-stat-value {
-    font-size: 28px;
-  }
-
-  .monitor-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .monitor-chart-wrap {
-    height: 220px;
-  }
+  .monitor-page             { padding: 12px; }
+  .monitor-panel            { padding: 16px; }
+  .monitor-terminal-header  { flex-direction: column; align-items: flex-start; }
+  .monitor-stat-value       { font-size: 28px; }
 }

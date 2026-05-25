@@ -17,18 +17,21 @@ export default function EditRoleModal({ show, onClose, user, form, setForm, onSa
           {user && (
             <div className="um-field">
               <label className="um-label">User</label>
-              <div
-                style={{
-                  padding: "9px 12px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderRadius: "9px",
-                  fontSize: "13px",
-                  color: "rgba(0, 0, 0, 0.8)",
-                }}
-              >
-                {user.email}
-              </div>
+             <div
+  style={{
+    padding: "11px 14px",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(98,255,255,0.14)",
+    borderRadius: "11px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#ffffff",
+    letterSpacing: "0.02em",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+  }}
+>
+  {user.email}
+</div>
             </div>
           )}
 
@@ -40,8 +43,8 @@ export default function EditRoleModal({ show, onClose, user, form, setForm, onSa
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
               <option value="ADMIN">Admin</option>
-              <option value="USER_TECHNIQUE">Technique</option>
-              <option value="USER_FONCTIONNEL">Fonctionnel</option>
+              <option value="USER_TECHNIQUE">Technical</option>
+              <option value="USER_FONCTIONNEL">Functional</option>
             </select>
           </div>
 
