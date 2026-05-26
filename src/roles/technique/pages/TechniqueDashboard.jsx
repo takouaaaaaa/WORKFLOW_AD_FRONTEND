@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { createPortal } from "react-dom";
 import "../styles/TechniqueDashboard.css";
+import { getToken } from "../../../auth/utils/auth";
 
 import {
   Chart,
@@ -58,6 +59,41 @@ const QUICK_LINKS = [
     btn: "Open Flow Types",
   },
 ];
+
+const exportCbrExcel = async () => {
+  try {
+    const token = getToken();
+
+    const response = await fetch("/api/reports/cbr/last24h/excel", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "cbr-report-last24h.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de l'export Excel CBR");
+  }
+};
+
+function getTodayIndex() {
+  const today = new Date().getDay();
+  return today === 0 ? 6 : today - 1;
+}
 
 function formatDateTime(value) {
   if (!value) return "No timestamp";
@@ -664,6 +700,10 @@ export default function TechniqueDashboard() {
             <h2 className="monitor-hero-title">What's about to break.</h2>
 
             <p className="monitor-hero-subtitle">Before it does.</p>
+            
+            <button className="btn btn-success" onClick={exportCbrExcel }>
+                Export Daily PDF Report
+            </button>
 
             <div className="row g-4 mt-4">
               {topStats.map((item) => (

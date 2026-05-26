@@ -52,10 +52,12 @@ const FILEOUT_ERRORS = [
 ];
 
 const FILEIN_WAITS = [
-  { key: "WAITACTION", label: "Wait action" },
-  { key: "SUSPENDED", label: "Suspended" },
-  { key: "INPROCESS", label: "In process" },
-  { key: "WAITPROCESS", label: "Wait process" },
+
+  { key: "WAITACTION",      label: "Wait action" },
+  { key: "SUSPENDED",       label: "Suspended" },
+  { key: "INPROCESS",       label: "In process" },
+  { key: "WAITPROCESS",     label: "Wait process" },
+  { key: "WAITFUNCTIONAL",  label: "Wait functional" },
 ];
 
 const FILEOUT_WAITS = [
@@ -83,17 +85,10 @@ function getStatus(item) {
   ).toUpperCase();
 }
 
-const isOk = (s) => OK_STATUSES.includes(String(s || "").toUpperCase());
-
-const isError = (s) =>
-  [...FILEIN_ERRORS, ...FILEOUT_ERRORS]
-    .map((x) => x.key)
-    .includes(String(s || "").toUpperCase());
-
-const isWaiting = (s) =>
-  [...FILEIN_WAITS, ...FILEOUT_WAITS]
-    .map((x) => x.key)
-    .includes(String(s || "").toUpperCase());
+const isOk      = s => OK_STATUSES.includes(String(s || "").toUpperCase());
+const isError   = s => [...FILEIN_ERRORS, ...FILEOUT_ERRORS].map(x => x.key).includes(String(s || "").toUpperCase());
+const isWaiting = (status) =>
+  String(status || "").toUpperCase() === "WAITFUNCTIONAL";
 
 function classify(s) {
   if (isOk(s)) return "processed";
