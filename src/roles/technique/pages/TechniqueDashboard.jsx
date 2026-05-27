@@ -64,7 +64,7 @@ const exportCbrExcel = async () => {
   try {
     const token = getToken();
 
-    const response = await fetch("/api/reports/cbr/last24h/excel", {
+    const response = await fetch("/api/reports/cbr/last24h/pdf", { 
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -79,14 +79,14 @@ const exportCbrExcel = async () => {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "cbr-report-last24h.xlsx";
+    link.download = "cbr-report-last24h.pdf";
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error(error);
-    alert("Erreur lors de l'export Excel CBR");
+    alert("Erreur lors de l'export PDF CBR");
   }
 };
 
