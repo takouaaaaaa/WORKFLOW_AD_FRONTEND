@@ -100,7 +100,9 @@ const normalizeDateTimeLocalToIso = (value) => {
 
 export default function FileInPage() {
   const location = useLocation();
+
   const urlStatus = location.state?.status || "";
+  const urlSenderReference = location.state?.senderReference || "";
 
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -119,7 +121,7 @@ export default function FileInPage() {
 
   const [filters, setFilters] = useState({
     appReference: "",
-    senderReference: "",
+    senderReference: urlSenderReference,
     status: urlStatus,
     category: "",
     sender: "",
@@ -196,16 +198,25 @@ export default function FileInPage() {
       setSenderOptions(senderData);
       setFlowTypeOptions(flowTypeData);
 
-      if (urlStatus) {
-        setFilteredRows(
-          fileIns.filter(
-            (row) =>
-              (row?.status || "").toUpperCase() === urlStatus.toUpperCase()
-          )
+      let initialFiltered = fileIns;
+
+      if (urlSenderReference) {
+        initialFiltered = initialFiltered.filter((row) =>
+          String(row?.senderReference || "")
+            .toLowerCase()
+            .includes(urlSenderReference.toLowerCase())
         );
-      } else {
-        setFilteredRows(fileIns);
       }
+
+      if (urlStatus) {
+        initialFiltered = initialFiltered.filter(
+          (row) =>
+            String(row?.status || "").toUpperCase() ===
+            urlStatus.toUpperCase()
+        );
+      }
+
+      setFilteredRows(initialFiltered);
     } catch (error) {
       console.error(error);
       alert("Failed to load data");
@@ -572,12 +583,23 @@ const handleReject = async (row) => {
 
   return (
     <div className="filein-page-bootstrap">
-      {urlStatus && (
+      {(urlStatus || urlSenderReference) && (
         <div className="filein-status-banner">
-          Filtered by status: <strong>{urlStatus}</strong>
+          {urlStatus && (
+            <>
+              Filtered by status: <strong>{urlStatus}</strong>
+            </>
+          )}
+
+          {urlSenderReference && (
+            <>
+              Filtered by sender reference:{" "}
+              <strong>{urlSenderReference}</strong>
+            </>
+          )}
 
           <span className="filein-status-count">
-           {filteredRows.length} result(s)
+            {filteredRows.length} result(s)
           </span>
         </div>
       )}

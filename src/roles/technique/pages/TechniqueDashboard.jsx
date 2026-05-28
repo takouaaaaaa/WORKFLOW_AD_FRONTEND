@@ -60,15 +60,39 @@ const QUICK_LINKS = [
   },
 ];
 
+function makeLogId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function addLogUnique(prev, entry) {
+  const exists = prev.logs.some(
+    (x) =>
+      x.source === entry.source &&
+      x.level === entry.level &&
+      x.message === entry.message &&
+      x.timestamp === entry.timestamp
+  );
+
+  if (exists) return prev;
+
+  return {
+    ...prev,
+    logs: [entry, ...prev.logs].slice(0, 200),
+  };
+}
+
 const exportCbrExcel = async () => {
   try {
     const token = getToken();
 
-    const response = await fetch("/api/reports/cbr/last24h/pdf", { 
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      "http://localhost:8080/api/reports/cbr/last24h/pdf",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Export failed: ${response.status}`);
@@ -83,17 +107,13 @@ const exportCbrExcel = async () => {
     document.body.appendChild(link);
     link.click();
     link.remove();
+
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error(error);
     alert("Erreur lors de l'export PDF CBR");
   }
 };
-
-function getTodayIndex() {
-  const today = new Date().getDay();
-  return today === 0 ? 6 : today - 1;
-}
 
 function formatDateTime(value) {
   if (!value) return "No timestamp";
@@ -183,9 +203,9 @@ function AlertsModal({ show, type, logs, onClose }) {
               </div>
             ) : (
               <div className="monitor-alert-list">
-                {cleanLogs.map((log) => (
+                {cleanLogs.map((log, index) => (
                   <div
-                    key={log.id}
+                    key={`${log.id}-${index}`}
                     className={`monitor-alert-item-dark ${
                       isErrorType ? "error" : "warning"
                     }`}
@@ -378,11 +398,16 @@ function MathBox({ type }) {
 
 function LogsSection({ title, subtitle, logs, source }) {
   const errors = logs.filter((l) => l.level === "ERROR").length;
+
   const warnings = logs.filter((l) =>
-    ["WARN", "WARNING"].includes(l.level)
+    ["WARN", "WARNING"].includes(String(l.level || "").toUpperCase())
   ).length;
+
   const healthy = logs.filter(
-    (l) => !["ERROR", "WARN", "WARNING"].includes(l.level)
+    (l) =>
+      !["ERROR", "WARN", "WARNING"].includes(
+        String(l.level || "").toUpperCase()
+      )
   ).length;
 
   return (
@@ -450,9 +475,9 @@ function LogsSection({ title, subtitle, logs, source }) {
           {logs.length === 0 ? (
             <div className="monitor-empty-log">No logs available.</div>
           ) : (
-            logs.slice(0, 20).map((log) => (
+            logs.slice(0, 20).map((log, index) => (
               <div
-                key={log.id}
+                key={`${log.id}-${index}`}
                 className={`monitor-log-line ${levelClass(log.level)}`}
               >
                 <div className="monitor-log-meta">
@@ -504,6 +529,7 @@ export default function TechniqueDashboard() {
   });
 
   const [loading, setLoading] = useState(true);
+
   const [alertModal, setAlertModal] = useState({
     show: false,
     type: "ERROR",
@@ -534,14 +560,21 @@ export default function TechniqueDashboard() {
 
   const heroPhrases = useMemo(
     () => [
-      `Monitoring ${dashboard.stats.generatorCount} generator events`,
-      `Watching ${dashboard.stats.autoencoderCount} autoencoder events`,
+      `Monitoring ${generatorLogs.length} generator events`,
+      `Watching ${autoencoderLogs.length} autoencoder events`,
       `${dashboard.totalSenders} senders referenced`,
       `${dashboard.totalReceivers} receivers mapped`,
       `${dashboard.totalTypeFlux} flow types supervised`,
-      `${dashboard.stats.totalErrors} errors require attention`,
+      `${errorLogs.length} errors require attention`,
     ],
-    [dashboard]
+    [
+      dashboard.totalSenders,
+      dashboard.totalReceivers,
+      dashboard.totalTypeFlux,
+      generatorLogs.length,
+      autoencoderLogs.length,
+      errorLogs.length,
+    ]
   );
 
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -557,7 +590,10 @@ export default function TechniqueDashboard() {
   const loadDashboard = async () => {
     try {
       const data = await getTechniqueDashboardData();
-      setDashboard(data);
+      setDashboard((prev) => ({
+        ...data,
+        logs: data?.logs?.length ? data.logs : prev.logs,
+      }));
     } catch (error) {
       console.error("Failed to load technique dashboard", error);
     } finally {
@@ -580,7 +616,7 @@ export default function TechniqueDashboard() {
       "/api/generator/logs/stream",
       (payload) => {
         const entry = {
-          id: `g-${Date.now()}`,
+          id: payload?.id || makeLogId("g"),
           source: "GENERATOR",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
@@ -589,10 +625,7 @@ export default function TechniqueDashboard() {
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
-        setDashboard((prev) => ({
-          ...prev,
-          logs: [entry, ...prev.logs].slice(0, 200),
-        }));
+        setDashboard((prev) => addLogUnique(prev, entry));
       }
     );
 
@@ -600,7 +633,7 @@ export default function TechniqueDashboard() {
       "/api/autoencoder/logs/stream",
       (payload) => {
         const entry = {
-          id: `a-${Date.now()}`,
+          id: payload?.id || makeLogId("a"),
           source: "AUTOENCODER",
           level: String(payload?.level || "INFO").toUpperCase(),
           phase: payload?.phase || payload?.step || "GENERAL",
@@ -609,10 +642,7 @@ export default function TechniqueDashboard() {
           timestamp: payload?.timestamp || new Date().toISOString(),
         };
 
-        setDashboard((prev) => ({
-          ...prev,
-          logs: [entry, ...prev.logs].slice(0, 200),
-        }));
+        setDashboard((prev) => addLogUnique(prev, entry));
       }
     );
 
@@ -622,33 +652,49 @@ export default function TechniqueDashboard() {
     };
   }, []);
 
+  const liveStats = useMemo(() => {
+    const totalLogs = dashboard.logs.length;
+    const totalErrors = errorLogs.length;
+    const totalWarnings = warningLogs.length;
+    const healthy = Math.max(0, totalLogs - totalErrors - totalWarnings);
+    const healthyRate =
+      totalLogs > 0 ? `${Math.round((healthy / totalLogs) * 100)}%` : "100%";
+
+    return {
+      totalLogs,
+      totalErrors,
+      totalWarnings,
+      healthyRate,
+    };
+  }, [dashboard.logs.length, errorLogs.length, warningLogs.length]);
+
   const topStats = [
     {
       label: "Total Logs",
-      value: dashboard.stats.totalLogs,
+      value: liveStats.totalLogs,
       sub: "Generator + Autoencoder",
       icon: "bi-activity",
       clickable: false,
     },
-   {
-  label: "Errors",
-  value: errorLogs.length,
-  sub: "Critical events",
-  icon: "bi-exclamation-triangle",
-  clickable: true,
-  type: "ERROR",
-},
-{
-  label: "Warnings",
-  value: warningLogs.length,
-  sub: "Need review",
-  icon: "bi-bell",
-  clickable: true,
-  type: "WARNING",
-},
+    {
+      label: "Errors",
+      value: errorLogs.length,
+      sub: "Critical events",
+      icon: "bi-exclamation-triangle",
+      clickable: true,
+      type: "ERROR",
+    },
+    {
+      label: "Warnings",
+      value: warningLogs.length,
+      sub: "Need review",
+      icon: "bi-bell",
+      clickable: true,
+      type: "WARNING",
+    },
     {
       label: "Healthy Rate",
-      value: dashboard.stats.healthyRate,
+      value: liveStats.healthyRate,
       sub: "Monitoring health",
       icon: "bi-heart-pulse",
       clickable: false,
@@ -690,7 +736,7 @@ export default function TechniqueDashboard() {
               <div className="monitor-overline">
                 <span>CURE · TECHNICAL SUPERVISION</span>
 
-                <button className="monitor-live-btn">
+                <button className="monitor-live-btn" type="button">
                   <span className="monitor-live-dot" />
                   {heroPhrases[phraseIndex]}
                 </button>
@@ -700,9 +746,9 @@ export default function TechniqueDashboard() {
             <h2 className="monitor-hero-title">What's about to break.</h2>
 
             <p className="monitor-hero-subtitle">Before it does.</p>
-            
-            <button className="btn btn-success" onClick={exportCbrExcel }>
-                Export Daily PDF Report
+
+            <button className="btn btn-success" onClick={exportCbrExcel}>
+              Export Daily PDF Report
             </button>
 
             <div className="row g-4 mt-4">
@@ -789,7 +835,7 @@ export default function TechniqueDashboard() {
           <div className="col-12 col-xl-6">
             <LogsSection
               title="Autoencoder AI Intelligence"
-             subtitle="Reconstruction error, anomaly threshold and AI logs"
+              subtitle="Reconstruction error, anomaly threshold and AI logs"
               logs={autoencoderLogs}
               source="AUTOENCODER"
             />

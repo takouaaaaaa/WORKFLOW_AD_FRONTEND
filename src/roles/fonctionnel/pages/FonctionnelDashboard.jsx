@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 
@@ -51,21 +51,6 @@ const FILEOUT_ERRORS = [
   { key: "CANCELED", label: "Canceled" },
 ];
 
-const FILEIN_WAITS = [
-
-  { key: "WAITACTION",      label: "Wait action" },
-  { key: "SUSPENDED",       label: "Suspended" },
-  { key: "INPROCESS",       label: "In process" },
-  { key: "WAITPROCESS",     label: "Wait process" },
-  { key: "WAITFUNCTIONAL",  label: "Wait functional" },
-];
-
-const FILEOUT_WAITS = [
-  { key: "WAITTOBESENT", label: "Wait to be sent" },
-  { key: "SENTANDWAITINGACK", label: "Waiting ACK" },
-  { key: "INITIAL", label: "Initial" },
-];
-
 const OK_STATUSES = ["PROCESSED", "SENT", "ACKED", "SUCCESS"];
 
 function normalize(res) {
@@ -85,8 +70,17 @@ function getStatus(item) {
   ).toUpperCase();
 }
 
-const isOk      = s => OK_STATUSES.includes(String(s || "").toUpperCase());
-const isError   = s => [...FILEIN_ERRORS, ...FILEOUT_ERRORS].map(x => x.key).includes(String(s || "").toUpperCase());
+function getCbrVerdict(item) {
+  return String(item?.cbrVerdict || item?.cbr_verdict || "").toUpperCase();
+}
+
+const isOk = (s) => OK_STATUSES.includes(String(s || "").toUpperCase());
+
+const isError = (s) =>
+  [...FILEIN_ERRORS, ...FILEOUT_ERRORS]
+    .map((x) => x.key)
+    .includes(String(s || "").toUpperCase());
+
 const isWaiting = (status) =>
   String(status || "").toUpperCase() === "WAITFUNCTIONAL";
 
@@ -147,6 +141,10 @@ function getRef(item, type) {
     item?.senderReference ||
     `${type}-${item?.id || item?.idFlux || item?.idFluxIn || item?.idFluxOut || ""}`
   );
+}
+
+function getSenderReference(item) {
+  return item?.senderReference || item?.sender_reference || "";
 }
 
 function buildRecentActivity(fileInData) {
@@ -250,84 +248,201 @@ function buildHourlyVolumeData(fileInData, fileOutData) {
   };
 }
 
-function buildNotifications(fileInData, fileOutData) {
-  return [
-    ...fileInData.map((x) => ({ ...x, sourceType: "File IN" })),
-    ...fileOutData.map((x) => ({ ...x, sourceType: "File OUT" })),
-  ]
-    .filter((i) => isError(getStatus(i)) || isWaiting(getStatus(i)))
-    .slice(0, 8)
-    .map((i) => {
-      const s = getStatus(i);
+function buildNotifications(fileInData = []) {
+  return fileInData
+    .filter(
+      (item) =>
+        String(
+          item?.cbrVerdict ||
+          item?.cbr_verdict ||
+          ""
+        ).toUpperCase() === "WAITFUNCTIONAL"
+    )
+    .sort(
+      (a, b) =>
+        new Date(resolveDate(b)) -
+        new Date(resolveDate(a))
+    )
+    .slice(0, 20)
+    .map((item, index) => {
+
+      const desc = String(
+        item?.descriptionFileIn || ""
+      ).toUpperCase();
+
+      let color = "#f59e0b";
+      let bg = "rgba(245,158,11,0.12)";
+      let border = "rgba(245,158,11,0.35)";
+      let label = "Functional review";
+
+      if (desc.includes("SETTLEMENT_DATE_PAST")) {
+        color = "#fb923c";
+        bg = "rgba(251,146,60,0.12)";
+        border = "rgba(251,146,60,0.35)";
+        label = "Settlement anomaly";
+      }
+
+      else if (desc.includes("DATA_INCOHERENCE")) {
+        color = "#a855f7";
+        bg = "rgba(168,85,247,0.12)";
+        border = "rgba(168,85,247,0.35)";
+        label = "Data incoherence";
+      }
 
       return {
-        type: isError(s) ? "error" : "warning",
-        label: isError(s) ? "Critical Error" : "Pending Action",
-        ref: getRef(i, i.sourceType),
-        time: fmtDate(resolveDate(i)),
-        msg: `${i.sourceType}: ${s}`,
+        id: index,
+        type: "warning",
+        label,
+        color,
+        bg,
+        border,
+
+        ref:
+          item?.appReference ||
+          item?.senderReference ||
+          "UNKNOWN",
+
+        senderReference:
+          item?.senderReference || "",
+
+        time: fmtDate(resolveDate(item)),
+
+        msg:
+          item?.descriptionFileIn ||
+          "Action required from functional user",
       };
     });
 }
 
 function LineChartInOut({ labels, inCounts, outCounts }) {
+
   const ref = useRef(null);
   const chart = useRef(null);
 
   useEffect(() => {
+
     if (!ref.current) return;
 
     chart.current?.destroy();
 
-    chart.current = new Chart(ref.current, {
+    const ctx = ref.current.getContext("2d");
+
+    const gradientIn = ctx.createLinearGradient(0, 0, 0, 240);
+    gradientIn.addColorStop(0, "rgba(99,102,241,0.35)");
+    gradientIn.addColorStop(1, "rgba(99,102,241,0.02)");
+
+    const gradientOut = ctx.createLinearGradient(0, 0, 0, 240);
+    gradientOut.addColorStop(0, "rgba(16,185,129,0.30)");
+    gradientOut.addColorStop(1, "rgba(16,185,129,0.02)");
+
+    chart.current = new Chart(ctx, {
       type: "line",
+
       data: {
         labels,
+
         datasets: [
           {
             label: "File IN",
             data: inCounts,
+
             borderColor: "#6366f1",
-            backgroundColor: "rgba(99,102,241,.06)",
-            borderWidth: 2,
+            backgroundColor: gradientIn,
+
             fill: true,
-            tension: 0.4,
+            tension: 0.42,
+
+            borderWidth: 3,
+
             pointRadius: 3,
+            pointHoverRadius: 6,
+
             pointBackgroundColor: "#6366f1",
           },
+
           {
             label: "File OUT",
             data: outCounts,
+
             borderColor: "#10b981",
-            backgroundColor: "rgba(16,185,129,.04)",
-            borderWidth: 2,
+            backgroundColor: gradientOut,
+
             fill: true,
-            tension: 0.4,
+            tension: 0.42,
+
+            borderWidth: 3,
+
             pointRadius: 3,
+            pointHoverRadius: 6,
+
             pointBackgroundColor: "#10b981",
-            borderDash: [5, 3],
           },
         ],
       },
+
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: {
-            ticks: { font: { size: 10 }, color: "#b0b8cc" },
-            grid: { color: "rgba(0,0,0,0.04)" },
+
+        interaction: {
+          intersect: false,
+          mode: "index",
+        },
+
+        plugins: {
+          legend: { display: false },
+
+          tooltip: {
+            backgroundColor: "rgba(2,10,18,0.96)",
+            borderColor: "rgba(255,255,255,0.08)",
+            borderWidth: 1,
+
+            titleColor: "#e5edf5",
+            bodyColor: "#c8d0d8",
+
+            padding: 12,
           },
+        },
+
+        scales: {
+
+          x: {
+            grid: {
+              color: "rgba(255,255,255,0.04)",
+            },
+
+            ticks: {
+              color: "rgba(200,208,216,0.70)",
+              font: {
+                size: 11,
+                weight: 700,
+              },
+            },
+          },
+
           y: {
             beginAtZero: true,
-            ticks: { font: { size: 10 }, color: "#b0b8cc" },
-            grid: { color: "rgba(0,0,0,0.04)" },
+
+            grid: {
+              color: "rgba(255,255,255,0.05)",
+            },
+
+            ticks: {
+              precision: 0,
+
+              color: "rgba(200,208,216,0.55)",
+
+              font: {
+                size: 10,
+              },
+            },
           },
         },
       },
     });
 
     return () => chart.current?.destroy();
+
   }, [labels, inCounts, outCounts]);
 
   return <canvas ref={ref} />;
@@ -533,6 +648,15 @@ function HourlyVolumeChart({ labels, bars, loading }) {
 
 function NotifDrawer({ notifications }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const goToFileIn = (notification) => {
+    navigate("/fonctionnel/file-in", {
+      state: {
+        senderReference: notification.senderReference,
+      },
+    });
+  };
 
   return (
     <div className={`wd-drawer${open ? " open" : ""}`}>
@@ -565,11 +689,76 @@ function NotifDrawer({ notifications }) {
             </div>
           ) : (
             notifications.map((n, i) => (
-              <div key={i} className={`wd-notif-item ${n.type}`}>
-                <div className="wd-ntype">{n.label}</div>
-                <div className="wd-nmsg">{n.msg}</div>
-                <div className="wd-nref">{n.ref}</div>
-                <div className="wd-ntime">{n.time}</div>
+              <div
+                key={`${n.ref}-${i}`}
+                onClick={() => goToFileIn(n)}
+                title="Open filtered File IN list"
+                style={{
+                  cursor: "pointer",
+                  padding: "14px",
+                  borderRadius: 18,
+                  background: n.bg,
+                  border: `1px solid ${n.border}`,
+                  marginBottom: 12,
+                  transition: ".2s ease",
+                }}
+              >
+                <div
+                  style={{
+                    color: n.color,
+                    fontSize: 11,
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: ".08em",
+                  }}
+                >
+                  {n.label}
+                </div>
+
+                <div
+                  style={{
+                    color: "var(--t1)",
+                    fontSize: 14,
+                    fontWeight: 800,
+                    marginTop: 6,
+                  }}
+                >
+                  {n.ref}
+                </div>
+
+                <div
+                  style={{
+                    color: "var(--t3)",
+                    fontSize: 12,
+                    marginTop: 5,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {n.msg}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ color: "var(--t4)", fontSize: 11 }}>
+                    {n.time}
+                  </span>
+
+                  <span
+                    style={{
+                      color: n.color,
+                      fontSize: 11,
+                      fontWeight: 900,
+                    }}
+                  >
+                    REVIEW →
+                  </span>
+                </div>
               </div>
             ))
           )}
@@ -684,7 +873,9 @@ function CortexOrb({ fluxData, totalErrors, totalProcessed, loading }) {
         <div className="wd-orb-corona" />
 
         <div className="wd-orb-inner">
-          <div className="wd-orb-inner-val">{loading ? "—" : fluxData.length}</div>
+          <div className="wd-orb-inner-val">
+            {loading ? "—" : fluxData.length}
+          </div>
           <div className="wd-orb-inner-lbl">FLUX</div>
         </div>
       </div>
@@ -724,7 +915,165 @@ function CortexOrb({ fluxData, totalErrors, totalProcessed, loading }) {
   );
 }
 
+function WaitFunctionalCard({ count, latest, loading, onReview }) {
+  const topItems = latest.slice(0, 3);
+
+  return (
+    <div
+      style={{
+        marginTop: 18,
+        padding: 16,
+        borderRadius: 18,
+        border: "1px solid rgba(245,158,11,0.28)",
+        background:
+          "linear-gradient(135deg, rgba(245,158,11,0.13), rgba(0,229,255,0.04))",
+        boxShadow: "0 0 28px rgba(245,158,11,0.07)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 12,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              color: "#f59e0b",
+              fontSize: 11,
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+            }}
+          >
+            Human validation required
+          </div>
+          <div
+            style={{
+              marginTop: 4,
+              color: "var(--t1)",
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            CBR detected files waiting for functional action
+          </div>
+        </div>
+
+        <div
+          style={{
+            minWidth: 74,
+            textAlign: "center",
+            padding: "10px 12px",
+            borderRadius: 16,
+            background: "rgba(245,158,11,0.13)",
+            border: "1px solid rgba(245,158,11,0.25)",
+          }}
+        >
+          <div
+            style={{
+              color: "#f59e0b",
+              fontSize: 28,
+              fontWeight: 900,
+              fontFamily: "var(--mono)",
+              lineHeight: 1,
+            }}
+          >
+            {loading ? "—" : count}
+          </div>
+          <div
+            style={{
+              marginTop: 4,
+              color: "var(--t4)",
+              fontSize: 9,
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+            }}
+          >
+            pending
+          </div>
+        </div>
+      </div>
+
+      {topItems.length > 0 ? (
+        <div style={{ display: "grid", gap: 8 }}>
+          {topItems.map((item) => (
+            <div
+              key={item.ref}
+              onClick={() => onReview(item)}
+              style={{
+                cursor: "pointer",
+                padding: "10px 12px",
+                borderRadius: 14,
+                background: "rgba(3,12,22,0.55)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: 10,
+                alignItems: "center",
+              }}
+              title="Open filtered File IN list"
+            >
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    color: "var(--t1)",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.ref}
+                </div>
+                <div
+                  style={{
+                    color: "var(--t4)",
+                    fontSize: 10,
+                    marginTop: 2,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.senderReference || "No sender reference"}
+                </div>
+              </div>
+              <span
+                style={{
+                  color: "#f59e0b",
+                  fontSize: 10,
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                }}
+              >
+                Review →
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: "12px 0 2px",
+            color: "var(--t4)",
+            fontSize: 12,
+          }}
+        >
+          No functional validation required right now.
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function FonctionnelDashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [fluxData, setFluxData] = useState([]);
   const [fileInData, setFileInData] = useState([]);
@@ -755,17 +1104,19 @@ export default function FonctionnelDashboard() {
         getAllFlux(),
         getAllFileIn(),
         getAllFileOut(),
+       
       ]);
 
       const flux = normalize(fluxRes);
       const fileIn = normalize(inRes);
       const fileOut = normalize(outRes);
+     
 
       setFluxData(flux);
       setFileInData(fileIn);
       setFileOutData(fileOut);
       setRecentFlows(buildRecentActivity(fileIn));
-      setNotifications(buildNotifications(fileIn, fileOut));
+      setNotifications(buildNotifications(fileIn));
       setChartData(buildChartData(fileIn, fileOut));
       setHourlyVolumeData(buildHourlyVolumeData(fileIn, fileOut));
     } catch (e) {
@@ -777,7 +1128,7 @@ export default function FonctionnelDashboard() {
 
   useEffect(() => {
     loadData();
-    const iv = setInterval(loadData, 60000);
+    const iv = setInterval(loadData, 10000);
     return () => clearInterval(iv);
   }, [loadData]);
 
@@ -807,13 +1158,22 @@ export default function FonctionnelDashboard() {
     fileInData.filter((x) => isError(getStatus(x))).length +
     fileOutData.filter((x) => isError(getStatus(x))).length;
 
+  const waitFunctionalNotifications = buildNotifications(fileInData);
+
+  const totalWaitFunctional = waitFunctionalNotifications.length;
+
   const totalWaiting =
-    fileInData.filter((x) => isWaiting(getStatus(x))).length +
-    fileOutData.filter((x) => isWaiting(getStatus(x))).length;
+    fileInData.filter(
+      (x) => isWaiting(getStatus(x)) || getCbrVerdict(x) === "WAITFUNCTIONAL"
+    ).length + fileOutData.filter((x) => isWaiting(getStatus(x))).length;
 
   const totalInProgress = Math.max(
     0,
-    fileInData.length + fileOutData.length - totalProcessed - totalErrors - totalWaiting
+    fileInData.length +
+      fileOutData.length -
+      totalProcessed -
+      totalErrors -
+      totalWaiting
   );
 
   const successRate = totalOut
@@ -839,6 +1199,12 @@ export default function FonctionnelDashboard() {
     { label: "Waiting", val: totalWaiting, color: "#f59e0b" },
   ];
 
+  const openWaitFunctionalFileIn = (item) => {
+    navigate("/fonctionnel/file-in", {
+      state: { senderReference: item?.senderReference || "" },
+    });
+  };
+
   const hourlyTotal24 = hourlyVolumeData.bars
     .slice(-24)
     .reduce((a, b) => a + b, 0);
@@ -863,7 +1229,8 @@ export default function FonctionnelDashboard() {
 
   const hourlyPeakHour =
     hourlyPeakIndex >= 0
-      ? hourlyVolumeData.labels.slice(-24)[hourlyPeakIndex]?.split(" ")[1] || "—"
+      ? hourlyVolumeData.labels.slice(-24)[hourlyPeakIndex]?.split(" ")[1] ||
+        "—"
       : "—";
 
   return (
@@ -983,7 +1350,7 @@ export default function FonctionnelDashboard() {
               </span>
             </div>
 
-            <div style={{ position: "relative", height: 148 }}>
+            <div style={{ position: "relative", height: 210 }}>
               {!loading && labels.length ? (
                 <LineChartInOut
                   labels={labels}
@@ -1089,28 +1456,12 @@ export default function FonctionnelDashboard() {
               ))}
             </div>
 
-            <div style={{ position: "relative", height: 110 }}>
-              {!loading && labels.length ? (
-                <LineChartLifecycle
-                  labels={labels}
-                  processedCounts={processedCounts}
-                  errorCounts={errorCounts}
-                  waitingCounts={waitingCounts}
-                  inProgressCounts={inProgressCounts}
-                />
-              ) : (
-                <div
-                  style={{
-                    padding: "16px 0",
-                    textAlign: "center",
-                    color: "var(--t4)",
-                    fontSize: 12,
-                  }}
-                >
-                  Loading…
-                </div>
-              )}
-            </div>
+            <WaitFunctionalCard
+              count={totalWaitFunctional}
+              latest={waitFunctionalNotifications}
+              loading={loading}
+              onReview={openWaitFunctionalFileIn}
+            />
           </div>
         </div>
 

@@ -10,7 +10,6 @@ function normalizeArrayPayload(res) {
   return [];
 }
 
-
 function normalizeStats(stats = {}) {
   return {
     total: Number(stats.total ?? 0),
@@ -130,6 +129,26 @@ export function createLogStream(path, onMessage) {
   };
 
   return eventSource;
+}
+
+export async function exportCbrPdf() {
+  const response = await http.get(
+    buildUrl("/api/reports/cbr/last24h/pdf"),
+    {
+      responseType: "blob",
+    }
+  );
+
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], { type: "application/pdf" })
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "cbr-report-last24h.pdf";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
 }
 
 export async function getGeneratorLogs(params = {}) {
