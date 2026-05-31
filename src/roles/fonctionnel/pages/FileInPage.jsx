@@ -47,6 +47,7 @@ const getRowSenderName = (row) =>
   row?.sender ||
   row?.sender?.sender ||
   row?.sender?.senderName ||
+  row?.flux?.sender?.sender ||
   "";
 
 const getRowSenderId = (row) =>
@@ -54,6 +55,7 @@ const getRowSenderId = (row) =>
   row?.idSender ||
   row?.sender?.id ||
   row?.sender?.idSender ||
+  row?.flux?.sender?.idSender ||
   "";
 
 const getFlowTypeValue = (item) => {
@@ -80,6 +82,7 @@ const getRowFlowTypeName = (row) =>
   row?.flowType ||
   row?.typeFlux?.flowType ||
   row?.typeFlux?.FlowType ||
+  row?.flux?.typeFlux?.flowType ||
   "";
 
 const getRowTypeFluxId = (row) =>
@@ -87,6 +90,7 @@ const getRowTypeFluxId = (row) =>
   row?.idTypeFlux ||
   row?.typeFlux?.id ||
   row?.typeFlux?.idTypeFlux ||
+  row?.flux?.typeFlux?.idTypeFlux ||
   "";
 
 const normalizeDateTimeLocalToIso = (value) => {
@@ -119,6 +123,14 @@ export default function FileInPage() {
 
   const [loading, setLoading] = useState(true);
 
+  const [modal, setModal] = useState({
+    show: false,
+    type: "info",
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
   const [filters, setFilters] = useState({
     appReference: "",
     senderReference: urlSenderReference,
@@ -135,6 +147,31 @@ export default function FileInPage() {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  const openModal = ({
+    type = "info",
+    title = "",
+    message = "",
+    onConfirm = null,
+  }) => {
+    setModal({
+      show: true,
+      type,
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
+  const closeModal = () => {
+    setModal({
+      show: false,
+      type: "info",
+      title: "",
+      message: "",
+      onConfirm: null,
+    });
+  };
 
   const hydrateRows = (fileIns, senderData, flowTypeData) => {
     const senderById = new Map(
@@ -386,194 +423,149 @@ export default function FileInPage() {
     }
   };
 
-const [modal, setModal] = useState({
-  show: false,
-  type: "info",
-  title: "",
-  message: "",
-  onConfirm: null,
-});
+  const handleSaveEdit = async () => {
+    try {
+      const id = getRowId(selectedRow) || editData.id;
 
-const openModal = ({
-  type = "info",
-  title = "",
-  message = "",
-  onConfirm = null,
-}) => {
-  setModal({
-    show: true,
-    type,
-    title,
-    message,
-    onConfirm,
-  });
-};
+      if (!id) {
+        openModal({
+          type: "error",
+          title: "Error",
+          message: "File IN ID not found",
+        });
+        return;
+      }
 
-const closeModal = () => {
-  setModal({
-    show: false,
-    type: "info",
-    title: "",
-    message: "",
-    onConfirm: null,
-  });
-};
+      const payload = {
+        status: editData.status || null,
+        category: editData.category || null,
+        descriptionFileIn: editData.descriptionFileIn || null,
+        senderReference: editData.senderReference || null,
+        totalAmount:
+          editData.totalAmount === "" || editData.totalAmount == null
+            ? null
+            : Number(editData.totalAmount),
+        sendingDate: normalizeDateTimeLocalToIso(editData.sendingDate),
+        settlementDate: normalizeDateTimeLocalToIso(editData.settlementDate),
+      };
 
-const handleSaveEdit = async () => {
-  try {
-    const id = getRowId(selectedRow) || editData.id;
+      if (editData.senderId && Number(editData.senderId) > 0) {
+        payload.sender = {
+          idSender: Number(editData.senderId),
+        };
+      }
 
-    if (!id) {
+      if (editData.typeFluxId && Number(editData.typeFluxId) > 0) {
+        payload.typeFlux = {
+          idTypeFlux: Number(editData.typeFluxId),
+        };
+      }
+
+      console.log("UPDATE FILEIN ID =", id);
+      console.log("UPDATE FILEIN PAYLOAD =", payload);
+
+      await updateFileIn(id, payload);
+
+      setShowEditModal(false);
+      setEditData({});
+      setSelectedRow(null);
+
+      await fetchAllData();
+
+      openModal({
+        type: "success",
+        title: "Updated",
+        message: "File IN updated successfully",
+      });
+    } catch (error) {
+      console.error("UPDATE FILEIN ERROR =", error.response?.data || error);
+
       openModal({
         type: "error",
-        title: "Error",
-        message: "File IN ID not found",
+        title: "Update Failed",
+        message: "Unable to update File IN",
       });
-      return;
     }
+  };
 
-    const payload = {
-      status: editData.status,
-
-      category: editData.category,
-
-      descriptionFileIn: editData.descriptionFileIn,
-
-      senderReference: editData.senderReference,
-
-      totalAmount:
-        editData.totalAmount === "" || editData.totalAmount == null
-          ? null
-          : Number(editData.totalAmount),
-
-      sendingDate: normalizeDateTimeLocalToIso(
-        editData.sendingDate
-      ),
-
-      settlementDate: normalizeDateTimeLocalToIso(
-        editData.settlementDate
-      ),
-
-      sender: {
-        idSender: Number(editData.senderId),
-      },
-
-      typeFlux: {
-        idTypeFlux: Number(editData.typeFluxId),
-      },
-    };
-
-    await updateFileIn(id, payload);
-
-    setShowEditModal(false);
-
-    setEditData({});
-
-    setSelectedRow(null);
-
-    await fetchAllData();
-
+  const handleForce = async (row) => {
     openModal({
-      type: "success",
-      title: "Updated",
-      message: "File IN updated successfully",
-    });
+      type: "confirm",
+      title: "Force File IN",
+      message: "Are you sure you want to force this File IN?",
+      onConfirm: async () => {
+        try {
+          const id = getRowId(row);
 
-  } catch (error) {
+          if (!id) {
+            openModal({
+              type: "error",
+              title: "Error",
+              message: "File IN ID not found",
+            });
+            return;
+          }
 
-    console.error(error);
+          await forceFileIn(id);
+          await fetchAllData();
 
-    openModal({
-      type: "error",
-      title: "Update Failed",
-      message: "Unable to update File IN",
-    });
-  }
-};
+          openModal({
+            type: "success",
+            title: "Success",
+            message: "File IN forced successfully",
+          });
+        } catch (error) {
+          console.error(error);
 
-const handleForce = async (row) => {
-  openModal({
-    type: "confirm",
-    title: "Force File IN",
-    message: "Are you sure you want to force this File IN?",
-    onConfirm: async () => {
-      try {
-        const id = getRowId(row);
-
-        if (!id) {
           openModal({
             type: "error",
-            title: "Error",
-            message: "File IN ID not found",
+            title: "Force Failed",
+            message: "Unable to force File IN",
           });
-          return;
         }
+      },
+    });
+  };
 
-        await forceFileIn(id);
+  const handleReject = async (row) => {
+    openModal({
+      type: "confirm",
+      title: "Reject File IN",
+      message: "Are you sure you want to reject this File IN?",
+      onConfirm: async () => {
+        try {
+          const id = getRowId(row);
 
-        await fetchAllData();
+          if (!id) {
+            openModal({
+              type: "error",
+              title: "Error",
+              message: "File IN ID not found",
+            });
+            return;
+          }
 
-        openModal({
-          type: "success",
-          title: "Success",
-          message: "File IN forced successfully",
-        });
+          await rejectFileIn(id);
+          await fetchAllData();
 
-      } catch (error) {
+          openModal({
+            type: "success",
+            title: "Rejected",
+            message: "File IN rejected successfully",
+          });
+        } catch (error) {
+          console.error(error);
 
-        console.error(error);
-
-        openModal({
-          type: "error",
-          title: "Force Failed",
-          message: "Unable to force File IN",
-        });
-      }
-    },
-  });
-};
-
-const handleReject = async (row) => {
-  openModal({
-    type: "confirm",
-    title: "Reject File IN",
-    message: "Are you sure you want to reject this File IN?",
-    onConfirm: async () => {
-      try {
-        const id = getRowId(row);
-
-        if (!id) {
           openModal({
             type: "error",
-            title: "Error",
-            message: "File IN ID not found",
+            title: "Reject Failed",
+            message: "Unable to reject File IN",
           });
-          return;
         }
+      },
+    });
+  };
 
-        await rejectFileIn(id);
-
-        await fetchAllData();
-
-        openModal({
-          type: "success",
-          title: "Rejected",
-          message: "File IN rejected successfully",
-        });
-
-      } catch (error) {
-
-        console.error(error);
-
-        openModal({
-          type: "error",
-          title: "Reject Failed",
-          message: "Unable to reject File IN",
-        });
-      }
-    },
-  });
-};
   const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE) || 1;
 
   const paginatedRows = useMemo(() => {
@@ -732,60 +724,50 @@ const handleReject = async (row) => {
         flowTypeOptions={flowTypeOptions}
         senderOptions={senderOptions}
       />
+
       {modal.show && (
-  <div className="custom-modal-overlay">
-    <div className="custom-modal">
+        <div className="custom-modal-overlay">
+          <div className="custom-modal">
+            <div className={`custom-modal-icon ${modal.type}`}>
+              {modal.type === "success" && "✓"}
+              {modal.type === "error" && "✕"}
+              {modal.type === "confirm" && "?"}
+            </div>
 
-      <div className={`custom-modal-icon ${modal.type}`}>
-        {modal.type === "success" && "✓"}
-        {modal.type === "error" && "✕"}
-        {modal.type === "confirm" && "?"}
-      </div>
+            <h3>{modal.title}</h3>
 
-      <h3>{modal.title}</h3>
+            <p>{modal.message}</p>
 
-      <p>{modal.message}</p>
+            <div className="custom-modal-actions">
+              {modal.type === "confirm" ? (
+                <>
+                  <button className="modal-btn cancel" onClick={closeModal}>
+                    Cancel
+                  </button>
 
-      <div className="custom-modal-actions">
+                  <button
+                    className="modal-btn confirm"
+                    onClick={async () => {
+                      const fn = modal.onConfirm;
+                      closeModal();
 
-        {modal.type === "confirm" ? (
-          <>
-            <button
-              className="modal-btn cancel"
-              onClick={closeModal}
-            >
-              Cancel
-            </button>
-
-            <button
-              className="modal-btn confirm"
-              onClick={async () => {
-                const fn = modal.onConfirm;
-
-                closeModal();
-
-                if (fn) {
-                  await fn();
-                }
-              }}
-            >
-              Confirm
-            </button>
-          </>
-        ) : (
-          <button
-            className="modal-btn confirm"
-            onClick={closeModal}
-          >
-            OK
-          </button>
-        )}
-
-      </div>
-
-    </div>
-  </div>
-)}
+                      if (fn) {
+                        await fn();
+                      }
+                    }}
+                  >
+                    Confirm
+                  </button>
+                </>
+              ) : (
+                <button className="modal-btn confirm" onClick={closeModal}>
+                  OK
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
