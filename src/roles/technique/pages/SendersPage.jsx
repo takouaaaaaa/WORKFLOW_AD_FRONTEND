@@ -19,6 +19,19 @@ export default function SendersPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [formValue, setFormValue] = useState("");
 
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    row: null,
+    title: "",
+    message: "",
+  });
+
+  const [errorModal, setErrorModal] = useState({
+    show: false,
+    title: "",
+    message: "",
+  });
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -89,15 +102,44 @@ export default function SendersPage() {
     }
   };
 
-  const handleDelete = async (row) => {
-    if (!window.confirm(`Delete sender "${row.sender}"?`)) return;
+  const handleDelete = (row) => {
+    setConfirmModal({
+      show: true,
+      row,
+      title: "Confirm Deletion",
+      message: `Are you sure you want to delete sender "${row.sender}"?`,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmModal.row) return;
 
     try {
-      await deleteSender(row.idSender);
+      await deleteSender(confirmModal.row.idSender);
       await fetchData();
+
+      setConfirmModal({
+        show: false,
+        row: null,
+        title: "",
+        message: "",
+      });
     } catch (error) {
       console.error(error);
-      alert("Delete failed");
+
+      setConfirmModal({
+        show: false,
+        row: null,
+        title: "",
+        message: "",
+      });
+
+      setErrorModal({
+        show: true,
+        title: "Deletion Not Allowed",
+        message:
+          "This sender is linked to existing flows. To preserve data integrity, this reference cannot be deleted.",
+      });
     }
   };
 
@@ -129,6 +171,7 @@ export default function SendersPage() {
           <span>
             Search Result : <span className="accent">Senders</span>
           </span>
+
           <span className="filein-results-badge">
             {filteredRows.length.toLocaleString()} results
           </span>
@@ -138,6 +181,7 @@ export default function SendersPage() {
           <div className="filein-search-row">
             <div className="filein-filter-field filein-filter-grow">
               <label className="filein-label">Sender</label>
+
               <input
                 type="text"
                 className="filein-input"
@@ -176,6 +220,7 @@ export default function SendersPage() {
                   <tr key={row.idSender}>
                     <td className="mono">{row.idSender}</td>
                     <td title={row.sender}>{row.sender}</td>
+
                     <td>
                       <div className="filein-row-actions">
                         <button
@@ -184,6 +229,7 @@ export default function SendersPage() {
                         >
                           Edit
                         </button>
+
                         <button
                           className="filein-btn-force"
                           onClick={() => handleDelete(row)}
@@ -234,6 +280,61 @@ export default function SendersPage() {
         placeholder="Enter sender name"
         onSave={handleSave}
       />
+
+      {confirmModal.show && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box-custom">
+            <div className="modal-icon-warning">!</div>
+
+            <h3>{confirmModal.title}</h3>
+            <p>{confirmModal.message}</p>
+
+            <div className="modal-actions-custom">
+              <button
+                className="modal-btn-cancel"
+                onClick={() =>
+                  setConfirmModal({
+                    show: false,
+                    row: null,
+                    title: "",
+                    message: "",
+                  })
+                }
+              >
+                Cancel
+              </button>
+
+              <button className="modal-btn-danger" onClick={confirmDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errorModal.show && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box-custom">
+            <div className="modal-icon-error">×</div>
+
+            <h3>{errorModal.title}</h3>
+            <p>{errorModal.message}</p>
+
+            <button
+              className="modal-btn-primary"
+              onClick={() =>
+                setErrorModal({
+                  show: false,
+                  title: "",
+                  message: "",
+                })
+              }
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

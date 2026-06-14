@@ -1,7 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────
-// Example: FonctionnelLayout.jsx (or wherever Topbar + Dashboard live)
-// Add these 3 pieces of state and pass them as props.
-// ─────────────────────────────────────────────────────────────────────
+
 
 import { useState } from "react";
 import Topbar from "../components/Topbar";

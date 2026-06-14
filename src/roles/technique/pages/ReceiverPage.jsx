@@ -6,7 +6,7 @@ import {
   deleteReceiver,
 } from "../services/receiverService";
 import CrudModal from "../components/Crudmodal";
-import "../styles/SearchTechnique.css"; 
+import "../styles/SearchTechnique.css";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -18,6 +18,19 @@ export default function ReceiversPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [formValue, setFormValue] = useState("");
+
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    row: null,
+    title: "",
+    message: "",
+  });
+
+  const [errorModal, setErrorModal] = useState({
+    show: false,
+    title: "",
+    message: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -89,15 +102,44 @@ export default function ReceiversPage() {
     }
   };
 
-  const handleDelete = async (row) => {
-    if (!window.confirm(`Delete receiver "${row.receiver}"?`)) return;
+  const handleDelete = (row) => {
+    setConfirmModal({
+      show: true,
+      row,
+      title: "Confirm Deletion",
+      message: `Are you sure you want to delete receiver "${row.receiver}"?`,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmModal.row) return;
 
     try {
-      await deleteReceiver(row.idReceiver);
+      await deleteReceiver(confirmModal.row.idReceiver);
       await fetchData();
+
+      setConfirmModal({
+        show: false,
+        row: null,
+        title: "",
+        message: "",
+      });
     } catch (error) {
       console.error(error);
-      alert("Delete failed");
+
+      setConfirmModal({
+        show: false,
+        row: null,
+        title: "",
+        message: "",
+      });
+
+      setErrorModal({
+        show: true,
+        title: "Deletion Not Allowed",
+        message:
+          "This receiver is linked to existing flows. To preserve data integrity, this reference cannot be deleted.",
+      });
     }
   };
 
@@ -129,6 +171,7 @@ export default function ReceiversPage() {
           <span>
             Search Result : <span className="accent">Receivers</span>
           </span>
+
           <span className="filein-results-badge">
             {filteredRows.length.toLocaleString()} results
           </span>
@@ -138,6 +181,7 @@ export default function ReceiversPage() {
           <div className="filein-search-row">
             <div className="filein-filter-field filein-filter-grow">
               <label className="filein-label">Receiver</label>
+
               <input
                 type="text"
                 className="filein-input"
@@ -176,6 +220,7 @@ export default function ReceiversPage() {
                   <tr key={row.idReceiver}>
                     <td className="mono">{row.idReceiver}</td>
                     <td title={row.receiver}>{row.receiver}</td>
+
                     <td>
                       <div className="filein-row-actions">
                         <button
@@ -184,6 +229,7 @@ export default function ReceiversPage() {
                         >
                           Edit
                         </button>
+
                         <button
                           className="filein-btn-force"
                           onClick={() => handleDelete(row)}
@@ -234,6 +280,61 @@ export default function ReceiversPage() {
         placeholder="Enter receiver name"
         onSave={handleSave}
       />
+
+      {confirmModal.show && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box-custom">
+            <div className="modal-icon-warning">!</div>
+
+            <h3>{confirmModal.title}</h3>
+            <p>{confirmModal.message}</p>
+
+            <div className="modal-actions-custom">
+              <button
+                className="modal-btn-cancel"
+                onClick={() =>
+                  setConfirmModal({
+                    show: false,
+                    row: null,
+                    title: "",
+                    message: "",
+                  })
+                }
+              >
+                Cancel
+              </button>
+
+              <button className="modal-btn-danger" onClick={confirmDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errorModal.show && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-box-custom">
+            <div className="modal-icon-error">×</div>
+
+            <h3>{errorModal.title}</h3>
+            <p>{errorModal.message}</p>
+
+            <button
+              className="modal-btn-primary"
+              onClick={() =>
+                setErrorModal({
+                  show: false,
+                  title: "",
+                  message: "",
+                })
+              }
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

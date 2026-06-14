@@ -69,7 +69,7 @@ export default function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
+const [blockModal, setBlockModal] = useState(false);
   /* ───────────────────────────────────── */
 
   const redirectByRole = (user) => {
@@ -118,11 +118,28 @@ export default function Login() {
       const user = getUserFromToken();
 
       redirectByRole(user);
-    } catch (err) {
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
+   } catch (err) {
+  const message =
+    err.response?.data?.message ||
+    err.response?.data?.error ||
+    err.response?.data ||
+    "";
+
+  if (
+    typeof message === "string" &&
+    message.includes("Too many failed attempts")
+  ) {
+    setBlockModal(true);
+
+    setTimeout(() => {
+      setBlockModal(false);
+    }, 3000);
+  } else {
+    setError("Invalid email or password");
+  }
+} finally {
+  setLoading(false);
+}
   };
 
   /* ───────────────────────────────────── */
@@ -265,7 +282,13 @@ export default function Login() {
             )}
           </button>
         </form>
-
+{blockModal && (
+  <div className="block-modal">
+    <div className="block-modal-content">
+      User blocked for 5 minutes
+    </div>
+  </div>
+)}
         {/* FOOTER */}
 
         <div className="login-footer">
